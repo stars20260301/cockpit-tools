@@ -227,6 +227,7 @@ pub fn run() {
             commands::github_copilot::add_github_copilot_account_with_token,
             commands::github_copilot::update_github_copilot_account_tags,
             commands::github_copilot::get_github_copilot_accounts_index_path,
+            commands::github_copilot::inject_github_copilot_to_vscode,
 
             // GitHub Copilot Instance Commands
             commands::github_copilot_instance::github_copilot_get_instance_defaults,

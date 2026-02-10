@@ -105,3 +105,67 @@ pub fn get_github_copilot_accounts_index_path() -> Result<String, String> {
     github_copilot_account::accounts_index_path_string()
 }
 
+/// Inject a Copilot account's GitHub token into VS Code's default instance.
+/// This enables one-click account switching by writing directly to VS Code's
+/// encrypted auth storage (state.vscdb) using the Chromium v10 + DPAPI scheme.
+/// Requires VS Code to be closed first (SQLite database lock).
+#[tauri::command]
+pub async fn inject_github_copilot_to_vscode(account_id: String) -> Result<String, String> {
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = account_id;
+        return Err("This feature is only available on Windows".to_string());
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        let account = github_copilot_account::load_account(&account_id)
+            .ok_or_else(|| format!("GitHub Copilot account not found: {}", account_id))?;
+
+        // Check if VS Code is running
+        {
+            let mut system = sysinfo::System::new();
+            system.refresh_processes(sysinfo::ProcessesToUpdate::All, true);
+            for (_pid, process) in system.processes() {
+                let name = process.name().to_string_lossy().to_lowercase();
+                if name == "code.exe" {
+                    let args = process.cmd();
+                    let args_str = args.iter().map(|a| a.to_string_lossy().to_lowercase()).collect::<Vec<_>>().join(" ");
+                    let is_helper = args_str.contains("--type=");
+                    if !is_helper {
+                        return Err("Please close VS Code before switching accounts. The database is locked while VS Code is running.".to_string());
+                    }
+                }
+            }
+        }
+
+        let result = crate::modules::vscode_inject::inject_copilot_token(
+            &account.github_login,
+            &account.github_access_token,
+            Some(&account.github_id.to_string()),
+        )?;
+
+        // Try to launch VS Code after injection
+        let launch_msg = match launch_vscode_default() {
+            Ok(_) => ", VS Code launched".to_string(),
+            Err(e) => format!(", but failed to launch VS Code: {}", e),
+        };
+
+        Ok(format!("{}{}", result, launch_msg))
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn launch_vscode_default() -> Result<(), String> {
+    use std::process::Command;
+    use std::os::windows::process::CommandExt;
+
+    // "code" on Windows is a .cmd script, must run via cmd.exe
+    Command::new("cmd")
+        .args(["/C", "code"])
+        .creation_flags(0x08000000) // CREATE_NO_WINDOW
+        .spawn()
+        .map_err(|e| format!("Failed to launch VS Code: {}", e))?;
+    Ok(())
+}
+

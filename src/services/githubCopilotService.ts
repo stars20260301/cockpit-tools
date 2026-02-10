@@ -73,3 +73,8 @@ export async function getGitHubCopilotAccountsIndexPath(): Promise<string> {
   return await invoke('get_github_copilot_accounts_index_path');
 }
 
+/** Inject a Copilot account's token into VS Code's default instance (Windows only) */
+export async function injectGitHubCopilotToVSCode(accountId: string): Promise<string> {
+  return await invoke('inject_github_copilot_to_vscode', { accountId });
+}
+

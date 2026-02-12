@@ -124,11 +124,7 @@ fn set_pending_login(state: Option<PendingDeviceLogin>) {
 
 fn clear_pending_login_if_matches(login_id: &str) {
     if let Ok(mut guard) = PENDING_DEVICE_LOGIN.lock() {
-        if guard
-            .as_ref()
-            .map(|state| state.login_id.as_str())
-            == Some(login_id)
-        {
+        if guard.as_ref().map(|state| state.login_id.as_str()) == Some(login_id) {
             *guard = None;
         }
     }
@@ -179,7 +175,10 @@ async fn request_device_code() -> Result<DeviceCodeResponse, String> {
 
     if !response.status().is_success() {
         let status = response.status();
-        let body = response.text().await.unwrap_or_else(|_| "<no-body>".to_string());
+        let body = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "<no-body>".to_string());
         return Err(format!(
             "请求 GitHub 设备码失败: status={}, body={}",
             status, body
@@ -237,10 +236,7 @@ async fn exchange_device_token(
         .form(&[
             ("client_id", GITHUB_OAUTH_CLIENT_ID),
             ("device_code", device_code),
-            (
-                "grant_type",
-                "urn:ietf:params:oauth:grant-type:device_code",
-            ),
+            ("grant_type", "urn:ietf:params:oauth:grant-type:device_code"),
         ])
         .send()
         .await
@@ -248,7 +244,10 @@ async fn exchange_device_token(
 
     if !response.status().is_success() {
         let status = response.status();
-        let body = response.text().await.unwrap_or_else(|_| "<no-body>".to_string());
+        let body = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "<no-body>".to_string());
         return Err(format!(
             "请求 GitHub access token 失败: status={}, body={}",
             status, body
@@ -276,7 +275,10 @@ async fn fetch_github_user(
 
     if !response.status().is_success() {
         let status = response.status();
-        let body = response.text().await.unwrap_or_else(|_| "<no-body>".to_string());
+        let body = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "<no-body>".to_string());
         return Err(format!(
             "请求 GitHub 用户信息失败: status={}, body={}",
             status, body
@@ -304,7 +306,10 @@ async fn fetch_github_email(
 
     if !response.status().is_success() {
         let status = response.status();
-        let body = response.text().await.unwrap_or_else(|_| "<no-body>".to_string());
+        let body = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "<no-body>".to_string());
         return Err(format!(
             "请求 GitHub 邮箱列表失败: status={}, body={}",
             status, body
@@ -345,7 +350,10 @@ async fn fetch_copilot_token(
 
     if !response.status().is_success() {
         let status = response.status();
-        let body = response.text().await.unwrap_or_else(|_| "<no-body>".to_string());
+        let body = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "<no-body>".to_string());
         return Err(format!(
             "请求 Copilot token 失败: status={}, body={}",
             status, body
@@ -357,11 +365,15 @@ async fn fetch_copilot_token(
         .await
         .map_err(|e| format!("解析 Copilot token 响应失败: {}", e))?;
 
-    let token = payload
-        .token
-        .ok_or_else(|| payload.message.unwrap_or_else(|| "Copilot token 缺失".to_string()))?;
+    let token = payload.token.ok_or_else(|| {
+        payload
+            .message
+            .unwrap_or_else(|| "Copilot token 缺失".to_string())
+    })?;
 
-    let user_info = fetch_copilot_user_info(client, github_access_token).await.ok();
+    let user_info = fetch_copilot_user_info(client, github_access_token)
+        .await
+        .ok();
 
     Ok(CopilotTokenBundle {
         token,
@@ -372,8 +384,12 @@ async fn fetch_copilot_token(
         chat_enabled: payload.chat_enabled,
         expires_at: payload.expires_at,
         refresh_in: payload.refresh_in,
-        quota_snapshots: user_info.as_ref().and_then(|info| info.quota_snapshots.clone()),
-        quota_reset_date: user_info.as_ref().and_then(|info| info.quota_reset_date.clone()),
+        quota_snapshots: user_info
+            .as_ref()
+            .and_then(|info| info.quota_snapshots.clone()),
+        quota_reset_date: user_info
+            .as_ref()
+            .and_then(|info| info.quota_reset_date.clone()),
         limited_user_quotas: payload.limited_user_quotas,
         limited_user_reset_date: payload.limited_user_reset_date,
     })
@@ -395,7 +411,10 @@ async fn fetch_copilot_user_info(
 
     if !response.status().is_success() {
         let status = response.status();
-        let body = response.text().await.unwrap_or_else(|_| "<no-body>".to_string());
+        let body = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "<no-body>".to_string());
         return Err(format!(
             "请求 Copilot user 信息失败: status={}, body={}",
             status, body
@@ -408,7 +427,9 @@ async fn fetch_copilot_user_info(
         .map_err(|e| format!("解析 Copilot user 信息失败: {}", e))
 }
 
-pub async fn refresh_copilot_token(github_access_token: &str) -> Result<CopilotTokenBundle, String> {
+pub async fn refresh_copilot_token(
+    github_access_token: &str,
+) -> Result<CopilotTokenBundle, String> {
     let client = reqwest::Client::new();
     fetch_copilot_token(&client, github_access_token).await
 }

@@ -5,16 +5,18 @@ import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
+import { RefreshCw, X } from 'lucide-react';
 import { AccountsPage } from './pages/AccountsPage';
 import { CodexAccountsPage } from './pages/CodexAccountsPage';
 import { GitHubCopilotAccountsPage } from './pages/GitHubCopilotAccountsPage';
+import { WindsurfAccountsPage } from './pages/WindsurfAccountsPage';
 
 import { FingerprintsPage } from './pages/FingerprintsPage';
 import { WakeupTasksPage } from './pages/WakeupTasksPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { InstancesPage } from './pages/InstancesPage';
 import { SideNav } from './components/layout/SideNav';
+import { PlatformLayoutModal } from './components/PlatformLayoutModal';
 import { UpdateNotification } from './components/UpdateNotification';
 import { CloseConfirmDialog } from './components/CloseConfirmDialog';
 import { Page } from './types/navigation';
@@ -32,10 +34,11 @@ interface GeneralConfig extends GeneralConfigTheme {
   antigravity_app_path: string;
   codex_app_path: string;
   vscode_app_path: string;
+  windsurf_app_path: string;
 }
 
 type AppPathMissingDetail = {
-  app: 'antigravity' | 'codex' | 'vscode';
+  app: 'antigravity' | 'codex' | 'vscode' | 'windsurf';
   retry?: { kind: 'default' | 'instance'; instanceId?: string };
 };
 
@@ -92,8 +95,10 @@ function App() {
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
   const [updateNotificationKey, setUpdateNotificationKey] = useState(0);
   const [showCloseDialog, setShowCloseDialog] = useState(false);
+  const [showPlatformLayoutModal, setShowPlatformLayoutModal] = useState(false);
   const [appPathMissing, setAppPathMissing] = useState<AppPathMissingDetail | null>(null);
   const [appPathSetting, setAppPathSetting] = useState(false);
+  const [appPathDetecting, setAppPathDetecting] = useState(false);
   const [appPathDraft, setAppPathDraft] = useState('');
   
   // 启用自动刷新 hook
@@ -156,6 +161,7 @@ function App() {
       try {
         await invoke('detect_app_path', { app: 'antigravity' });
         await invoke('detect_app_path', { app: 'vscode' });
+        await invoke('detect_app_path', { app: 'windsurf' });
         const userAgent = navigator.userAgent.toLowerCase();
         if (userAgent.includes('mac')) {
           await invoke('detect_app_path', { app: 'codex' });
@@ -356,7 +362,7 @@ function App() {
     const handlePayload = (payload: unknown) => {
       if (!payload || typeof payload !== 'object') return;
       const detail = payload as AppPathMissingDetail;
-      if (detail.app !== 'antigravity' && detail.app !== 'codex' && detail.app !== 'vscode') return;
+      if (detail.app !== 'antigravity' && detail.app !== 'codex' && detail.app !== 'vscode' && detail.app !== 'windsurf') return;
       setAppPathMissing(detail);
     };
 
@@ -382,6 +388,7 @@ function App() {
     let active = true;
     if (!appPathMissing) {
       setAppPathDraft('');
+      setAppPathDetecting(false);
       return () => {
         active = false;
       };
@@ -394,6 +401,8 @@ function App() {
             ? config.codex_app_path
             : appPathMissing.app === 'vscode'
               ? config.vscode_app_path
+              : appPathMissing.app === 'windsurf'
+                ? config.windsurf_app_path
               : config.antigravity_app_path;
         if (active) {
           setAppPathDraft(currentPath || '');
@@ -424,7 +433,7 @@ function App() {
   };
 
   const handleSaveMissingAppPath = async () => {
-    if (!appPathMissing || appPathSetting) return;
+    if (!appPathMissing || appPathSetting || appPathDetecting) return;
     const path = appPathDraft.trim();
     if (!path) return;
     setAppPathSetting(true);
@@ -439,6 +448,8 @@ function App() {
           await invoke('codex_start_instance', { instanceId: retry.instanceId });
         } else if (app === 'vscode') {
           await invoke('github_copilot_start_instance', { instanceId: retry.instanceId });
+        } else if (app === 'windsurf') {
+          await invoke('windsurf_start_instance', { instanceId: retry.instanceId });
         } else {
           await invoke('start_instance', { instanceId: retry.instanceId });
         }
@@ -447,6 +458,8 @@ function App() {
           await invoke('codex_start_instance', { instanceId: '__default__' });
         } else if (app === 'vscode') {
           await invoke('github_copilot_start_instance', { instanceId: '__default__' });
+        } else if (app === 'windsurf') {
+          await invoke('windsurf_start_instance', { instanceId: '__default__' });
         } else {
           await invoke('start_instance', { instanceId: '__default__' });
         }
@@ -454,6 +467,22 @@ function App() {
     } catch (error) {
       console.error('设置应用路径失败:', error);
       setAppPathSetting(false);
+    }
+  };
+
+  const handleResetMissingAppPath = async () => {
+    if (!appPathMissing || appPathSetting || appPathDetecting) return;
+    setAppPathDetecting(true);
+    try {
+      const detected = await invoke<string | null>('detect_app_path', {
+        app: appPathMissing.app,
+        force: true,
+      });
+      setAppPathDraft((detected || '').trim());
+    } catch (error) {
+      console.error('自动探测应用路径失败:', error);
+    } finally {
+      setAppPathDetecting(false);
     }
   };
 
@@ -533,6 +562,8 @@ function App() {
                       ? 'Codex'
                       : appPathMissing.app === 'vscode'
                         ? 'VS Code'
+                        : appPathMissing.app === 'windsurf'
+                          ? 'Windsurf'
                         : 'Antigravity',
                 })}
               </p>
@@ -546,20 +577,55 @@ function App() {
                     onChange={(e) => setAppPathDraft(e.target.value)}
                     disabled={appPathSetting}
                   />
-                  <button className="btn btn-secondary" onClick={handlePickMissingAppPath} disabled={appPathSetting}>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={handlePickMissingAppPath}
+                    disabled={appPathSetting || appPathDetecting}
+                  >
                     {t('settings.general.codexPathSelect', '选择')}
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={handleResetMissingAppPath}
+                    disabled={appPathSetting || appPathDetecting}
+                    title={
+                      appPathDetecting
+                        ? t('common.loading', '加载中...')
+                        : (
+                          appPathMissing.app === 'vscode'
+                            ? t('settings.general.vscodePathReset', '重置默认')
+                            : appPathMissing.app === 'windsurf'
+                              ? t('settings.general.windsurfPathReset', '重置默认')
+                              : t('settings.general.codexPathReset', '重置默认')
+                        )
+                    }
+                  >
+                    <RefreshCw size={14} className={appPathDetecting ? 'spin' : undefined} />
+                    {appPathDetecting
+                      ? t('common.loading', '加载中...')
+                      : (
+                        appPathMissing.app === 'vscode'
+                          ? t('settings.general.vscodePathReset', '重置默认')
+                          : appPathMissing.app === 'windsurf'
+                            ? t('settings.general.windsurfPathReset', '重置默认')
+                            : t('settings.general.codexPathReset', '重置默认')
+                      )}
                   </button>
                 </div>
               </div>
             </div>
             <div className="modal-footer">
-              <button className="btn btn-secondary" onClick={() => setAppPathMissing(null)} disabled={appPathSetting}>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setAppPathMissing(null)}
+                disabled={appPathSetting || appPathDetecting}
+              >
                 {t('common.cancel', '取消')}
               </button>
               <button
                 className="btn btn-primary"
                 onClick={handleSaveMissingAppPath}
-                disabled={appPathSetting || !appPathDraft.trim()}
+                disabled={appPathSetting || appPathDetecting || !appPathDraft.trim()}
               >
                 {t('common.save', '保存')}
               </button>
@@ -576,15 +642,20 @@ function App() {
       />
       
       {/* 左侧悬浮导航 */}
-      <SideNav page={page} setPage={setPage} />
+      <SideNav page={page} setPage={setPage} onOpenPlatformLayout={() => setShowPlatformLayoutModal(true)} />
+
+      <PlatformLayoutModal open={showPlatformLayoutModal} onClose={() => setShowPlatformLayoutModal(false)} />
 
       <div className="main-wrapper">
         {/* overview 现在是合并后的账号总览页面 */}
 
-        {page === 'dashboard' && <DashboardPage onNavigate={setPage} />}
+        {page === 'dashboard' && (
+          <DashboardPage onNavigate={setPage} onOpenPlatformLayout={() => setShowPlatformLayoutModal(true)} />
+        )}
         {page === 'overview' && <AccountsPage onNavigate={setPage} />}
         {page === 'codex' && <CodexAccountsPage />}
         {page === 'github-copilot' && <GitHubCopilotAccountsPage />}
+        {page === 'windsurf' && <WindsurfAccountsPage />}
         {page === 'instances' && <InstancesPage onNavigate={setPage} />}
         {page === 'fingerprints' && <FingerprintsPage onNavigate={setPage} />}
         {page === 'wakeup' && <WakeupTasksPage onNavigate={setPage} />}

@@ -12,7 +12,8 @@ use crate::modules::instance_store;
 
 pub use crate::modules::instance_store::{CreateInstanceParams, UpdateInstanceParams};
 
-static INSTANCE_STORE_LOCK: std::sync::LazyLock<Mutex<()>> = std::sync::LazyLock::new(|| Mutex::new(()));
+static INSTANCE_STORE_LOCK: std::sync::LazyLock<Mutex<()>> =
+    std::sync::LazyLock::new(|| Mutex::new(()));
 
 const INSTANCES_FILE: &str = "instances.json";
 
@@ -22,7 +23,6 @@ pub struct InstanceDefaults {
     pub root_dir: String,
     pub default_user_data_dir: String,
 }
-
 
 fn instances_path() -> Result<PathBuf, String> {
     let data_dir = modules::account::get_data_dir()?;
@@ -76,7 +76,6 @@ pub fn update_default_settings(
     Ok(updated)
 }
 
-
 pub fn get_default_user_data_dir() -> Result<PathBuf, String> {
     #[cfg(target_os = "macos")]
     {
@@ -86,8 +85,8 @@ pub fn get_default_user_data_dir() -> Result<PathBuf, String> {
 
     #[cfg(target_os = "windows")]
     {
-        let appdata = std::env::var("APPDATA")
-            .map_err(|_| "无法获取 APPDATA 环境变量".to_string())?;
+        let appdata =
+            std::env::var("APPDATA").map_err(|_| "无法获取 APPDATA 环境变量".to_string())?;
         return Ok(PathBuf::from(appdata).join("Antigravity"));
     }
 
@@ -110,8 +109,8 @@ pub fn get_default_instances_root_dir() -> Result<PathBuf, String> {
 
     #[cfg(target_os = "windows")]
     {
-        let appdata = std::env::var("APPDATA")
-            .map_err(|_| "无法获取 APPDATA 环境变量".to_string())?;
+        let appdata =
+            std::env::var("APPDATA").map_err(|_| "无法获取 APPDATA 环境变量".to_string())?;
         return Ok(PathBuf::from(appdata).join(".antigravity_cockpit\\instances\\antigravity"));
     }
 
@@ -169,25 +168,36 @@ fn ensure_profile_global_storage(profile_dir: &Path) -> Result<PathBuf, String> 
 }
 
 fn ensure_state_db_for_injection(profile_dir: &Path) -> Result<PathBuf, String> {
-    let db_path = profile_dir.join("User").join("globalStorage").join("state.vscdb");
+    let db_path = profile_dir
+        .join("User")
+        .join("globalStorage")
+        .join("state.vscdb");
     if db_path.exists() {
         return Ok(db_path);
     }
 
     let default_dir = get_default_user_data_dir()?;
-    let default_db = default_dir.join("User").join("globalStorage").join("state.vscdb");
+    let default_db = default_dir
+        .join("User")
+        .join("globalStorage")
+        .join("state.vscdb");
     if default_db.exists() {
         let _ = ensure_profile_global_storage(profile_dir)?;
-        fs::copy(&default_db, &db_path)
-            .map_err(|e| format!("复制 state.vscdb 失败: {}", e))?;
+        fs::copy(&default_db, &db_path).map_err(|e| format!("复制 state.vscdb 失败: {}", e))?;
     }
 
     if !db_path.exists() {
         return Err("未找到 state.vscdb，请先勾选复制当前登录状态或先启动实例一次".to_string());
     }
 
-    let default_storage = default_dir.join("User").join("globalStorage").join("storage.json");
-    let target_storage = profile_dir.join("User").join("globalStorage").join("storage.json");
+    let default_storage = default_dir
+        .join("User")
+        .join("globalStorage")
+        .join("storage.json");
+    let target_storage = profile_dir
+        .join("User")
+        .join("globalStorage")
+        .join("storage.json");
     if default_storage.exists() && !target_storage.exists() {
         let _ = fs::copy(&default_storage, &target_storage);
     }
@@ -280,7 +290,11 @@ pub fn create_instance(params: CreateInstanceParams) -> Result<InstanceProfile, 
         name,
         user_data_dir,
         extra_args: params.extra_args.trim().to_string(),
-        bind_account_id: if create_empty { None } else { params.bind_account_id },
+        bind_account_id: if create_empty {
+            None
+        } else {
+            params.bind_account_id
+        },
         created_at: Utc::now().timestamp_millis(),
         last_launched_at: None,
         last_pid: None,
@@ -384,7 +398,6 @@ pub fn delete_instance_directory(dir_path: &Path) -> Result<(), String> {
         }
     }
 }
-
 
 #[allow(dead_code)]
 pub fn update_instance_last_launched(instance_id: &str) -> Result<InstanceProfile, String> {

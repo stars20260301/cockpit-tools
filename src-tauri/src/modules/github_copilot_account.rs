@@ -33,6 +33,11 @@ pub fn accounts_index_path_string() -> Result<String, String> {
     Ok(get_accounts_index_path()?.to_string_lossy().to_string())
 }
 
+/// Load a single account by ID (public wrapper)
+pub fn load_account(account_id: &str) -> Option<GitHubCopilotAccount> {
+    load_account_file(account_id)
+}
+
 fn load_account_file(account_id: &str) -> Option<GitHubCopilotAccount> {
     let account_path = get_accounts_dir()
         .ok()
@@ -70,15 +75,17 @@ fn load_account_index() -> GitHubCopilotAccountIndex {
     }
 
     match fs::read_to_string(path) {
-        Ok(content) => serde_json::from_str(&content).unwrap_or_else(|_| GitHubCopilotAccountIndex::new()),
+        Ok(content) => {
+            serde_json::from_str(&content).unwrap_or_else(|_| GitHubCopilotAccountIndex::new())
+        }
         Err(_) => GitHubCopilotAccountIndex::new(),
     }
 }
 
 fn save_account_index(index: &GitHubCopilotAccountIndex) -> Result<(), String> {
     let path = get_accounts_index_path()?;
-    let content = serde_json::to_string_pretty(index)
-        .map_err(|e| format!("序列化账号索引失败: {}", e))?;
+    let content =
+        serde_json::to_string_pretty(index).map_err(|e| format!("序列化账号索引失败: {}", e))?;
     fs::write(path, content).map_err(|e| format!("写入账号索引失败: {}", e))
 }
 
@@ -107,7 +114,9 @@ pub fn list_accounts() -> Vec<GitHubCopilotAccount> {
         .collect()
 }
 
-pub fn upsert_account(payload: GitHubCopilotOAuthCompletePayload) -> Result<GitHubCopilotAccount, String> {
+pub fn upsert_account(
+    payload: GitHubCopilotOAuthCompletePayload,
+) -> Result<GitHubCopilotAccount, String> {
     let now = now_ts();
     let mut index = load_account_index();
     let generated_id = format!(
@@ -198,7 +207,8 @@ pub async fn refresh_account_token(account_id: &str) -> Result<GitHubCopilotAcco
     Ok(updated)
 }
 
-pub async fn refresh_all_tokens() -> Result<Vec<(String, Result<GitHubCopilotAccount, String>)>, String> {
+pub async fn refresh_all_tokens(
+) -> Result<Vec<(String, Result<GitHubCopilotAccount, String>)>, String> {
     let accounts = list_accounts();
     let mut results = Vec::new();
     for acc in accounts {
@@ -224,7 +234,10 @@ pub fn remove_accounts(account_ids: &[String]) -> Result<(), String> {
     Ok(())
 }
 
-pub fn update_account_tags(account_id: &str, tags: Vec<String>) -> Result<GitHubCopilotAccount, String> {
+pub fn update_account_tags(
+    account_id: &str,
+    tags: Vec<String>,
+) -> Result<GitHubCopilotAccount, String> {
     let mut account = load_account_file(account_id).ok_or_else(|| "账号不存在".to_string())?;
     account.tags = Some(tags);
     account.last_used = now_ts();

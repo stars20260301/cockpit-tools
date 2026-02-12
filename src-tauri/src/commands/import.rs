@@ -29,7 +29,7 @@ pub async fn import_from_json(json_content: String) -> Result<Vec<models::Accoun
 #[tauri::command]
 pub async fn export_accounts(account_ids: Vec<String>) -> Result<String, String> {
     let mut accounts_to_export = Vec::new();
-    
+
     if account_ids.is_empty() {
         // 导出全部
         accounts_to_export = modules::list_accounts()?;
@@ -40,7 +40,7 @@ pub async fn export_accounts(account_ids: Vec<String>) -> Result<String, String>
             }
         }
     }
-    
+
     #[derive(serde::Serialize)]
     struct SimpleAccount {
         email: String,
@@ -55,8 +55,8 @@ pub async fn export_accounts(account_ids: Vec<String>) -> Result<String, String>
         })
         .collect();
 
-    let json = serde_json::to_string_pretty(&simplified)
-        .map_err(|e| format!("序列化失败: {}", e))?;
-    
+    let json =
+        serde_json::to_string_pretty(&simplified).map_err(|e| format!("序列化失败: {}", e))?;
+
     Ok(json)
 }

@@ -28,13 +28,20 @@ interface GeneralConfig {
   theme: string;
   auto_refresh_minutes: number;
   codex_auto_refresh_minutes: number;
+  ghcp_auto_refresh_minutes: number;
+  windsurf_auto_refresh_minutes: number;
   close_behavior: 'ask' | 'minimize' | 'quit';
   opencode_app_path: string;
   antigravity_app_path: string;
   codex_app_path: string;
   vscode_app_path: string;
+  windsurf_app_path: string;
   opencode_sync_on_switch: boolean;
+  auto_switch_enabled: boolean;
+  auto_switch_threshold: number;
 }
+
+type AppPathTarget = 'antigravity' | 'codex' | 'vscode' | 'opencode' | 'windsurf';
 
 export function SettingsPage() {
   const { t } = useTranslation();
@@ -64,12 +71,18 @@ export function SettingsPage() {
   const [theme, setTheme] = useState('system');
   const [autoRefresh, setAutoRefresh] = useState('5');
   const [codexAutoRefresh, setCodexAutoRefresh] = useState('10');
+  const [ghcpAutoRefresh, setGhcpAutoRefresh] = useState('10');
+  const [windsurfAutoRefresh, setWindsurfAutoRefresh] = useState('10');
   const [closeBehavior, setCloseBehavior] = useState<'ask' | 'minimize' | 'quit'>('ask');
   const [opencodeAppPath, setOpencodeAppPath] = useState('');
   const [antigravityAppPath, setAntigravityAppPath] = useState('');
   const [codexAppPath, setCodexAppPath] = useState('');
   const [vscodeAppPath, setVscodeAppPath] = useState('');
+  const [windsurfAppPath, setWindsurfAppPath] = useState('');
+  const [appPathResetDetectingTargets, setAppPathResetDetectingTargets] = useState<Set<AppPathTarget>>(new Set());
   const [opencodeSyncOnSwitch, setOpencodeSyncOnSwitch] = useState(true);
+  const [autoSwitchEnabled, setAutoSwitchEnabled] = useState(false);
+  const [autoSwitchThreshold, setAutoSwitchThreshold] = useState('5');
   const [generalLoaded, setGeneralLoaded] = useState(false);
   const generalSaveTimerRef = useRef<number | null>(null);
   const suppressGeneralSaveRef = useRef(false);
@@ -114,12 +127,19 @@ export function SettingsPage() {
       window.clearTimeout(generalSaveTimerRef.current);
     }
 
-    if (!autoRefresh.trim() || !codexAutoRefresh.trim()) {
+    if (
+      !autoRefresh.trim() ||
+      !codexAutoRefresh.trim() ||
+      !ghcpAutoRefresh.trim() ||
+      !windsurfAutoRefresh.trim()
+    ) {
       return;
     }
 
     const autoRefreshNum = parseInt(autoRefresh, 10) || -1;
     const codexAutoRefreshNum = parseInt(codexAutoRefresh, 10) || -1;
+    const ghcpAutoRefreshNum = parseInt(ghcpAutoRefresh, 10) || -1;
+    const windsurfAutoRefreshNum = parseInt(windsurfAutoRefresh, 10) || -1;
 
     if (suppressGeneralSaveRef.current) {
       suppressGeneralSaveRef.current = false;
@@ -133,12 +153,17 @@ export function SettingsPage() {
           theme,
           autoRefreshMinutes: autoRefreshNum,
           codexAutoRefreshMinutes: codexAutoRefreshNum,
+          ghcpAutoRefreshMinutes: ghcpAutoRefreshNum,
+          windsurfAutoRefreshMinutes: windsurfAutoRefreshNum,
           closeBehavior,
           opencodeAppPath,
           antigravityAppPath,
           codexAppPath,
           vscodeAppPath,
+          windsurfAppPath,
           opencodeSyncOnSwitch,
+          autoSwitchEnabled,
+          autoSwitchThreshold: parseInt(autoSwitchThreshold, 10) || 5,
         });
         window.dispatchEvent(new Event('config-updated'));
       } catch (err) {
@@ -155,6 +180,8 @@ export function SettingsPage() {
   }, [
     autoRefresh,
     codexAutoRefresh,
+    ghcpAutoRefresh,
+    windsurfAutoRefresh,
     closeBehavior,
     generalLoaded,
     language,
@@ -163,7 +190,10 @@ export function SettingsPage() {
     antigravityAppPath,
     codexAppPath,
     vscodeAppPath,
+    windsurfAppPath,
     opencodeSyncOnSwitch,
+    autoSwitchEnabled,
+    autoSwitchThreshold,
     t,
   ]);
 
@@ -180,6 +210,18 @@ export function SettingsPage() {
     window.addEventListener('general-language-updated', handleLanguageUpdated);
     return () => {
       window.removeEventListener('general-language-updated', handleLanguageUpdated);
+    };
+  }, []);
+
+  // 监听外部配置更新（如 QuickSettingsPopover 保存后同步）
+  useEffect(() => {
+    const handleConfigUpdated = () => {
+      suppressGeneralSaveRef.current = true;
+      loadGeneralConfig();
+    };
+    window.addEventListener('config-updated', handleConfigUpdated);
+    return () => {
+      window.removeEventListener('config-updated', handleConfigUpdated);
     };
   }, []);
   
@@ -276,12 +318,17 @@ export function SettingsPage() {
       setTheme(config.theme);
       setAutoRefresh(String(config.auto_refresh_minutes));
       setCodexAutoRefresh(String(config.codex_auto_refresh_minutes ?? 10));
+      setGhcpAutoRefresh(String(config.ghcp_auto_refresh_minutes ?? 10));
+      setWindsurfAutoRefresh(String(config.windsurf_auto_refresh_minutes ?? 10));
       setCloseBehavior(config.close_behavior || 'ask');
       setOpencodeAppPath(config.opencode_app_path || '');
       setAntigravityAppPath(config.antigravity_app_path || '');
       setCodexAppPath(config.codex_app_path || '');
       setVscodeAppPath(config.vscode_app_path || '');
+      setWindsurfAppPath(config.windsurf_app_path || '');
       setOpencodeSyncOnSwitch(config.opencode_sync_on_switch ?? true);
+      setAutoSwitchEnabled(config.auto_switch_enabled ?? false);
+      setAutoSwitchThreshold(String(config.auto_switch_threshold ?? 5));
       // 同步语言
       changeLanguage(config.language);
       applyTheme(config.theme);
@@ -331,7 +378,36 @@ export function SettingsPage() {
     openUrl(url);
   };
 
-  const handlePickAppPath = async (target: 'antigravity' | 'codex' | 'vscode' | 'opencode') => {
+  const isAppPathResetDetecting = (target: AppPathTarget) => appPathResetDetectingTargets.has(target);
+
+  const setAppPathForTarget = (target: AppPathTarget, path: string) => {
+    if (target === 'antigravity') {
+      setAntigravityAppPath(path);
+    } else if (target === 'codex') {
+      setCodexAppPath(path);
+    } else if (target === 'vscode') {
+      setVscodeAppPath(path);
+    } else if (target === 'windsurf') {
+      setWindsurfAppPath(path);
+    } else {
+      setOpencodeAppPath(path);
+    }
+  };
+
+  const getResetLabelByTarget = (target: AppPathTarget) => {
+    if (target === 'vscode') {
+      return t('settings.general.vscodePathReset', '重置默认');
+    }
+    if (target === 'windsurf') {
+      return t('settings.general.windsurfPathReset', '重置默认');
+    }
+    if (target === 'opencode') {
+      return t('settings.general.opencodePathReset', '重置默认');
+    }
+    return t('settings.general.codexPathReset', '重置默认');
+  };
+
+  const handlePickAppPath = async (target: AppPathTarget) => {
     try {
       const selected = await open({
         multiple: false,
@@ -341,44 +417,31 @@ export function SettingsPage() {
       const path = Array.isArray(selected) ? selected[0] : selected;
       if (!path) return;
 
-      if (target === 'antigravity') {
-        setAntigravityAppPath(path);
-      } else if (target === 'codex') {
-        setCodexAppPath(path);
-      } else if (target === 'vscode') {
-        setVscodeAppPath(path);
-      } else {
-        setOpencodeAppPath(path);
-      }
+      setAppPathForTarget(target, path);
     } catch (err) {
       console.error('选择启动路径失败:', err);
     }
   };
 
-  const handleResetAppPath = async (target: 'antigravity' | 'codex' | 'vscode' | 'opencode') => {
+  const handleResetAppPath = async (target: AppPathTarget) => {
+    if (isAppPathResetDetecting(target)) return;
+    setAppPathResetDetectingTargets((prev) => {
+      const next = new Set(prev);
+      next.add(target);
+      return next;
+    });
     try {
-      const detected = await invoke<string | null>('detect_app_path', { app: target });
-      const path = detected || '';
-      if (target === 'antigravity') {
-        setAntigravityAppPath(path);
-      } else if (target === 'codex') {
-        setCodexAppPath(path);
-      } else if (target === 'vscode') {
-        setVscodeAppPath(path);
-      } else {
-        setOpencodeAppPath(path);
-      }
+      const detected = await invoke<string | null>('detect_app_path', { app: target, force: true });
+      setAppPathForTarget(target, detected || '');
     } catch (err) {
       console.error('重置启动路径失败:', err);
-      if (target === 'antigravity') {
-        setAntigravityAppPath('');
-      } else if (target === 'codex') {
-        setCodexAppPath('');
-      } else if (target === 'vscode') {
-        setVscodeAppPath('');
-      } else {
-        setOpencodeAppPath('');
-      }
+      setAppPathForTarget(target, '');
+    } finally {
+      setAppPathResetDetectingTargets((prev) => {
+        const next = new Set(prev);
+        next.delete(target);
+        return next;
+      });
     }
   };
 
@@ -419,6 +482,7 @@ export function SettingsPage() {
         {/* === General Tab === */}
         {activeTab === 'general' && (
           <>
+            <div className="group-title">{t('settings.general.commonTitle', '通用')}</div>
             <div className="settings-group">
               <div className="settings-row">
                 <div className="row-label">
@@ -473,9 +537,33 @@ export function SettingsPage() {
                   </select>
                 </div>
               </div>
+
+              <div className="settings-row">
+                <div className="row-label">
+                  <div className="row-title">{t('settings.general.dataDir')}</div>
+                  <div className="row-desc">{t('settings.general.dataDirDesc')}</div>
+                </div>
+                <div className="row-control">
+                  <button className="btn btn-secondary" onClick={() => accountService.openDataFolder()}>
+                    <FolderOpen size={16} />{t('common.open')}
+                  </button>
+                </div>
+              </div>
+
+              <div className="settings-row">
+                <div className="row-label">
+                  <div className="row-title">{t('settings.general.fpDir')}</div>
+                  <div className="row-desc">{t('settings.general.fpDirDesc')}</div>
+                </div>
+                <div className="row-control">
+                  <button className="btn btn-secondary" onClick={() => accountService.openDeviceFolder()}>
+                    <FolderOpen size={16} />{t('common.open')}
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div className="group-title">{t('settings.general.accountManagement')}</div>
+            <div className="group-title">{t('settings.general.antigravitySettingsTitle', 'Antigravity 设置')}</div>
             <div className="settings-group">
               <div className="settings-row">
                 <div className="row-label">
@@ -546,6 +634,82 @@ export function SettingsPage() {
 
               <div className="settings-row">
                 <div className="row-label">
+                  <div className="row-title">{t('settings.general.antigravityAppPath', 'Antigravity 启动路径')}</div>
+                  <div className="row-desc">{t('settings.general.codexAppPathDesc', '留空则使用默认路径')}</div>
+                </div>
+                <div className="row-control row-control--grow">
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flex: 1 }}>
+                    <input
+                      type="text"
+                      className="settings-input settings-input--path"
+                      value={antigravityAppPath}
+                      placeholder={t('settings.general.codexAppPathPlaceholder', '默认路径')}
+                      onChange={(e) => setAntigravityAppPath(e.target.value)}
+                    />
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => handlePickAppPath('antigravity')}
+                      disabled={isAppPathResetDetecting('antigravity')}
+                    >
+                      {t('settings.general.codexPathSelect', '选择')}
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => handleResetAppPath('antigravity')}
+                      disabled={isAppPathResetDetecting('antigravity')}
+                    >
+                      <RefreshCw size={16} className={isAppPathResetDetecting('antigravity') ? 'spin' : undefined} />
+                      {isAppPathResetDetecting('antigravity')
+                        ? t('common.loading', '加载中...')
+                        : getResetLabelByTarget('antigravity')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="settings-row">
+                <div className="row-label">
+                  <div className="row-title">{t('quickSettings.autoSwitch.enable', '自动切号')}</div>
+                  <div className="row-desc">{t('quickSettings.autoSwitch.hint', '当任意模型配额低于阈值时，自动切换到配额最高的账号。')}</div>
+                </div>
+                <div className="row-control">
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      checked={autoSwitchEnabled}
+                      onChange={(e) => setAutoSwitchEnabled(e.target.checked)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+              </div>
+              {autoSwitchEnabled && (
+                <div className="settings-row" style={{ animation: 'fadeUp 0.3s ease both' }}>
+                  <div className="row-label">
+                    <div className="row-title">{t('quickSettings.autoSwitch.threshold', '切号阈值')}</div>
+                    <div className="row-desc">{t('quickSettings.autoSwitch.thresholdDesc', '任意模型配额低于此百分比时触发自动切号')}</div>
+                  </div>
+                  <div className="row-control">
+                    <select
+                      className="settings-select"
+                      value={autoSwitchThreshold}
+                      onChange={(e) => setAutoSwitchThreshold(e.target.value)}
+                    >
+                      <option value="3">3%</option>
+                      <option value="5">5%</option>
+                      <option value="10">10%</option>
+                      <option value="15">15%</option>
+                      <option value="20">20%</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="group-title">{t('settings.general.codexSettingsTitle', 'Codex 设置')}</div>
+            <div className="settings-group">
+              <div className="settings-row">
+                <div className="row-label">
                   <div className="row-title">{t('settings.general.codexAutoRefresh')}</div>
                   <div className="row-desc">{t('settings.general.codexAutoRefreshDesc')}</div>
                 </div>
@@ -592,64 +756,7 @@ export function SettingsPage() {
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="group-title">{t('settings.general.storageTitle')}</div>
-            <div className="settings-group">
-              <div className="settings-row">
-                <div className="row-label">
-                  <div className="row-title">{t('settings.general.dataDir')}</div>
-                  <div className="row-desc">{t('settings.general.dataDirDesc')}</div>
-                </div>
-                <div className="row-control">
-                  <button className="btn btn-secondary" onClick={() => accountService.openDataFolder()}>
-                    <FolderOpen size={16} />{t('common.open')}
-                  </button>
-                </div>
-              </div>
-              <div className="settings-row">
-                <div className="row-label">
-                  <div className="row-title">{t('settings.general.fpDir')}</div>
-                  <div className="row-desc">{t('settings.general.fpDirDesc')}</div>
-                </div>
-                <div className="row-control">
-                  <button className="btn btn-secondary" onClick={() => accountService.openDeviceFolder()}>
-                    <FolderOpen size={16} />{t('common.open')}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="group-title">{t('settings.general.antigravityTitle', 'Antigravity 启动')}</div>
-            <div className="settings-group">
-              <div className="settings-row">
-                <div className="row-label">
-                  <div className="row-title">{t('settings.general.antigravityAppPath', 'Antigravity 启动路径')}</div>
-                  <div className="row-desc">{t('settings.general.codexAppPathDesc', '留空则使用默认路径')}</div>
-                </div>
-                <div className="row-control row-control--grow">
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flex: 1 }}>
-                    <input
-                      type="text"
-                      className="settings-input settings-input--path"
-                      value={antigravityAppPath}
-                      placeholder={t('settings.general.codexAppPathPlaceholder', '默认路径')}
-                      onChange={(e) => setAntigravityAppPath(e.target.value)}
-                    />
-                    <button className="btn btn-secondary" onClick={() => handlePickAppPath('antigravity')}>
-                      {t('settings.general.codexPathSelect', '选择')}
-                    </button>
-                    <button className="btn btn-secondary" onClick={() => handleResetAppPath('antigravity')}>
-                      <RefreshCw size={16} />
-                      {t('settings.general.codexPathReset', '恢复默认')}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="group-title">{t('settings.general.codexTitle', 'Codex 启动')}</div>
-            <div className="settings-group">
               <div className="settings-row">
                 <div className="row-label">
                   <div className="row-title">{t('settings.general.codexAppPath', 'Codex 启动路径')}</div>
@@ -664,48 +771,27 @@ export function SettingsPage() {
                       placeholder={t('settings.general.codexAppPathPlaceholder', '默认路径')}
                       onChange={(e) => setCodexAppPath(e.target.value)}
                     />
-                    <button className="btn btn-secondary" onClick={() => handlePickAppPath('codex')}>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => handlePickAppPath('codex')}
+                      disabled={isAppPathResetDetecting('codex')}
+                    >
                       {t('settings.general.codexPathSelect', '选择')}
                     </button>
-                    <button className="btn btn-secondary" onClick={() => handleResetAppPath('codex')}>
-                      <RefreshCw size={16} />
-                      {t('settings.general.codexPathReset', '恢复默认')}
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => handleResetAppPath('codex')}
+                      disabled={isAppPathResetDetecting('codex')}
+                    >
+                      <RefreshCw size={16} className={isAppPathResetDetecting('codex') ? 'spin' : undefined} />
+                      {isAppPathResetDetecting('codex')
+                        ? t('common.loading', '加载中...')
+                        : getResetLabelByTarget('codex')}
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="group-title">{t('settings.general.vscodeTitle', 'VS Code 启动')}</div>
-            <div className="settings-group">
-              <div className="settings-row">
-                <div className="row-label">
-                  <div className="row-title">{t('settings.general.vscodeAppPath', 'VS Code 启动路径')}</div>
-                  <div className="row-desc">{t('settings.general.vscodeAppPathDesc', '留空则使用默认路径')}</div>
-                </div>
-                <div className="row-control row-control--grow">
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flex: 1 }}>
-                    <input
-                      type="text"
-                      className="settings-input settings-input--path"
-                      value={vscodeAppPath}
-                      placeholder={t('settings.general.vscodeAppPathPlaceholder', '默认路径')}
-                      onChange={(e) => setVscodeAppPath(e.target.value)}
-                    />
-                    <button className="btn btn-secondary" onClick={() => handlePickAppPath('vscode')}>
-                      {t('settings.general.vscodePathSelect', '选择')}
-                    </button>
-                    <button className="btn btn-secondary" onClick={() => handleResetAppPath('vscode')}>
-                      <RefreshCw size={16} />
-                      {t('settings.general.vscodePathReset', '重置默认')}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="group-title">{t('settings.general.opencodeTitle')}</div>
-            <div className="settings-group">
               <div className="settings-row">
                 <div className="row-label">
                   <div className="row-title">{t('settings.general.opencodeRestart')}</div>
@@ -739,15 +825,196 @@ export function SettingsPage() {
                       placeholder={t('settings.general.opencodeAppPathPlaceholder')}
                       onChange={(e) => setOpencodeAppPath(e.target.value)}
                     />
-                    <button className="btn btn-secondary" onClick={() => handlePickAppPath('opencode')}>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => handlePickAppPath('opencode')}
+                      disabled={isAppPathResetDetecting('opencode')}
+                    >
                       {t('settings.general.opencodePathSelect', '选择')}
                     </button>
                     <button
                       className="btn btn-secondary"
                       onClick={() => handleResetAppPath('opencode')}
+                      disabled={isAppPathResetDetecting('opencode')}
                     >
-                      <RefreshCw size={16} />
-                      {t('settings.general.opencodePathReset')}
+                      <RefreshCw size={16} className={isAppPathResetDetecting('opencode') ? 'spin' : undefined} />
+                      {isAppPathResetDetecting('opencode')
+                        ? t('common.loading', '加载中...')
+                        : getResetLabelByTarget('opencode')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="group-title">{t('settings.general.githubCopilotSettingsTitle', 'GitHub Copilot 设置')}</div>
+            <div className="settings-group">
+              <div className="settings-row">
+                <div className="row-label">
+                  <div className="row-title">{t('settings.general.ghcpAutoRefresh', 'GitHub Copilot 自动刷新配额')}</div>
+                  <div className="row-desc">{t('settings.general.ghcpAutoRefreshDesc', '后台自动更新频率')}</div>
+                </div>
+                <div className="row-control">
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <select
+                      className="settings-select"
+                      style={{ minWidth: '120px', width: 'auto' }}
+                      value={['-1', '2', '5', '10', '15'].includes(ghcpAutoRefresh) ? ghcpAutoRefresh : 'custom'}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'custom') {
+                          if (['-1', '2', '5', '10', '15'].includes(ghcpAutoRefresh)) {
+                            setGhcpAutoRefresh('12');
+                          }
+                        } else {
+                          setGhcpAutoRefresh(val);
+                        }
+                      }}
+                    >
+                      <option value="-1">{t('settings.general.autoRefreshDisabled')}</option>
+                      <option value="2">2 {t('settings.general.minutes')}</option>
+                      <option value="5">5 {t('settings.general.minutes')}</option>
+                      <option value="10">10 {t('settings.general.minutes')}</option>
+                      <option value="15">15 {t('settings.general.minutes')}</option>
+                      <option value="custom">{t('settings.general.autoRefreshCustom')}</option>
+                    </select>
+
+                    {!['-1', '2', '5', '10', '15'].includes(ghcpAutoRefresh) && (
+                      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <input
+                          type="number"
+                          min="1"
+                          className="settings-input"
+                          style={{ width: '80px', paddingRight: '24px' }}
+                          value={ghcpAutoRefresh}
+                          onChange={(e) => setGhcpAutoRefresh(e.target.value)}
+                        />
+                        <span style={{ position: 'absolute', right: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                          {t('settings.general.minutes')}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="settings-row">
+                <div className="row-label">
+                  <div className="row-title">{t('settings.general.vscodeAppPath', 'VS Code 启动路径')}</div>
+                  <div className="row-desc">{t('settings.general.vscodeAppPathDesc', '留空则使用默认路径')}</div>
+                </div>
+                <div className="row-control row-control--grow">
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flex: 1 }}>
+                    <input
+                      type="text"
+                      className="settings-input settings-input--path"
+                      value={vscodeAppPath}
+                      placeholder={t('settings.general.vscodeAppPathPlaceholder', '默认路径')}
+                      onChange={(e) => setVscodeAppPath(e.target.value)}
+                    />
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => handlePickAppPath('vscode')}
+                      disabled={isAppPathResetDetecting('vscode')}
+                    >
+                      {t('settings.general.vscodePathSelect', '选择')}
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => handleResetAppPath('vscode')}
+                      disabled={isAppPathResetDetecting('vscode')}
+                    >
+                      <RefreshCw size={16} className={isAppPathResetDetecting('vscode') ? 'spin' : undefined} />
+                      {isAppPathResetDetecting('vscode')
+                        ? t('common.loading', '加载中...')
+                        : getResetLabelByTarget('vscode')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="group-title">{t('settings.general.windsurfSettingsTitle', 'Windsurf 设置')}</div>
+            <div className="settings-group">
+              <div className="settings-row">
+                <div className="row-label">
+                  <div className="row-title">{t('settings.general.windsurfAutoRefresh', 'Windsurf 自动刷新配额')}</div>
+                  <div className="row-desc">{t('settings.general.windsurfAutoRefreshDesc', '后台自动更新频率')}</div>
+                </div>
+                <div className="row-control">
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <select
+                      className="settings-select"
+                      style={{ minWidth: '120px', width: 'auto' }}
+                      value={['-1', '2', '5', '10', '15'].includes(windsurfAutoRefresh) ? windsurfAutoRefresh : 'custom'}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'custom') {
+                          if (['-1', '2', '5', '10', '15'].includes(windsurfAutoRefresh)) {
+                            setWindsurfAutoRefresh('12');
+                          }
+                        } else {
+                          setWindsurfAutoRefresh(val);
+                        }
+                      }}
+                    >
+                      <option value="-1">{t('settings.general.autoRefreshDisabled')}</option>
+                      <option value="2">2 {t('settings.general.minutes')}</option>
+                      <option value="5">5 {t('settings.general.minutes')}</option>
+                      <option value="10">10 {t('settings.general.minutes')}</option>
+                      <option value="15">15 {t('settings.general.minutes')}</option>
+                      <option value="custom">{t('settings.general.autoRefreshCustom')}</option>
+                    </select>
+
+                    {!['-1', '2', '5', '10', '15'].includes(windsurfAutoRefresh) && (
+                      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <input
+                          type="number"
+                          min="1"
+                          className="settings-input"
+                          style={{ width: '80px', paddingRight: '24px' }}
+                          value={windsurfAutoRefresh}
+                          onChange={(e) => setWindsurfAutoRefresh(e.target.value)}
+                        />
+                        <span style={{ position: 'absolute', right: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                          {t('settings.general.minutes')}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="settings-row">
+                <div className="row-label">
+                  <div className="row-title">{t('settings.general.windsurfAppPath', 'Windsurf 启动路径')}</div>
+                  <div className="row-desc">{t('settings.general.windsurfAppPathDesc', '留空则使用默认路径')}</div>
+                </div>
+                <div className="row-control row-control--grow">
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flex: 1 }}>
+                    <input
+                      type="text"
+                      className="settings-input settings-input--path"
+                      value={windsurfAppPath}
+                      placeholder={t('settings.general.windsurfAppPathPlaceholder', '默认路径')}
+                      onChange={(e) => setWindsurfAppPath(e.target.value)}
+                    />
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => handlePickAppPath('windsurf')}
+                      disabled={isAppPathResetDetecting('windsurf')}
+                    >
+                      {t('settings.general.windsurfPathSelect', '选择')}
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => handleResetAppPath('windsurf')}
+                      disabled={isAppPathResetDetecting('windsurf')}
+                    >
+                      <RefreshCw size={16} className={isAppPathResetDetecting('windsurf') ? 'spin' : undefined} />
+                      {isAppPathResetDetecting('windsurf')
+                        ? t('common.loading', '加载中...')
+                        : getResetLabelByTarget('windsurf')}
                     </button>
                   </div>
                 </div>

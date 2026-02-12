@@ -32,7 +32,7 @@ impl UserInfo {
                 return Some(name.clone());
             }
         }
-        
+
         match (&self.given_name, &self.family_name) {
             (Some(given), Some(family)) => Some(format!("{} {}", given, family)),
             (Some(given), None) => Some(given.clone()),
@@ -49,8 +49,9 @@ pub fn get_auth_url(redirect_uri: &str) -> String {
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/cclog",
-        "https://www.googleapis.com/auth/experimentsandconfigs"
-    ].join(" ");
+        "https://www.googleapis.com/auth/experimentsandconfigs",
+    ]
+    .join(" ");
 
     let params = vec![
         ("client_id", CLIENT_ID),
@@ -61,7 +62,7 @@ pub fn get_auth_url(redirect_uri: &str) -> String {
         ("prompt", "consent"),
         ("include_granted_scopes", "true"),
     ];
-    
+
     let url = url::Url::parse_with_params(AUTH_URL, &params).expect("无效的 Auth URL");
     url.to_string()
 }
@@ -70,7 +71,7 @@ pub fn get_auth_url(redirect_uri: &str) -> String {
 pub async fn exchange_code(code: &str, redirect_uri: &str) -> Result<TokenResponse, String> {
     crate::modules::logger::log_info(&format!("开始 Token 交换, redirect_uri: {}", redirect_uri));
     let client = crate::utils::http::create_client(15);
-    
+
     let params = [
         ("client_id", CLIENT_ID),
         ("client_secret", CLIENT_SECRET),
@@ -94,22 +95,20 @@ pub async fn exchange_code(code: &str, redirect_uri: &str) -> Result<TokenRespon
     crate::modules::logger::log_info(&format!("Token 交换响应状态: {}", status));
 
     if status.is_success() {
-        let token_res = response.json::<TokenResponse>()
-            .await
-            .map_err(|e| {
-                let msg = format!("Token 解析失败: {}", e);
-                crate::modules::logger::log_error(&msg);
-                msg
-            })?;
-        
+        let token_res = response.json::<TokenResponse>().await.map_err(|e| {
+            let msg = format!("Token 解析失败: {}", e);
+            crate::modules::logger::log_error(&msg);
+            msg
+        })?;
+
         if token_res.refresh_token.is_some() {
             crate::modules::logger::log_info("Token 交换成功, 获取到 refresh_token");
         } else {
             crate::modules::logger::log_warn(
-                "警告: Google 未返回 refresh_token, 可能之前已授权过此应用"
+                "警告: Google 未返回 refresh_token, 可能之前已授权过此应用",
             );
         }
-        
+
         Ok(token_res)
     } else {
         let error_text = response.text().await.unwrap_or_default();
@@ -122,7 +121,7 @@ pub async fn exchange_code(code: &str, redirect_uri: &str) -> Result<TokenRespon
 /// 使用 refresh_token 刷新 access_token
 pub async fn refresh_access_token(refresh_token: &str) -> Result<TokenResponse, String> {
     let client = crate::utils::http::create_client(15);
-    
+
     let params = [
         ("client_id", CLIENT_ID),
         ("client_secret", CLIENT_SECRET),
@@ -142,7 +141,7 @@ pub async fn refresh_access_token(refresh_token: &str) -> Result<TokenResponse, 
             .json::<TokenResponse>()
             .await
             .map_err(|e| format!("刷新数据解析失败: {}", e))?;
-        
+
         Ok(token_data)
     } else {
         let error_text = response.text().await.unwrap_or_default();
@@ -153,7 +152,7 @@ pub async fn refresh_access_token(refresh_token: &str) -> Result<TokenResponse, 
 /// 获取用户信息
 pub async fn get_user_info(access_token: &str) -> Result<UserInfo, String> {
     let client = crate::utils::http::create_client(15);
-    
+
     let response = client
         .get(USERINFO_URL)
         .bearer_auth(access_token)
@@ -162,7 +161,8 @@ pub async fn get_user_info(access_token: &str) -> Result<UserInfo, String> {
         .map_err(|e| format!("用户信息请求失败: {}", e))?;
 
     if response.status().is_success() {
-        response.json::<UserInfo>()
+        response
+            .json::<UserInfo>()
             .await
             .map_err(|e| format!("用户信息解析失败: {}", e))
     } else {
@@ -176,14 +176,14 @@ pub async fn ensure_fresh_token(
     current_token: &crate::models::TokenData,
 ) -> Result<crate::models::TokenData, String> {
     let now = chrono::Local::now().timestamp();
-    
+
     if current_token.expiry_timestamp > now + 300 {
         return Ok(current_token.clone());
     }
-    
+
     crate::modules::logger::log_info("Token 即将过期，正在刷新...");
     let response = refresh_access_token(&current_token.refresh_token).await?;
-    
+
     Ok(crate::models::TokenData::new(
         response.access_token,
         current_token.refresh_token.clone(),

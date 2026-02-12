@@ -355,8 +355,7 @@ async fn send_stream_request(
                                 promote_base_url(base);
                                 crate::modules::logger::log_info(&format!(
                                     "[Wakeup] 请求成功: url={}, status={}",
-                                    url,
-                                    status
+                                    url, status
                                 ));
                                 return Ok(parsed);
                             }
@@ -452,15 +451,13 @@ pub async fn trigger_wakeup(
     ));
     let mut token = modules::oauth::ensure_fresh_token(&account.token).await?;
 
-    let (project_id, _) = modules::quota::fetch_project_id(&token.access_token, &account.email).await;
+    let (project_id, _) =
+        modules::quota::fetch_project_id(&token.access_token, &account.email).await;
     let final_project_id = project_id
         .clone()
         .or_else(|| token.project_id.clone())
         .unwrap_or_else(generate_fallback_project_id);
-    crate::modules::logger::log_info(&format!(
-        "[Wakeup] 项目ID: {}",
-        final_project_id
-    ));
+    crate::modules::logger::log_info(&format!("[Wakeup] 项目ID: {}", final_project_id));
 
     if token.project_id.is_none() && project_id.is_some() {
         token.project_id = project_id.clone();
@@ -533,12 +530,16 @@ pub async fn fetch_available_models() -> Result<Vec<AvailableModel>, String> {
         account
     } else {
         let accounts = modules::list_accounts()?;
-        accounts.into_iter().next().ok_or_else(|| "未找到可用账号".to_string())?
+        accounts
+            .into_iter()
+            .next()
+            .ok_or_else(|| "未找到可用账号".to_string())?
     };
 
-
     let token = modules::oauth::ensure_fresh_token(&account.token).await?;
-    if token.access_token != account.token.access_token || token.expiry_timestamp != account.token.expiry_timestamp {
+    if token.access_token != account.token.access_token
+        || token.expiry_timestamp != account.token.expiry_timestamp
+    {
         let mut updated = account.clone();
         updated.token = token.clone();
         let _ = modules::save_account(&updated);
@@ -580,8 +581,8 @@ pub async fn fetch_available_models() -> Result<Vec<AvailableModel>, String> {
                     }
                     let status = res.status();
                     let text = res.text().await.unwrap_or_default();
-                    let retryable = status == reqwest::StatusCode::TOO_MANY_REQUESTS
-                        || status.as_u16() >= 500;
+                    let retryable =
+                        status == reqwest::StatusCode::TOO_MANY_REQUESTS || status.as_u16() >= 500;
                     last_error = Some(format!("获取模型列表失败: {} - {}", status, text));
                     if retryable && attempt < DEFAULT_ATTEMPTS {
                         let delay = get_backoff_delay_ms(attempt + 1);

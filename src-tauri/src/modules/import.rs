@@ -1,10 +1,10 @@
+use crate::models;
+use crate::modules;
+use crate::utils;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs;
 use uuid::Uuid;
-use crate::models;
-use crate::modules;
-use crate::utils;
 
 // ==================== 辅助结构体和函数 ====================
 
@@ -78,10 +78,7 @@ pub fn fingerprint_profile_full_key(profile: &models::DeviceProfile) -> String {
 pub fn fingerprint_profile_weak_key(profile: &models::DeviceProfile) -> String {
     format!(
         "{}|{}|{}|{}",
-        profile.machine_id,
-        profile.mac_machine_id,
-        profile.dev_device_id,
-        profile.sqm_id
+        profile.machine_id, profile.mac_machine_id, profile.dev_device_id, profile.sqm_id
     )
 }
 
@@ -138,8 +135,12 @@ pub fn upsert_fingerprint_in_store(
     };
     let id = fingerprint.id.clone();
     store.fingerprints.push(fingerprint);
-    fingerprint_map.entry(full_key).or_insert_with(|| id.clone());
-    fingerprint_map.entry(weak_key).or_insert_with(|| id.clone());
+    fingerprint_map
+        .entry(full_key)
+        .or_insert_with(|| id.clone());
+    fingerprint_map
+        .entry(weak_key)
+        .or_insert_with(|| id.clone());
     (id, true)
 }
 
@@ -166,12 +167,19 @@ pub fn select_account_profile(
         return Some((profile, label, created_at));
     }
     if let Some(entry) = current {
-        return Some((entry.profile.clone(), Some(entry.label.clone()), Some(entry.created_at)));
+        return Some((
+            entry.profile.clone(),
+            Some(entry.label.clone()),
+            Some(entry.created_at),
+        ));
     }
-    account
-        .device_history
-        .last()
-        .map(|entry| (entry.profile.clone(), Some(entry.label.clone()), Some(entry.created_at)))
+    account.device_history.last().map(|entry| {
+        (
+            entry.profile.clone(),
+            Some(entry.label.clone()),
+            Some(entry.created_at),
+        )
+    })
 }
 
 pub fn extract_profile_from_input(input: &FingerprintJsonInput) -> Option<models::DeviceProfile> {
@@ -220,35 +228,35 @@ pub fn resolve_json_import_name(
 /// 从旧版 ~/.antigravity_tools/ 导入账号
 pub async fn import_from_old_tools_logic() -> Result<Vec<models::Account>, String> {
     use std::fs;
-    
+
     let home = dirs::home_dir().ok_or("无法获取用户主目录")?;
     let old_dir = home.join(".antigravity_tools");
-    
+
     if !old_dir.exists() {
         return Err("未找到旧版数据目录 ~/.antigravity_tools/".to_string());
     }
-    
+
     let old_accounts_dir = old_dir.join("accounts");
     if !old_accounts_dir.exists() {
         return Err("未找到旧版账号目录 ~/.antigravity_tools/accounts/".to_string());
     }
-    
+
     modules::logger::log_info("开始从旧版目录导入账号...");
-    
+
     let mut imported = Vec::new();
     let mut fingerprint_store = modules::fingerprint::load_fingerprint_store()?;
     let mut fingerprint_map = build_fingerprint_profile_map(&fingerprint_store);
     let mut fingerprint_dirty = false;
-    
+
     // 读取旧版索引
     let old_index_path = old_dir.join("accounts.json");
     if old_index_path.exists() {
-        let content = fs::read_to_string(&old_index_path)
-            .map_err(|e| format!("读取旧版索引失败: {}", e))?;
-        
-        let old_index: models::AccountIndex = serde_json::from_str(&content)
-            .map_err(|e| format!("解析旧版索引失败: {}", e))?;
-        
+        let content =
+            fs::read_to_string(&old_index_path).map_err(|e| format!("读取旧版索引失败: {}", e))?;
+
+        let old_index: models::AccountIndex =
+            serde_json::from_str(&content).map_err(|e| format!("解析旧版索引失败: {}", e))?;
+
         for summary in old_index.accounts {
             let old_account_path = old_accounts_dir.join(format!("{}.json", summary.id));
             if old_account_path.exists() {
@@ -263,9 +271,18 @@ pub async fn import_from_old_tools_logic() -> Result<Vec<models::Account>, Strin
                                     old_account.token.clone(),
                                 ) {
                                     Ok(mut new_account) => {
-                                        if let Some((profile, label, created_at)) = select_account_profile(&old_account) {
-                                            let base = old_account.name.as_deref().unwrap_or(&old_account.email);
-                                            let name = format_import_name(base, label.as_deref(), created_at);
+                                        if let Some((profile, label, created_at)) =
+                                            select_account_profile(&old_account)
+                                        {
+                                            let base = old_account
+                                                .name
+                                                .as_deref()
+                                                .unwrap_or(&old_account.email);
+                                            let name = format_import_name(
+                                                base,
+                                                label.as_deref(),
+                                                created_at,
+                                            );
                                             let (fp_id, inserted) = upsert_fingerprint_in_store(
                                                 &mut fingerprint_store,
                                                 profile,
@@ -278,24 +295,39 @@ pub async fn import_from_old_tools_logic() -> Result<Vec<models::Account>, Strin
                                             }
                                             new_account.fingerprint_id = Some(fp_id);
                                             if let Err(e) = modules::save_account(&new_account) {
-                                                modules::logger::log_error(&format!("更新账号指纹失败 {}: {}", new_account.email, e));
+                                                modules::logger::log_error(&format!(
+                                                    "更新账号指纹失败 {}: {}",
+                                                    new_account.email, e
+                                                ));
                                             }
                                         }
-                                        modules::logger::log_info(&format!("导入账号: {}", new_account.email));
+                                        modules::logger::log_info(&format!(
+                                            "导入账号: {}",
+                                            new_account.email
+                                        ));
                                         imported.push(new_account);
                                     }
                                     Err(e) => {
-                                        modules::logger::log_error(&format!("导入账号失败 {}: {}", old_account.email, e));
+                                        modules::logger::log_error(&format!(
+                                            "导入账号失败 {}: {}",
+                                            old_account.email, e
+                                        ));
                                     }
                                 }
                             }
                             Err(e) => {
-                                modules::logger::log_error(&format!("解析账号文件失败 {:?}: {}", old_account_path, e));
+                                modules::logger::log_error(&format!(
+                                    "解析账号文件失败 {:?}: {}",
+                                    old_account_path, e
+                                ));
                             }
                         }
                     }
                     Err(e) => {
-                        modules::logger::log_error(&format!("读取账号文件失败 {:?}: {}", old_account_path, e));
+                        modules::logger::log_error(&format!(
+                            "读取账号文件失败 {:?}: {}",
+                            old_account_path, e
+                        ));
                     }
                 }
             }
@@ -306,12 +338,12 @@ pub async fn import_from_old_tools_logic() -> Result<Vec<models::Account>, Strin
     }
 
     modules::logger::log_info(&format!("导入完成，共导入 {} 个账号", imported.len()));
-    
+
     // 广播数据变更通知
     if !imported.is_empty() {
         modules::websocket::broadcast_data_changed("import_from_old_tools");
     }
-    
+
     Ok(imported)
 }
 
@@ -340,11 +372,11 @@ pub async fn import_fingerprints_from_old_tools_logic() -> Result<usize, String>
 
     let old_index_path = old_dir.join("accounts.json");
     if old_index_path.exists() {
-        let content = fs::read_to_string(&old_index_path)
-            .map_err(|e| format!("读取旧版索引失败: {}", e))?;
+        let content =
+            fs::read_to_string(&old_index_path).map_err(|e| format!("读取旧版索引失败: {}", e))?;
 
-        let old_index: models::AccountIndex = serde_json::from_str(&content)
-            .map_err(|e| format!("解析旧版索引失败: {}", e))?;
+        let old_index: models::AccountIndex =
+            serde_json::from_str(&content).map_err(|e| format!("解析旧版索引失败: {}", e))?;
 
         for summary in old_index.accounts {
             let old_account_path = old_accounts_dir.join(format!("{}.json", summary.id));
@@ -358,7 +390,11 @@ pub async fn import_fingerprints_from_old_tools_logic() -> Result<usize, String>
                             let base = old_account.name.as_deref().unwrap_or(&old_account.email);
 
                             for version in &old_account.device_history {
-                                let name = format_import_name(base, Some(version.label.as_str()), Some(version.created_at));
+                                let name = format_import_name(
+                                    base,
+                                    Some(version.label.as_str()),
+                                    Some(version.created_at),
+                                );
                                 let (_, inserted) = upsert_fingerprint_in_store(
                                     &mut fingerprint_store,
                                     version.profile.clone(),
@@ -372,7 +408,9 @@ pub async fn import_fingerprints_from_old_tools_logic() -> Result<usize, String>
                                 }
                             }
 
-                            if let Some((profile, label, created_at)) = select_account_profile(&old_account) {
+                            if let Some((profile, label, created_at)) =
+                                select_account_profile(&old_account)
+                            {
                                 let name = format_import_name(base, label.as_deref(), created_at);
                                 let (_, inserted) = upsert_fingerprint_in_store(
                                     &mut fingerprint_store,
@@ -388,12 +426,18 @@ pub async fn import_fingerprints_from_old_tools_logic() -> Result<usize, String>
                             }
                         }
                         Err(e) => {
-                            modules::logger::log_error(&format!("解析账号文件失败 {:?}: {}", old_account_path, e));
+                            modules::logger::log_error(&format!(
+                                "解析账号文件失败 {:?}: {}",
+                                old_account_path, e
+                            ));
                         }
                     }
                 }
                 Err(e) => {
-                    modules::logger::log_error(&format!("读取账号文件失败 {:?}: {}", old_account_path, e));
+                    modules::logger::log_error(&format!(
+                        "读取账号文件失败 {:?}: {}",
+                        old_account_path, e
+                    ));
                 }
             }
         }
@@ -414,25 +458,35 @@ pub async fn import_fingerprints_from_json_logic(json_content: String) -> Result
         return Err("JSON 内容为空".to_string());
     }
 
-    let value: serde_json::Value = serde_json::from_str(trimmed)
-        .map_err(|e| format!("JSON 格式错误: {}", e))?;
+    let value: serde_json::Value =
+        serde_json::from_str(trimmed).map_err(|e| format!("JSON 格式错误: {}", e))?;
 
-    let mut candidates: Vec<(Option<String>, Option<String>, models::DeviceProfile, Option<i64>)> = Vec::new();
+    let mut candidates: Vec<(
+        Option<String>,
+        Option<String>,
+        models::DeviceProfile,
+        Option<i64>,
+    )> = Vec::new();
 
     if value.is_object() {
         let obj = value.as_object().ok_or("JSON 格式错误")?;
         if obj.contains_key("fingerprints") || obj.contains_key("original_baseline") {
-            let store: modules::fingerprint::FingerprintStore = serde_json::from_value(value)
-                .map_err(|e| format!("解析指纹存储失败: {}", e))?;
+            let store: modules::fingerprint::FingerprintStore =
+                serde_json::from_value(value).map_err(|e| format!("解析指纹存储失败: {}", e))?;
             if let Some(baseline) = store.original_baseline {
-                candidates.push((Some(baseline.name), None, baseline.profile, Some(baseline.created_at)));
+                candidates.push((
+                    Some(baseline.name),
+                    None,
+                    baseline.profile,
+                    Some(baseline.created_at),
+                ));
             }
             for fp in store.fingerprints {
                 candidates.push((Some(fp.name), None, fp.profile, Some(fp.created_at)));
             }
         } else {
-            let input: FingerprintJsonInput = serde_json::from_value(value)
-                .map_err(|e| format!("解析指纹数据失败: {}", e))?;
+            let input: FingerprintJsonInput =
+                serde_json::from_value(value).map_err(|e| format!("解析指纹数据失败: {}", e))?;
             if let Some(profile) = extract_profile_from_input(&input) {
                 candidates.push((input.name, input.label, profile, input.created_at));
             }
@@ -458,7 +512,8 @@ pub async fn import_fingerprints_from_json_logic(json_content: String) -> Result
     let mut imported_count = 0;
 
     for (idx, (name, label, profile, created_at)) in candidates.into_iter().enumerate() {
-        let display_name = resolve_json_import_name(name.as_deref(), label.as_deref(), created_at, idx);
+        let display_name =
+            resolve_json_import_name(name.as_deref(), label.as_deref(), created_at, idx);
         let (_, inserted) = upsert_fingerprint_in_store(
             &mut fingerprint_store,
             profile,
@@ -481,14 +536,14 @@ pub async fn import_fingerprints_from_json_logic(json_content: String) -> Result
 /// 从本地 Antigravity 客户端导入当前账号
 pub async fn import_from_local_logic() -> Result<models::Account, String> {
     use base64::{engine::general_purpose, Engine as _};
-    
+
     modules::logger::log_info("开始从本地 Antigravity 客户端导入...");
-    
+
     // 读取 state.vscdb
     let db_path = modules::db::get_db_path()?;
-    let conn = rusqlite::Connection::open(&db_path)
-        .map_err(|e| format!("打开数据库失败: {}", e))?;
-    
+    let conn =
+        rusqlite::Connection::open(&db_path).map_err(|e| format!("打开数据库失败: {}", e))?;
+
     // 读取 protobuf 数据
     let state_data: String = conn
         .query_row(
@@ -497,29 +552,32 @@ pub async fn import_from_local_logic() -> Result<models::Account, String> {
             |row| row.get(0),
         )
         .map_err(|_| "未找到登录状态，请确保 Antigravity 客户端已登录")?;
-    
+
     // Base64 解码
     let blob = general_purpose::STANDARD
         .decode(&state_data)
         .map_err(|e| format!("Base64 解码失败: {}", e))?;
-    
+
     // 解析 protobuf 获取 refresh_token（Field 6）
-    let refresh_token = utils::protobuf::extract_refresh_token(&blob)
-        .ok_or("无法从本地数据解析 refresh_token")?;
-    
+    let refresh_token =
+        utils::protobuf::extract_refresh_token(&blob).ok_or("无法从本地数据解析 refresh_token")?;
+
     if refresh_token.is_empty() {
         return Err("本地 refresh_token 为空".to_string());
     }
-    
-    modules::logger::log_info(&format!("获取到本地 refresh_token (len={})", refresh_token.len()));
-    
+
+    modules::logger::log_info(&format!(
+        "获取到本地 refresh_token (len={})",
+        refresh_token.len()
+    ));
+
     // 使用 refresh_token 获取新的 access_token
     let token_response = modules::oauth::refresh_access_token(&refresh_token).await?;
-    
+
     // 获取用户信息
     let user_info = modules::oauth::get_user_info(&token_response.access_token).await?;
     let email = user_info.email.clone();
-    
+
     // 构建 TokenData
     let token = models::TokenData::new(
         token_response.access_token,
@@ -529,42 +587,42 @@ pub async fn import_from_local_logic() -> Result<models::Account, String> {
         None,
         None,
     );
-    
+
     // 添加或更新账号
     let account = modules::upsert_account(email.clone(), user_info.get_display_name(), token)?;
-    
+
     modules::logger::log_info(&format!("本地账号导入成功: {}", email));
-    
+
     // 广播数据变更通知
     modules::websocket::broadcast_data_changed("import_from_local");
-    
+
     Ok(account)
 }
 
 /// 从 JSON 导入账号
 pub async fn import_from_json_logic(json_content: String) -> Result<Vec<models::Account>, String> {
     modules::logger::log_info("开始从 JSON 导入账号...");
-    
+
     // 简化格式: [{"email": "xxx", "refresh_token": "..."}]
     #[derive(serde::Deserialize)]
     struct SimpleAccount {
         email: String,
         refresh_token: String,
     }
-    
+
     // 尝试解析为简化格式数组
     let simple_accounts: Result<Vec<SimpleAccount>, _> = serde_json::from_str(&json_content)
         .or_else(|_| {
             // 单个简化账号
             serde_json::from_str::<SimpleAccount>(&json_content).map(|a| vec![a])
         });
-    
+
     if let Ok(accounts) = simple_accounts {
         let mut imported = Vec::new();
-        
+
         for simple in accounts {
             modules::logger::log_info(&format!("正在导入账号: {}", simple.email));
-            
+
             // 使用 refresh_token 获取 access_token
             match modules::oauth::refresh_access_token(&simple.refresh_token).await {
                 Ok(token_response) => {
@@ -577,14 +635,20 @@ pub async fn import_from_json_logic(json_content: String) -> Result<Vec<models::
                         None,
                         None,
                     );
-                    
+
                     match modules::upsert_account(simple.email.clone(), None, token) {
                         Ok(new_account) => {
-                            modules::logger::log_info(&format!("导入账号成功: {}", new_account.email));
+                            modules::logger::log_info(&format!(
+                                "导入账号成功: {}",
+                                new_account.email
+                            ));
                             imported.push(new_account);
                         }
                         Err(e) => {
-                            modules::logger::log_error(&format!("保存账号失败 {}: {}", simple.email, e));
+                            modules::logger::log_error(&format!(
+                                "保存账号失败 {}: {}",
+                                simple.email, e
+                            ));
                         }
                     }
                 }
@@ -593,20 +657,18 @@ pub async fn import_from_json_logic(json_content: String) -> Result<Vec<models::
                 }
             }
         }
-        
+
         modules::logger::log_info(&format!("JSON 导入完成，共导入 {} 个账号", imported.len()));
         return Ok(imported);
     }
-    
+
     // 尝试解析为完整账号格式（向后兼容）
     let accounts: Vec<models::Account> = serde_json::from_str(&json_content)
-        .or_else(|_| {
-            serde_json::from_str::<models::Account>(&json_content).map(|a| vec![a])
-        })
+        .or_else(|_| serde_json::from_str::<models::Account>(&json_content).map(|a| vec![a]))
         .map_err(|e| format!("JSON 格式错误: {}", e))?;
-    
+
     let mut imported = Vec::new();
-    
+
     for old_account in accounts {
         match modules::upsert_account(
             old_account.email.clone(),
@@ -622,14 +684,14 @@ pub async fn import_from_json_logic(json_content: String) -> Result<Vec<models::
             }
         }
     }
-    
+
     modules::logger::log_info(&format!("JSON 导入完成，共导入 {} 个账号", imported.len()));
-    
+
     // 广播数据变更通知
     if !imported.is_empty() {
         modules::websocket::broadcast_data_changed("import_from_json");
     }
-    
+
     Ok(imported)
 }
 
@@ -642,11 +704,11 @@ pub async fn import_from_extension_credentials() -> Result<usize, String> {
         return Ok(0);
     }
 
-    let content = fs::read_to_string(&file_path)
-        .map_err(|e| format!("读取 credentials.json 失败: {}", e))?;
+    let content =
+        fs::read_to_string(&file_path).map_err(|e| format!("读取 credentials.json 失败: {}", e))?;
 
-    let parsed: ExtensionCredentialsFile = serde_json::from_str(&content)
-        .map_err(|e| format!("解析 credentials.json 失败: {}", e))?;
+    let parsed: ExtensionCredentialsFile =
+        serde_json::from_str(&content).map_err(|e| format!("解析 credentials.json 失败: {}", e))?;
 
     if parsed.accounts.is_empty() {
         return Ok(0);
@@ -686,7 +748,11 @@ pub async fn import_from_extension_credentials() -> Result<usize, String> {
                     None,
                 );
 
-                match modules::upsert_account(user_info.email.clone(), user_info.get_display_name(), token) {
+                match modules::upsert_account(
+                    user_info.email.clone(),
+                    user_info.get_display_name(),
+                    token,
+                ) {
                     Ok(_) => {
                         imported_count += 1;
                     }

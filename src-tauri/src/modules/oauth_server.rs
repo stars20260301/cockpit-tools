@@ -1,10 +1,10 @@
+use crate::modules::oauth;
+use std::sync::{Mutex, OnceLock};
+use tauri::Url;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 use tokio::sync::oneshot;
 use tokio::sync::watch;
-use std::sync::{Mutex, OnceLock};
-use tauri::Url;
-use crate::modules::oauth;
 
 struct OAuthFlowState {
     auth_url: String,
@@ -52,7 +52,7 @@ async fn ensure_oauth_flow_prepared(app_handle: &tauri::AppHandle) -> Result<Str
     let listener = TcpListener::bind("127.0.0.1:0")
         .await
         .map_err(|e| format!("无法绑定本地端口: {}", e))?;
-    
+
     let port = listener
         .local_addr()
         .map_err(|e| format!("无法获取本地端口: {}", e))?
@@ -90,7 +90,10 @@ async fn ensure_oauth_flow_prepared(app_handle: &tauri::AppHandle) -> Result<Str
 
             let (result, response_html) = match code {
                 Some(code) => (Ok(code), oauth_success_html()),
-                None => (Err("未能在回调中获取 Authorization Code".to_string()), oauth_fail_html()),
+                None => (
+                    Err("未能在回调中获取 Authorization Code".to_string()),
+                    oauth_fail_html(),
+                ),
             };
             let _ = stream.write_all(response_html.as_bytes()).await;
             let _ = stream.flush().await;
@@ -131,7 +134,9 @@ pub fn cancel_oauth_flow() {
 }
 
 /// 启动 OAuth 流程并等待回调
-pub async fn start_oauth_flow(app_handle: tauri::AppHandle) -> Result<oauth::TokenResponse, String> {
+pub async fn start_oauth_flow(
+    app_handle: tauri::AppHandle,
+) -> Result<oauth::TokenResponse, String> {
     let auth_url = ensure_oauth_flow_prepared(&app_handle).await?;
 
     use tauri_plugin_opener::OpenerExt;
@@ -169,7 +174,9 @@ pub async fn start_oauth_flow(app_handle: tauri::AppHandle) -> Result<oauth::Tok
 
 /// 完成 OAuth 流程（不打开浏览器）
 
-pub async fn complete_oauth_flow(app_handle: tauri::AppHandle) -> Result<oauth::TokenResponse, String> {
+pub async fn complete_oauth_flow(
+    app_handle: tauri::AppHandle,
+) -> Result<oauth::TokenResponse, String> {
     let _ = ensure_oauth_flow_prepared(&app_handle).await?;
 
     let (code_rx, redirect_uri) = {

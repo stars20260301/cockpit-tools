@@ -41,19 +41,19 @@ pub struct GroupSettings {
     /// 模型 -> 分组映射 (modelId -> groupId)
     #[serde(default)]
     pub group_mappings: HashMap<String, String>,
-    
+
     /// 分组名称映射 (groupId -> displayName)
     #[serde(default)]
     pub group_names: HashMap<String, String>,
-    
+
     /// 分组排序
     #[serde(default)]
     pub group_order: Vec<String>,
-    
+
     /// 最后更新时间戳 (毫秒)
     #[serde(default)]
     pub updated_at: i64,
-    
+
     /// 最后更新来源
     #[serde(default)]
     pub updated_by: ConfigSource,
@@ -64,34 +64,40 @@ impl Default for GroupSettings {
         // 固定的 4 个分组
         let mut group_mappings = HashMap::new();
         let mut group_names = HashMap::new();
-        
+
         // Claude 4.5 分组
-        group_mappings.insert("claude-opus-4-5-thinking".to_string(), "claude_45".to_string());
+        group_mappings.insert(
+            "claude-opus-4-5-thinking".to_string(),
+            "claude_45".to_string(),
+        );
         group_mappings.insert("claude-sonnet-4-5".to_string(), "claude_45".to_string());
-        group_mappings.insert("claude-sonnet-4-5-thinking".to_string(), "claude_45".to_string());
+        group_mappings.insert(
+            "claude-sonnet-4-5-thinking".to_string(),
+            "claude_45".to_string(),
+        );
         group_mappings.insert("gpt-oss-120b-medium".to_string(), "claude_45".to_string());
         group_names.insert("claude_45".to_string(), "Claude 4.5".to_string());
-        
+
         // G3-Pro 分组
         group_mappings.insert("gemini-3-pro-high".to_string(), "g3_pro".to_string());
         group_mappings.insert("gemini-3-pro-low".to_string(), "g3_pro".to_string());
         group_names.insert("g3_pro".to_string(), "G3-Pro".to_string());
-        
+
         // G3-Flash 分组
         group_mappings.insert("gemini-3-flash".to_string(), "g3_flash".to_string());
         group_names.insert("g3_flash".to_string(), "G3-Flash".to_string());
-        
+
         // G3-Image 分组
         group_mappings.insert("gemini-3-pro-image".to_string(), "g3_image".to_string());
         group_names.insert("g3_image".to_string(), "G3-Image".to_string());
-        
+
         let group_order = vec![
             "claude_45".to_string(),
             "g3_pro".to_string(),
             "g3_flash".to_string(),
             "g3_image".to_string(),
         ];
-        
+
         Self {
             group_mappings,
             group_names,
@@ -110,31 +116,31 @@ impl GroupSettings {
             .cloned()
             .unwrap_or_else(|| group_id.to_string())
     }
-    
+
     /// 获取模型所属分组
     /// 获取排序后的分组列表（最多返回指定数量）
     pub fn get_ordered_groups(&self, max_count: Option<usize>) -> Vec<String> {
         let mut groups = self.group_order.clone();
-        
+
         // 添加在 mappings 中但不在 order 中的分组
         for group_id in self.group_mappings.values() {
             if !groups.contains(group_id) {
                 groups.push(group_id.clone());
             }
         }
-        
+
         // 去重
         let mut seen = std::collections::HashSet::new();
         groups.retain(|g| seen.insert(g.clone()));
-        
+
         // 限制数量
         if let Some(max) = max_count {
             groups.truncate(max);
         }
-        
+
         groups
     }
-    
+
     /// 获取分组内的模型列表
     pub fn get_models_in_group(&self, group_id: &str) -> Vec<String> {
         self.group_mappings
@@ -143,31 +149,33 @@ impl GroupSettings {
             .map(|(mid, _)| mid.clone())
             .collect()
     }
-    
+
     /// 设置模型分组
     pub fn set_model_group(&mut self, model_id: &str, group_id: &str) {
-        self.group_mappings.insert(model_id.to_string(), group_id.to_string());
+        self.group_mappings
+            .insert(model_id.to_string(), group_id.to_string());
         self.touch();
     }
-    
+
     /// 移除模型的分组
     pub fn remove_model_group(&mut self, model_id: &str) {
         self.group_mappings.remove(model_id);
         self.touch();
     }
-    
+
     /// 设置分组名称
     pub fn set_group_name(&mut self, group_id: &str, name: &str) {
-        self.group_names.insert(group_id.to_string(), name.to_string());
+        self.group_names
+            .insert(group_id.to_string(), name.to_string());
         self.touch();
     }
-    
+
     /// 更新分组排序
     pub fn set_group_order(&mut self, order: Vec<String>) {
         self.group_order = order;
         self.touch();
     }
-    
+
     /// 删除分组（移除该分组的所有模型映射）
     pub fn delete_group(&mut self, group_id: &str) {
         self.group_mappings.retain(|_, gid| gid != group_id);
@@ -175,7 +183,7 @@ impl GroupSettings {
         self.group_order.retain(|g| g != group_id);
         self.touch();
     }
-    
+
     /// 更新时间戳和来源
     fn touch(&mut self) {
         self.updated_at = chrono::Utc::now().timestamp_millis();
@@ -192,11 +200,11 @@ fn get_group_settings_path() -> PathBuf {
 pub fn load_group_settings() -> GroupSettings {
     let path = get_group_settings_path();
     let default_settings = GroupSettings::default();
-    
+
     if !path.exists() {
         return default_settings;
     }
-    
+
     match fs::read_to_string(&path) {
         Ok(content) => {
             let mut settings: GroupSettings = serde_json::from_str(&content).unwrap_or_else(|e| {
@@ -206,7 +214,7 @@ pub fn load_group_settings() -> GroupSettings {
                 ));
                 default_settings.clone()
             });
-            
+
             // 如果配置文件中的分组为空，使用默认分组
             if settings.group_order.is_empty() {
                 settings.group_mappings = default_settings.group_mappings;
@@ -216,7 +224,7 @@ pub fn load_group_settings() -> GroupSettings {
                     settings.group_names.entry(id).or_insert(name);
                 }
             }
-            
+
             settings
         }
         Err(e) => {
@@ -232,23 +240,23 @@ pub fn load_group_settings() -> GroupSettings {
 /// 保存分组配置
 pub fn save_group_settings(settings: &GroupSettings) -> Result<(), String> {
     let path = get_group_settings_path();
-    
+
     // 确保目录存在
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).map_err(|e| format!("创建目录失败: {}", e))?;
     }
-    
-    let content = serde_json::to_string_pretty(settings)
-        .map_err(|e| format!("序列化失败: {}", e))?;
-    
+
+    let content =
+        serde_json::to_string_pretty(settings).map_err(|e| format!("序列化失败: {}", e))?;
+
     fs::write(&path, content).map_err(|e| format!("写入文件失败: {}", e))?;
-    
+
     crate::modules::logger::log_info(&format!(
         "[GroupSettings] 保存配置成功: {} 个映射, {} 个分组",
         settings.group_mappings.len(),
         settings.group_order.len()
     ));
-    
+
     Ok(())
 }
 
@@ -260,7 +268,7 @@ pub fn update_group_settings(settings: GroupSettings) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_group_settings_default() {
         let settings = GroupSettings::default();
@@ -268,18 +276,18 @@ mod tests {
         assert!(settings.group_names.is_empty());
         assert!(settings.group_order.is_empty());
     }
-    
+
     #[test]
     fn test_set_model_group() {
         let mut settings = GroupSettings::default();
         settings.set_model_group("claude-sonnet-4-5", "claude");
-        
+
         assert_eq!(
             settings.group_mappings.get("claude-sonnet-4-5"),
             Some(&"claude".to_string())
         );
     }
-    
+
     #[test]
     fn test_get_ordered_groups_with_limit() {
         let mut settings = GroupSettings::default();
@@ -290,7 +298,7 @@ mod tests {
             "d".to_string(),
             "e".to_string(),
         ];
-        
+
         let groups = settings.get_ordered_groups(Some(4));
         assert_eq!(groups.len(), 4);
         assert_eq!(groups, vec!["a", "b", "c", "d"]);

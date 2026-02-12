@@ -31,7 +31,9 @@
     "codex": "Аккаунты Codex",
     "dashboard": "Панель",
     "instances": "Мульти-инстанс",
-    "githubCopilot": "GitHub Copilot"
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
+    "morePlatforms": "Другие платформы"
   },
   "settings": {
     "title": "Настройки приложения",
@@ -93,7 +95,21 @@
       "vscodePathSelect": "Выбрать",
       "vscodePathReset": "Сбросить по умолчанию",
       "antigravityAppPath": "Путь к приложению Antigravity",
-      "antigravityTitle": "Запуск Antigravity"
+      "antigravityTitle": "Запуск Antigravity",
+      "commonTitle": "Общие",
+      "antigravitySettingsTitle": "Настройки Antigravity",
+      "codexSettingsTitle": "Настройки Codex",
+      "githubCopilotSettingsTitle": "Настройки GitHub Copilot",
+      "ghcpAutoRefresh": "Автообновление квоты GitHub Copilot",
+      "ghcpAutoRefreshDesc": "Частота фонового обновления",
+      "windsurfSettingsTitle": "Настройки Windsurf",
+      "windsurfAutoRefresh": "Автообновление квоты Windsurf",
+      "windsurfAutoRefreshDesc": "Частота фонового обновления",
+      "windsurfAppPath": "Путь к приложению Windsurf",
+      "windsurfAppPathDesc": "Оставьте пустым, чтобы использовать путь по умолчанию",
+      "windsurfAppPathPlaceholder": "Путь по умолчанию",
+      "windsurfPathSelect": "Выбрать",
+      "windsurfPathReset": "Сбросить по умолчанию"
     },
     "network": {
       "apiTitle": "Antigravity Cockpit API",
@@ -767,6 +783,15 @@
           "commandWin": "Windows: taskkill /F /PID <pid> (совпадение по CODEX_HOME)"
         }
       }
+    },
+    "refreshSuccess": "Квота обновлена",
+    "refreshFailed": "Не удалось обновить квоту: {{error}}",
+    "refreshAllSuccess": "Обновление завершено, успешно: {{count}} аккаунт(ов)",
+    "refreshAllPartialFailed": "Обновление завершено, успешно: {{success}} / {{total}}, часть с ошибками",
+    "quotaError": {
+      "badge": "Ошибка квоты",
+      "generic": "Не удалось обновить квоту, попробуйте позже",
+      "deactivatedWorkspace": "Рабочее пространство деактивировано, переключите аккаунт или авторизуйтесь заново"
     }
   },
   "dashboard": {
@@ -846,7 +871,8 @@
       "openFolder": "Открыть папку",
       "edit": "Редактировать",
       "openRootDir": "Открыть папку",
-      "selectPath": "Выбрать путь"
+      "selectPath": "Выбрать путь",
+      "openWindow": "Открыть окно"
     },
     "bulkConfirm": {
       "startAll": "Запустить все остановленные инстансы?",
@@ -1115,10 +1141,208 @@
     "export": "Экспорт",
     "flowNotice": {
       "title": "Руководство по аккаунтам GitHub Copilot (нажмите, чтобы развернуть/свернуть)",
-      "desc": "Текущий процесс: авторизовать новый аккаунт -> получить и показать лимиты -> привязать аккаунт в режиме мульти-инстансов.",
-      "reason": "Почему недоступно переключение аккаунта в один клик: состояние входа VS Code управляется сессиями GitHub и SecretStorage расширения, и внешние приложения не могут подменить эти учетные данные.",
-      "storage": "Где хранятся данные входа: в основном в SecretStorage VS Code (системная связка ключей/менеджер учетных данных) и в глобальной базе состояния (например, ~/Library/Application Support/Code/User/globalStorage/state.vscdb).",
-      "alternative": "Альтернатива: использовать изоляцию мульти-инстансов (разные --user-data-dir). Войдите один раз для каждого инстанса, затем запускайте нужный инстанс для быстрого переключения на целевую среду аккаунта."
+      "desc": "Для переключения аккаунта требуется чтение локального хранилища аутентификации VS Code и использование системной службы учетных данных для расшифровки и обратной записи; данные обрабатываются только локально.",
+      "reason": "Объем разрешений: чтение базы аутентификации VS Code (state.vscdb) и вызов системного шифрования (Windows DPAPI / macOS Keychain / Linux Secret Service) для расшифровки и обратной записи.",
+      "storage": "Область чтения: обрабатываются только данные, связанные с сессией входа GitHub; все процессы выполняются локально.",
+      "alternative": "Альтернатива: использовать изоляцию мульти-инстансов (разные --user-data-dir). Войдите один раз для каждого инстанса, затем запускайте нужный инстанс для быстрого переключения на целевую среду аккаунта.",
+      "inject": "Переключение в один клик: инструмент читает локальный криптографический материал VS Code (DPAPI/Keychain/Secret Service), расшифровывает сессию авторизации в state.vscdb, заменяет токен GitHub Copilot и шифрует обратно — всё локально на вашем устройстве."
+    },
+    "injectToVSCode": "Переключить в VS Code",
+    "injecting": "Внедрение...",
+    "injectSuccess": "Токен успешно внедрён в VS Code. VS Code запускается.",
+    "injectRequireClose": "Перед внедрением закройте VS Code."
+  },
+  "quickSettings": {
+    "antigravity": {
+      "title": "Настройки Antigravity",
+      "appPath": "Путь к приложению"
+    },
+    "codex": {
+      "title": "Настройки Codex",
+      "appPath": "Путь к приложению"
+    },
+    "githubCopilot": {
+      "title": "Настройки GitHub Copilot",
+      "appPath": "Путь к VS Code"
+    },
+    "refreshInterval": "Автообновление квоты",
+    "codexRefreshInterval": "Автообновление квоты",
+    "ghcpRefreshInterval": "Автообновление квоты",
+    "autoSwitch": {
+      "title": "Автопереключение",
+      "enable": "Автопереключение",
+      "threshold": "Порог переключения",
+      "thresholdDesc": "Автопереключение срабатывает, когда квота любой модели падает ниже этого процента",
+      "hint": "Автоматически переключается на аккаунт с наибольшей квотой, когда квота любой модели падает ниже порога."
+    },
+    "customInput": "Другое",
+    "apply": "Применить",
+    "inputMinutes": "Введите минуты",
+    "inputPercent": "Введите процент",
+    "windsurf": {
+      "title": "Настройки Windsurf",
+      "appPath": "Путь к Windsurf"
+    },
+    "windsurfRefreshInterval": "Автообновление квоты"
+  },
+  "privacy": {
+    "hideSensitive": "Скрыть e-mail",
+    "showSensitive": "Показать e-mail"
+  },
+  "windsurf": {
+    "title": "Управление аккаунтами Windsurf",
+    "subtitle": "Управляйте аккаунтами Windsurf",
+    "overview": {
+      "title": "Обзор аккаунтов"
+    },
+    "instances": {
+      "title": "Мульти-инстанс",
+      "subtitle": "Независимая конфигурация для каждого экземпляра, параллельная работа с несколькими аккаунтами.",
+      "unsupported": {
+        "title": "Не поддерживается на этой системе",
+        "desc": "Мульти-инстанс Windsurf в настоящее время доступен только на macOS."
+      },
+      "quota": {
+        "inline": "Inline Suggestions",
+        "chat": "Chat messages"
+      }
+    },
+    "addAccount": "Добавить аккаунт",
+    "refreshAll": "Обновить все",
+    "refreshQuota": "Обновить квоту",
+    "empty": {
+      "title": "Нет аккаунтов",
+      "description": "Нажмите «Добавить аккаунт», чтобы начать"
+    },
+    "noMatch": {
+      "title": "Нет подходящих аккаунтов",
+      "desc": "Попробуйте изменить поиск или фильтры"
+    },
+    "addModal": {
+      "title": "Добавить аккаунт Windsurf",
+      "oauth": "Вход OAuth",
+      "token": "Импорт JSON",
+      "import": "Локальный импорт"
+    },
+    "oauth": {
+      "desc": "Нажмите ниже и завершите авторизацию Windsurf в браузере.",
+      "preparing": "Подготовка ссылки авторизации...",
+      "openBrowser": "Открыть в браузере",
+      "hint": "После авторизации это окно обновится автоматически",
+      "success": "Авторизация успешна",
+      "failed": "Ошибка авторизации",
+      "retry": "Сгенерировать данные авторизации заново",
+      "timeoutRetry": "Обновить ссылку авторизации",
+      "waiting": "Ожидание авторизации...",
+      "meta": "Истекает через: {{expires}}с; интервал опроса: {{interval}}с"
+    },
+    "token": {
+      "desc": "Вставьте токен доступа Windsurf или экспортированные данные JSON.",
+      "placeholder": "Вставьте JSON...",
+      "import": "Импортировать",
+      "importing": "Импорт...",
+      "importSuccessMsg": "Импортировано аккаунтов: {{count}}",
+      "importFailedMsg": "Импорт не удался: {{error}}",
+      "empty": "Введите token или JSON"
+    },
+    "import": {
+      "label": "Импорт",
+      "localDesc": "Импортировать аккаунты Windsurf из локальных вошедших сессий.",
+      "localClient": "Импорт из локального Windsurf",
+      "orJson": "Или импорт из JSON-файла",
+      "importing": "Импорт локального аккаунта...",
+      "failedMsg": "Ошибка импорта: {{error}}",
+      "pickFile": "Выберите JSON-файл для импорта"
+    },
+    "quota": {
+      "hourly": "Квота 5 часов",
+      "weekly": "Недельная квота",
+      "noData": "Нет данных квоты",
+      "resetDone": "Сброшено"
+    },
+    "credits": {
+      "title": "Тариф",
+      "renewMonthly": "Кредиты обновляются каждый месяц",
+      "planEndsIn": "Цикл сбросится через {{days}} дн.",
+      "planEndsUnknown": "Время цикла недоступно",
+      "periodRange": "Цикл: {{start}} - {{end}}",
+      "periodEndOnly": "Конец цикла: {{end}}",
+      "left": "Осталось {{count}} кредитов",
+      "leftUnknown": "Остаток кредитов -",
+      "promptLeft": "Осталось {{remaining}}/{{total}} кредитов промптов",
+      "promptLeftNoTotal": "Осталось {{remaining}} кредитов промптов",
+      "promptLeftUnknown": "Остаток кредитов промптов -",
+      "addOnAvailable": "Доступно {{count}} доп. кредитов",
+      "usedLine": "Использовано {{used}} / {{total}}",
+      "leftInline": "осталось {{left}}"
+    },
+    "usage": {
+      "resetUnknown": "Лимит сбрасывается через -",
+      "resetLine": "Лимит будет сброшен {{dateText}}."
+    },
+    "time": {
+      "relativeDays": "{{days}} д",
+      "relativeDaysHours": "{{days}} д {{hours}} ч",
+      "relativeHours": "{{hours}} ч",
+      "relativeHoursMinutes": "{{hours}} ч {{minutes}} мин",
+      "relativeMinutes": "{{minutes}} мин",
+      "lessThanMinute": "<1 мин",
+      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+    },
+    "search": "Поиск аккаунтов...",
+    "view": {
+      "list": "Список",
+      "grid": "Карточки"
+    },
+    "filter": {
+      "all": "Все ({{count}})",
+      "free": "FREE ({{count}})",
+      "individual": "INDIVIDUAL ({{count}})",
+      "pro": "PRO ({{count}})",
+      "business": "BUSINESS ({{count}})",
+      "enterprise": "ENTERPRISE ({{count}})"
+    },
+    "filterLabel": "Фильтр",
+    "sortLabel": "Сортировка",
+    "sort": {
+      "createdAt": "Дата создания",
+      "credits": "По оставшимся кредитам",
+      "planEnd": "По окончанию цикла",
+      "descTooltip": "По убыванию (нажмите для возрастания)",
+      "ascTooltip": "По возрастанию (нажмите для убывания)",
+      "toggleDirection": "Изменить порядок"
+    },
+    "columns": {
+      "email": "Email",
+      "plan": "Тег",
+      "promptCredits": "Кредиты промптов",
+      "addOnPromptCredits": "Доп. кредиты промптов",
+      "credits": "Кредиты",
+      "actions": "Действия"
+    },
+    "export": "Экспорт",
+    "injectToVSCode": "Переключить в Windsurf",
+    "injecting": "Внедрение...",
+    "injectSuccess": "Переключение завершено. Windsurf запускается.",
+    "injectRequireClose": "Пожалуйста, закройте Windsurf перед переключением.",
+    "flowNotice": {
+      "title": "Руководство по аккаунтам Windsurf (нажмите, чтобы развернуть/свернуть)",
+      "desc": "Для переключения аккаунта требуется чтение локального хранилища аутентификации Windsurf и использование системной службы учетных данных для расшифровки и обратной записи; данные обрабатываются только локально.",
+      "inject": "Переключение в один клик: инструмент читает локальный криптографический материал Windsurf (DPAPI/Keychain/Secret Service), расшифровывает сессию авторизации в state.vscdb, заменяет токен Windsurf и шифрует обратно — всё локально на вашем устройстве.",
+      "alternative": "Альтернатива: использовать изоляцию мульти-инстансов (разные --user-data-dir). Войдите один раз для каждого инстанса, затем запускайте нужный инстанс для быстрого переключения на целевую среду аккаунта.",
+      "reason": "Объем разрешений: чтение базы аутентификации Windsurf (state.vscdb) и вызов системного шифрования (Windows DPAPI / macOS Keychain / Linux Secret Service) для расшифровки и обратной записи.",
+      "storage": "Область чтения: обрабатываются только данные, связанные с сессией входа Windsurf; все процессы выполняются локально."
     }
+  },
+  "platformLayout": {
+    "title": "Макет платформ",
+    "sidebarSelected": "Выбрано в боковой панели {{count}}/{{max}}",
+    "reset": "Сбросить по умолчанию",
+    "tip": "Перетащите для изменения порядка. В боковой панели можно показывать не более двух платформ. Если выбрана только одна, будет показана только одна.",
+    "sidebarToggle": "Показывать в боковой панели",
+    "dashboardToggle": "Показывать на панели",
+    "hiddenBadge": "Скрыто",
+    "openFromMore": "Управление макетом платформ",
+    "dragHandleLabel": "Перетащите для изменения порядка"
   }
 }

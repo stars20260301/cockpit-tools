@@ -31,7 +31,9 @@
     "codex": "Cuentas de Codex",
     "githubCopilot": "GitHub Copilot",
     "dashboard": "Panel",
-    "instances": "Multi-Instancia"
+    "instances": "Multi-Instancia",
+    "windsurf": "Windsurf",
+    "morePlatforms": "Más plataformas"
   },
   "settings": {
     "title": "Ajustes de la Aplicación",
@@ -93,7 +95,21 @@
       "vscodePathSelect": "Seleccionar",
       "vscodePathReset": "Restablecer predeterminado",
       "antigravityAppPath": "Ruta de la app de Antigravity",
-      "antigravityTitle": "Inicio de Antigravity"
+      "antigravityTitle": "Inicio de Antigravity",
+      "commonTitle": "General",
+      "antigravitySettingsTitle": "Configuración de Antigravity",
+      "codexSettingsTitle": "Configuración de Codex",
+      "githubCopilotSettingsTitle": "Configuración de GitHub Copilot",
+      "ghcpAutoRefresh": "Actualización automática de cuota de GitHub Copilot",
+      "ghcpAutoRefreshDesc": "Frecuencia de actualización en segundo plano",
+      "windsurfSettingsTitle": "Configuración de Windsurf",
+      "windsurfAutoRefresh": "Actualización automática de cuota de Windsurf",
+      "windsurfAutoRefreshDesc": "Frecuencia de actualización en segundo plano",
+      "windsurfAppPath": "Ruta de la app de Windsurf",
+      "windsurfAppPathDesc": "Déjalo vacío para usar la ruta predeterminada",
+      "windsurfAppPathPlaceholder": "Ruta predeterminada",
+      "windsurfPathSelect": "Seleccionar",
+      "windsurfPathReset": "Restablecer predeterminado"
     },
     "network": {
       "apiTitle": "Antigravity Cockpit API",
@@ -767,6 +783,15 @@
           "commandWin": "Windows: taskkill /F /PID <pid> (coincidencia con CODEX_HOME)"
         }
       }
+    },
+    "refreshSuccess": "Cuota actualizada",
+    "refreshFailed": "Error al actualizar la cuota: {{error}}",
+    "refreshAllSuccess": "Actualización completada, {{count}} cuenta(s) correctas",
+    "refreshAllPartialFailed": "Actualización completada, {{success}} / {{total}} cuentas correctas y algunas fallaron",
+    "quotaError": {
+      "badge": "Error de cuota",
+      "generic": "No se pudo actualizar la cuota, inténtalo más tarde",
+      "deactivatedWorkspace": "El espacio de trabajo está desactivado, cambia de cuenta o vuelve a autorizar"
     }
   },
   "githubCopilot": {
@@ -886,11 +911,16 @@
     "export": "Exportar",
     "flowNotice": {
       "title": "Guía de cuentas de GitHub Copilot (clic para expandir/contraer)",
-      "desc": "Flujo actual: autorizar una cuenta nueva -> consultar y mostrar cuotas -> vincular cuenta en la vista multiinstancia.",
-      "reason": "Por qué no hay cambio de cuenta en un clic: el estado de inicio de sesión de VS Code está gestionado por sesiones de GitHub y SecretStorage de la extensión, y las apps externas no pueden reemplazar esas credenciales.",
-      "storage": "Ubicación de datos de inicio de sesión: principalmente en SecretStorage de VS Code (llavero/gestor de credenciales del sistema) y en la base de estado global (p. ej. ~/Library/Application Support/Code/User/globalStorage/state.vscdb).",
-      "alternative": "Alternativa: usar aislamiento multiinstancia (distinto --user-data-dir). Inicia sesión una vez por instancia y luego ejecuta por instancia para cambiar rápidamente al entorno de cuenta objetivo."
-    }
+      "desc": "Cambiar de cuenta requiere leer el almacenamiento local de autenticación de VS Code y usar el servicio de credenciales del sistema para descifrar y reescribir; los datos se procesan solo en local.",
+      "reason": "Alcance de permisos: leer la base de autenticación de VS Code (state.vscdb) y usar el cifrado del sistema (Windows DPAPI / macOS Keychain / Linux Secret Service) para descifrar y reescribir.",
+      "storage": "Alcance de lectura: solo se procesan datos relacionados con sesiones de inicio de GitHub; todos los procesos se ejecutan localmente.",
+      "alternative": "Alternativa: usar aislamiento multiinstancia (distinto --user-data-dir). Inicia sesión una vez por instancia y luego ejecuta por instancia para cambiar rápidamente al entorno de cuenta objetivo.",
+      "inject": "Cambio con un clic: Esta herramienta lee el material de cifrado local de VS Code (DPAPI/Keychain/Secret Service), descifra la sesión de autenticación en state.vscdb, reemplaza el token de GitHub Copilot y vuelve a cifrarla; todo localmente en tu equipo."
+    },
+    "injectToVSCode": "Cambiar a VS Code",
+    "injecting": "Inyectando...",
+    "injectSuccess": "El token se inyectó correctamente en VS Code. VS Code se está iniciando.",
+    "injectRequireClose": "Cierra VS Code antes de inyectar."
   },
   "dashboard": {
     "title": "Panel de cuentas",
@@ -969,7 +999,8 @@
       "openFolder": "Abrir carpeta",
       "edit": "Editar",
       "openRootDir": "Abrir carpeta",
-      "selectPath": "Seleccionar ruta"
+      "selectPath": "Seleccionar ruta",
+      "openWindow": "Abrir ventana"
     },
     "bulkConfirm": {
       "startAll": "¿Iniciar todas las instancias detenidas?",
@@ -1120,5 +1151,198 @@
       "desc": "No se pudo encontrar la ruta de la aplicación {{app}}. Establécela ahora para continuar.",
       "action": "Establecer ahora"
     }
+  },
+  "quickSettings": {
+    "antigravity": {
+      "title": "Configuración de Antigravity",
+      "appPath": "Ruta de la aplicación"
+    },
+    "codex": {
+      "title": "Configuración de Codex",
+      "appPath": "Ruta de la aplicación"
+    },
+    "githubCopilot": {
+      "title": "Configuración de GitHub Copilot",
+      "appPath": "Ruta de VS Code"
+    },
+    "refreshInterval": "Actualización automática de cuota",
+    "codexRefreshInterval": "Actualización automática de cuota",
+    "ghcpRefreshInterval": "Actualización automática de cuota",
+    "autoSwitch": {
+      "title": "Cambio automático",
+      "enable": "Cambio automático",
+      "threshold": "Umbral de cambio",
+      "thresholdDesc": "El cambio automático se activa cuando la cuota de cualquier modelo cae por debajo de este porcentaje",
+      "hint": "Cambia automáticamente a la cuenta con la cuota más alta cuando la cuota de cualquier modelo cae por debajo del umbral."
+    },
+    "customInput": "Personalizado",
+    "apply": "Aplicar",
+    "inputMinutes": "Introduzca minutos",
+    "inputPercent": "Introduzca porcentaje",
+    "windsurf": {
+      "title": "Configuración de Windsurf",
+      "appPath": "Ruta de Windsurf"
+    },
+    "windsurfRefreshInterval": "Actualización automática de cuota"
+  },
+  "privacy": {
+    "hideSensitive": "Ocultar correos",
+    "showSensitive": "Mostrar correos"
+  },
+  "windsurf": {
+    "title": "Gestión de cuentas de Windsurf",
+    "subtitle": "Supervisa en tiempo real el estado de cuota de todas las cuentas.",
+    "overview": {
+      "title": "Resumen de cuentas"
+    },
+    "instances": {
+      "title": "Multi-Instancia",
+      "subtitle": "Configuraciones independientes por instancia para ejecutar varias cuentas en paralelo.",
+      "unsupported": {
+        "title": "No compatible en este sistema",
+        "desc": "La multiinstancia de Windsurf está disponible solo en macOS."
+      },
+      "quota": {
+        "inline": "Sugerencias en línea",
+        "chat": "Mensajes de chat"
+      }
+    },
+    "addAccount": "Agregar cuenta",
+    "refreshAll": "Actualizar todo",
+    "refreshQuota": "Actualizar cuota",
+    "empty": {
+      "title": "Sin cuentas",
+      "description": "Haz clic en \"Agregar cuenta\" para empezar a gestionar tus cuentas de Windsurf"
+    },
+    "noMatch": {
+      "title": "No hay cuentas coincidentes",
+      "desc": "Intenta ajustar tu búsqueda o tus filtros"
+    },
+    "addModal": {
+      "title": "Agregar cuenta de Windsurf",
+      "oauth": "OAuth",
+      "token": "Token / JSON",
+      "import": "Importación local"
+    },
+    "oauth": {
+      "desc": "Haz clic en el botón de abajo y completa la autorización de Windsurf en tu navegador.",
+      "preparing": "Preparando información de autorización...",
+      "openBrowser": "Abrir en el navegador",
+      "hint": "Cuando completes la autorización, esta ventana se actualizará automáticamente",
+      "success": "Autorización completada",
+      "failed": "Autorización fallida",
+      "retry": "Regenerar información de autorización",
+      "timeoutRetry": "Actualizar enlace de autorización",
+      "waiting": "Esperando autorización...",
+      "meta": "Caduca en: {{expires}}s; Intervalo de consulta: {{interval}}s"
+    },
+    "token": {
+      "desc": "Pega tu token de acceso de Windsurf o los datos JSON exportados.",
+      "placeholder": "Pega el token o JSON...",
+      "import": "Importar",
+      "importing": "Importando...",
+      "importSuccessMsg": "Se importaron correctamente {{count}} cuenta(s)",
+      "importFailedMsg": "Error de importación: {{error}}",
+      "empty": "Introduce un token o JSON"
+    },
+    "import": {
+      "label": "Importar",
+      "localDesc": "Importa datos de cuentas de Windsurf desde un archivo JSON.",
+      "localClient": "Importar desde Windsurf local",
+      "orJson": "O importar desde un archivo JSON",
+      "importing": "Importando...",
+      "failedMsg": "Error de importación: {{error}}",
+      "pickFile": "Selecciona un archivo JSON para importar"
+    },
+    "quota": {
+      "hourly": "Sugerencias en línea",
+      "weekly": "Mensajes de chat",
+      "noData": "Sin datos de cuota",
+      "resetDone": "Restablecido"
+    },
+    "credits": {
+      "title": "Plan",
+      "renewMonthly": "Los créditos se renuevan cada mes",
+      "planEndsIn": "El ciclo se restablece en {{days}} días",
+      "planEndsUnknown": "Tiempo de ciclo no disponible",
+      "periodRange": "Ciclo: {{start}} - {{end}}",
+      "periodEndOnly": "Fin del ciclo: {{end}}",
+      "left": "{{count}} créditos restantes",
+      "leftUnknown": "Créditos restantes -",
+      "promptLeft": "{{remaining}}/{{total}} créditos de prompts restantes",
+      "promptLeftNoTotal": "{{remaining}} créditos de prompts restantes",
+      "promptLeftUnknown": "Créditos de prompts restantes -",
+      "addOnAvailable": "{{count}} créditos adicionales disponibles",
+      "usedLine": "{{used}} / {{total}} usados",
+      "leftInline": "{{left}} restantes"
+    },
+    "usage": {
+      "resetUnknown": "La cuota se restablece en -",
+      "resetLine": "La cuota se restablece {{dateText}}."
+    },
+    "time": {
+      "relativeDays": "{{days}}d",
+      "relativeDaysHours": "{{days}}d {{hours}}h",
+      "relativeHours": "{{hours}}h",
+      "relativeHoursMinutes": "{{hours}}h {{minutes}}m",
+      "relativeMinutes": "{{minutes}}m",
+      "lessThanMinute": "<1m",
+      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+    },
+    "search": "Buscar cuentas...",
+    "view": {
+      "list": "Vista de lista",
+      "grid": "Vista de tarjetas"
+    },
+    "filter": {
+      "all": "Todas ({{count}})",
+      "free": "FREE ({{count}})",
+      "individual": "INDIVIDUAL ({{count}})",
+      "pro": "PRO ({{count}})",
+      "business": "BUSINESS ({{count}})",
+      "enterprise": "ENTERPRISE ({{count}})"
+    },
+    "filterLabel": "Filtrar",
+    "sortLabel": "Ordenar",
+    "sort": {
+      "createdAt": "Fecha de creación",
+      "credits": "Por créditos restantes",
+      "planEnd": "Por fin de ciclo",
+      "descTooltip": "Actual: descendente. Haz clic para cambiar a ascendente",
+      "ascTooltip": "Actual: ascendente. Haz clic para cambiar a descendente",
+      "toggleDirection": "Cambiar dirección de orden"
+    },
+    "columns": {
+      "email": "Correo electrónico",
+      "plan": "Etiqueta",
+      "promptCredits": "Créditos de prompts",
+      "addOnPromptCredits": "Créditos de prompts adicionales",
+      "credits": "Créditos",
+      "actions": "Acciones"
+    },
+    "export": "Exportar",
+    "injectToVSCode": "Cambiar a Windsurf",
+    "injecting": "Inyectando...",
+    "injectSuccess": "Cambio completado. Windsurf se está iniciando.",
+    "injectRequireClose": "Cierra Windsurf antes de cambiar.",
+    "flowNotice": {
+      "title": "Guía de cuentas de Windsurf (clic para expandir/contraer)",
+      "desc": "Cambiar de cuenta requiere leer el almacenamiento local de autenticación de Windsurf y usar el servicio de credenciales del sistema para descifrar y reescribir; los datos se procesan solo en local.",
+      "inject": "Cambio con un clic: Esta herramienta lee el material de cifrado local de Windsurf (DPAPI/Keychain/Secret Service), descifra la sesión de autenticación en state.vscdb, reemplaza el token de Windsurf y vuelve a cifrarla; todo localmente en tu equipo.",
+      "alternative": "Alternativa: usar aislamiento multiinstancia (distinto --user-data-dir). Inicia sesión una vez por instancia y luego ejecuta por instancia para cambiar rápidamente al entorno de cuenta objetivo.",
+      "reason": "Alcance de permisos: leer la base de autenticación de Windsurf (state.vscdb) y usar el cifrado del sistema (Windows DPAPI / macOS Keychain / Linux Secret Service) para descifrar y reescribir.",
+      "storage": "Alcance de lectura: solo se procesan datos relacionados con sesiones de inicio de Windsurf; todos los procesos se ejecutan localmente."
+    }
+  },
+  "platformLayout": {
+    "title": "Diseño de plataformas",
+    "sidebarSelected": "Seleccionadas en la barra lateral {{count}}/{{max}}",
+    "reset": "Restablecer por defecto",
+    "tip": "Arrastra para reordenar. Se pueden mostrar hasta dos plataformas en la barra lateral. Si solo se selecciona una, solo se muestra una.",
+    "sidebarToggle": "Mostrar en la barra lateral",
+    "dashboardToggle": "Mostrar en el panel",
+    "hiddenBadge": "Oculto",
+    "openFromMore": "Gestionar diseño de plataformas",
+    "dragHandleLabel": "Arrastrar para reordenar"
   }
 }

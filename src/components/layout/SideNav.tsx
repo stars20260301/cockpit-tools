@@ -1,21 +1,16 @@
-import { Settings, Rocket, GaugeCircle, Github } from 'lucide-react';
+import { Settings, Rocket, GaugeCircle, LayoutGrid, SlidersHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { Page } from '../../types/navigation';
-import { RobotIcon } from '../icons/RobotIcon';
-
-interface FlyingRocket {
-  id: number;
-  x: number;
-  y: number;
-}
+import { PlatformId, PLATFORM_PAGE_MAP } from '../../types/platform';
+import { usePlatformLayoutStore } from '../../stores/usePlatformLayoutStore';
+import { getPlatformLabel, renderPlatformIcon } from '../../utils/platformMeta';
 
 interface SideNavProps {
   page: Page;
   setPage: (page: Page) => void;
+  onOpenPlatformLayout: () => void;
 }
-
-import { CodexIcon } from '../icons/CodexIcon';
 
 interface FlyingRocket {
   id: number;
@@ -23,14 +18,32 @@ interface FlyingRocket {
   y: number;
 }
 
-export function SideNav({ page, setPage }: SideNavProps) {
+const PAGE_PLATFORM_MAP: Partial<Record<Page, PlatformId>> = {
+  overview: 'antigravity',
+  codex: 'codex',
+  'github-copilot': 'github-copilot',
+  windsurf: 'windsurf',
+};
+
+export function SideNav({ page, setPage, onOpenPlatformLayout }: SideNavProps) {
   const { t } = useTranslation();
-  const isOverviewGroup = page === 'overview' || page === 'fingerprints' || page === 'wakeup' || page === 'instances';
   const [clickCount, setClickCount] = useState(0);
   const [flyingRockets, setFlyingRockets] = useState<FlyingRocket[]>([]);
+  const [showMore, setShowMore] = useState(false);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rocketIdRef = useRef(0);
   const logoRef = useRef<HTMLDivElement>(null);
+  const morePopoverRef = useRef<HTMLDivElement>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const { orderedPlatformIds, hiddenPlatformIds, sidebarPlatformIds } = usePlatformLayoutStore();
+
+  const currentPlatformId = PAGE_PLATFORM_MAP[page] ?? null;
+  const hiddenSet = useMemo(() => new Set(hiddenPlatformIds), [hiddenPlatformIds]);
+  const sidebarVisiblePlatformIds = useMemo(
+    () => orderedPlatformIds.filter((id) => sidebarPlatformIds.includes(id) && !hiddenSet.has(id)),
+    [orderedPlatformIds, sidebarPlatformIds, hiddenSet],
+  );
+  const isMoreActive = !!currentPlatformId && !sidebarVisiblePlatformIds.includes(currentPlatformId);
 
   const handleLogoClick = useCallback(() => {
     // 清除之前的重置计时器
@@ -60,6 +73,18 @@ export function SideNav({ page, setPage }: SideNavProps) {
       setClickCount(0);
     }, 2000);
   }, []);
+
+  useEffect(() => {
+    if (!showMore) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (morePopoverRef.current?.contains(target)) return;
+      if (moreButtonRef.current?.contains(target)) return;
+      setShowMore(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMore]);
 
   return (
     <nav className="side-nav">
@@ -101,35 +126,71 @@ export function SideNav({ page, setPage }: SideNavProps) {
           <span className="tooltip">{t('nav.dashboard')}</span>
         </button>
 
-        <button 
-          className={`nav-item ${isOverviewGroup ? 'active' : ''}`} 
-          onClick={() => setPage('overview')}
-          title={t('nav.overview')}
-        >
-          <RobotIcon />
-          <span className="tooltip">{t('nav.overview')}</span>
-        </button>
-        
-        <button 
-          className={`nav-item ${page === 'codex' ? 'active' : ''}`} 
-          onClick={() => setPage('codex')}
-          title={t('nav.codex')}
-        >
-          <CodexIcon />
-          <span className="tooltip">{t('nav.codex')}</span>
-        </button>
+        {sidebarVisiblePlatformIds.map((platformId) => {
+          const active = currentPlatformId === platformId;
+          return (
+            <button
+              key={platformId}
+              className={`nav-item ${active ? 'active' : ''}`}
+              onClick={() => setPage(PLATFORM_PAGE_MAP[platformId])}
+              title={getPlatformLabel(platformId, t)}
+            >
+              {renderPlatformIcon(platformId, 20)}
+              <span className="tooltip">{getPlatformLabel(platformId, t)}</span>
+            </button>
+          );
+        })}
 
         <button
-          className={`nav-item ${page === 'github-copilot' ? 'active' : ''}`}
-          onClick={() => setPage('github-copilot')}
-          title={t('nav.githubCopilot', 'GitHub Copilot')}
+          ref={moreButtonRef}
+          className={`nav-item ${showMore || isMoreActive ? 'active' : ''}`}
+          onClick={() => setShowMore((prev) => !prev)}
+          title={t('nav.morePlatforms', '更多平台')}
         >
-          <Github size={20} />
-          <span className="tooltip">{t('nav.githubCopilot', 'GitHub Copilot')}</span>
+          <LayoutGrid size={20} />
+          <span className="tooltip">{t('nav.morePlatforms', '更多平台')}</span>
         </button>
 
-        <button 
-          className={`nav-item ${page === 'settings' ? 'active' : ''}`} 
+        {showMore && (
+          <div className="side-nav-more-popover" ref={morePopoverRef}>
+            <div className="side-nav-more-title">{t('nav.morePlatforms', '更多平台')}</div>
+            <div className="side-nav-more-list">
+              {orderedPlatformIds.map((platformId) => {
+                const active = currentPlatformId === platformId;
+                const hidden = hiddenSet.has(platformId);
+                return (
+                  <button
+                    key={platformId}
+                    className={`side-nav-more-item ${active ? 'active' : ''}`}
+                    onClick={() => {
+                      setPage(PLATFORM_PAGE_MAP[platformId]);
+                      setShowMore(false);
+                    }}
+                  >
+                    <span className="side-nav-more-item-icon">{renderPlatformIcon(platformId, 16)}</span>
+                    <span className="side-nav-more-item-label">{getPlatformLabel(platformId, t)}</span>
+                    {hidden && <span className="side-nav-more-item-badge">{t('platformLayout.hiddenBadge', '已隐藏')}</span>}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              className="side-nav-more-manage"
+              onClick={() => {
+                setShowMore(false);
+                onOpenPlatformLayout();
+              }}
+            >
+              <SlidersHorizontal size={14} />
+              <span>{t('platformLayout.openFromMore', '管理平台布局')}</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="nav-footer">
+        <button
+          className={`nav-item ${page === 'settings' ? 'active' : ''}`}
           onClick={() => setPage('settings')}
           title={t('nav.settings')}
         >

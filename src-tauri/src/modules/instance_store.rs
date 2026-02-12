@@ -33,12 +33,15 @@ pub fn load_instance_store(path: &Path, file_name: &str) -> Result<InstanceStore
         return Ok(InstanceStore::new());
     }
 
-    serde_json::from_str(&content).map_err(|e| {
-        file_corrupted_error(file_name, &path.to_string_lossy(), &e.to_string())
-    })
+    serde_json::from_str(&content)
+        .map_err(|e| file_corrupted_error(file_name, &path.to_string_lossy(), &e.to_string()))
 }
 
-pub fn save_instance_store(path: &Path, file_name: &str, store: &InstanceStore) -> Result<(), String> {
+pub fn save_instance_store(
+    path: &Path,
+    file_name: &str,
+    store: &InstanceStore,
+) -> Result<(), String> {
     let data_dir = path.parent().ok_or("无法获取实例配置目录")?;
     let temp_path = data_dir.join(format!("{}.tmp", file_name));
     let content =
@@ -116,7 +119,9 @@ pub fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), String> {
         let path = entry.path();
         let target = dst.join(entry.file_name());
 
-        let file_type = entry.file_type().map_err(|e| format!("获取文件类型失败: {}", e))?;
+        let file_type = entry
+            .file_type()
+            .map_err(|e| format!("获取文件类型失败: {}", e))?;
 
         if file_type.is_dir() {
             copy_dir_recursive(&path, &target)?;

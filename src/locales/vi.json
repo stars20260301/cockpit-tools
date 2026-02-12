@@ -31,7 +31,9 @@
     "codex": "Tài khoản Codex",
     "dashboard": "Bảng điều khiển",
     "instances": "Đa Phiên Bản",
-    "githubCopilot": "GitHub Copilot"
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
+    "morePlatforms": "Thêm nền tảng"
   },
   "settings": {
     "title": "Cài đặt ứng dụng",
@@ -93,7 +95,21 @@
       "vscodePathSelect": "Chọn",
       "vscodePathReset": "Đặt lại mặc định",
       "antigravityAppPath": "Đường dẫn ứng dụng Antigravity",
-      "antigravityTitle": "Khởi chạy Antigravity"
+      "antigravityTitle": "Khởi chạy Antigravity",
+      "commonTitle": "Chung",
+      "antigravitySettingsTitle": "Cài đặt Antigravity",
+      "codexSettingsTitle": "Cài đặt Codex",
+      "githubCopilotSettingsTitle": "Cài đặt GitHub Copilot",
+      "ghcpAutoRefresh": "Tự động làm mới quota GitHub Copilot",
+      "ghcpAutoRefreshDesc": "Tần suất cập nhật nền",
+      "windsurfSettingsTitle": "Cài đặt Windsurf",
+      "windsurfAutoRefresh": "Tự động làm mới hạn mức Windsurf",
+      "windsurfAutoRefreshDesc": "Tần suất cập nhật tự động dưới nền",
+      "windsurfAppPath": "Đường dẫn ứng dụng Windsurf",
+      "windsurfAppPathDesc": "Để trống để dùng đường dẫn mặc định",
+      "windsurfAppPathPlaceholder": "Đường dẫn mặc định",
+      "windsurfPathSelect": "Chọn",
+      "windsurfPathReset": "Đặt lại mặc định"
     },
     "network": {
       "apiTitle": "API Antigravity Cockpit",
@@ -154,7 +170,7 @@
       "actions": "Thao tác"
     },
     "status": {
-      "current": "Đang sử dụng",
+      "current": "Hiện tại",
       "disabled": "Đã vô hiệu hóa",
       "authInvalid": "Invalid credentials",
       "refreshFailed": "Refresh failed",
@@ -767,6 +783,15 @@
           "commandWin": "Windows: taskkill /F /PID <pid> (khớp với CODEX_HOME)"
         }
       }
+    },
+    "refreshSuccess": "Đã làm mới quota",
+    "refreshFailed": "Làm mới quota thất bại: {{error}}",
+    "refreshAllSuccess": "Làm mới hoàn tất, {{count}} tài khoản thành công",
+    "refreshAllPartialFailed": "Làm mới hoàn tất, {{success}} / {{total}} tài khoản thành công và một số thất bại",
+    "quotaError": {
+      "badge": "Lỗi quota",
+      "generic": "Làm mới quota thất bại, vui lòng thử lại sau",
+      "deactivatedWorkspace": "Workspace đã bị vô hiệu hoá, hãy đổi tài khoản hoặc cấp quyền lại"
     }
   },
   "dashboard": {
@@ -846,7 +871,8 @@
       "openFolder": "Mở thư mục",
       "edit": "Chỉnh sửa",
       "openRootDir": "Mở thư mục",
-      "selectPath": "Chọn đường dẫn"
+      "selectPath": "Chọn đường dẫn",
+      "openWindow": "Mở cửa sổ"
     },
     "bulkConfirm": {
       "startAll": "Bắt đầu tất cả các phiên bản đang dừng?",
@@ -1115,10 +1141,208 @@
     "export": "Xuất",
     "flowNotice": {
       "title": "Hướng dẫn tài khoản GitHub Copilot (bấm để mở rộng/thu gọn)",
-      "desc": "Luồng hiện tại: cấp quyền tài khoản mới -> lấy và hiển thị hạn mức -> liên kết tài khoản trong chế độ đa phiên bản.",
-      "reason": "Vì sao không thể chuyển tài khoản bằng một cú nhấp: trạng thái đăng nhập VS Code được quản lý bởi phiên GitHub và SecretStorage của tiện ích, ứng dụng bên ngoài không thể thay thế các thông tin xác thực này.",
-      "storage": "Vị trí dữ liệu đăng nhập: chủ yếu trong SecretStorage của VS Code (keychain/trình quản lý thông tin xác thực hệ thống) và cơ sở dữ liệu trạng thái toàn cục (ví dụ: ~/Library/Application Support/Code/User/globalStorage/state.vscdb).",
-      "alternative": "Giải pháp thay thế: dùng cô lập đa phiên bản (khác --user-data-dir). Đăng nhập một lần cho mỗi phiên bản, sau đó khởi chạy theo phiên bản để chuyển nhanh sang môi trường tài khoản mục tiêu."
+      "desc": "Việc chuyển tài khoản yêu cầu đọc kho xác thực cục bộ của VS Code và dùng dịch vụ thông tin xác thực hệ thống để giải mã/ghi lại; dữ liệu chỉ được xử lý trên máy cục bộ.",
+      "reason": "Phạm vi quyền: đọc cơ sở dữ liệu xác thực VS Code (state.vscdb) và gọi khả năng mã hóa hệ thống (Windows DPAPI / macOS Keychain / Linux Secret Service) để giải mã/ghi lại.",
+      "storage": "Phạm vi đọc: chỉ xử lý dữ liệu liên quan đến phiên đăng nhập GitHub; mọi quy trình đều được thực thi cục bộ.",
+      "alternative": "Giải pháp thay thế: dùng cô lập đa phiên bản (khác --user-data-dir). Đăng nhập một lần cho mỗi phiên bản, sau đó khởi chạy theo phiên bản để chuyển nhanh sang môi trường tài khoản mục tiêu.",
+      "inject": "Chuyển đổi một lần nhấp: công cụ này đọc dữ liệu mã hóa cục bộ của VS Code (DPAPI/Keychain/Secret Service), giải mã phiên xác thực trong state.vscdb, thay thế token GitHub Copilot rồi mã hóa lại — mọi thao tác đều diễn ra cục bộ trên máy của bạn."
+    },
+    "injectToVSCode": "Chuyển sang VS Code",
+    "injecting": "Đang chèn...",
+    "injectSuccess": "Đã chèn token vào VS Code thành công. VS Code đang được khởi chạy.",
+    "injectRequireClose": "Vui lòng đóng VS Code trước khi chèn."
+  },
+  "quickSettings": {
+    "antigravity": {
+      "title": "Cài đặt Antigravity",
+      "appPath": "Đường dẫn ứng dụng"
+    },
+    "codex": {
+      "title": "Cài đặt Codex",
+      "appPath": "Đường dẫn ứng dụng"
+    },
+    "githubCopilot": {
+      "title": "Cài đặt GitHub Copilot",
+      "appPath": "Đường dẫn VS Code"
+    },
+    "refreshInterval": "Tự động làm mới hạn ngạch",
+    "codexRefreshInterval": "Tự động làm mới hạn ngạch",
+    "ghcpRefreshInterval": "Tự động làm mới hạn ngạch",
+    "autoSwitch": {
+      "title": "Tự động chuyển đổi",
+      "enable": "Tự động chuyển đổi",
+      "threshold": "Ngưỡng chuyển đổi",
+      "thresholdDesc": "Tự động chuyển đổi được kích hoạt khi hạn ngạch của bất kỳ mô hình nào giảm xuống dưới tỷ lệ phần trăm này",
+      "hint": "Tự động chuyển sang tài khoản có hạn ngạch cao nhất khi hạn ngạch của bất kỳ mô hình nào giảm xuống dưới ngưỡng."
+    },
+    "customInput": "Tùy chỉnh",
+    "apply": "Áp dụng",
+    "inputMinutes": "Nhập số phút",
+    "inputPercent": "Nhập phần trăm",
+    "windsurf": {
+      "title": "Cài đặt Windsurf",
+      "appPath": "Đường dẫn Windsurf"
+    },
+    "windsurfRefreshInterval": "Tự động làm mới hạn ngạch"
+  },
+  "privacy": {
+    "hideSensitive": "Ẩn email",
+    "showSensitive": "Hiện email"
+  },
+  "windsurf": {
+    "title": "Quản lý tài khoản Windsurf",
+    "subtitle": "Quản lý các tài khoản Windsurf",
+    "overview": {
+      "title": "Tổng quan tài khoản"
+    },
+    "instances": {
+      "title": "Đa Phiên Bản",
+      "subtitle": "Cấu hình độc lập cho mỗi phiên bản, vận hành song song với nhiều tài khoản.",
+      "unsupported": {
+        "title": "Không hỗ trợ trên hệ thống này",
+        "desc": "Đa phiên bản Windsurf hiện chỉ khả dụng trên macOS."
+      },
+      "quota": {
+        "inline": "Inline Suggestions",
+        "chat": "Chat messages"
+      }
+    },
+    "addAccount": "Thêm tài khoản",
+    "refreshAll": "Làm mới tất cả",
+    "refreshQuota": "Làm mới hạn mức",
+    "empty": {
+      "title": "Chưa có tài khoản",
+      "description": "Nhấn \"Thêm tài khoản\" để bắt đầu"
+    },
+    "noMatch": {
+      "title": "Không có tài khoản phù hợp",
+      "desc": "Thử điều chỉnh tìm kiếm hoặc bộ lọc"
+    },
+    "addModal": {
+      "title": "Thêm tài khoản Windsurf",
+      "oauth": "Đăng nhập OAuth",
+      "token": "Nhập JSON",
+      "import": "Nhập từ máy"
+    },
+    "oauth": {
+      "desc": "Nhấn nút bên dưới và hoàn tất ủy quyền Windsurf trong trình duyệt.",
+      "preparing": "Đang chuẩn bị liên kết ủy quyền...",
+      "openBrowser": "Mở trong trình duyệt",
+      "hint": "Sau khi ủy quyền, cửa sổ này sẽ tự cập nhật",
+      "success": "Ủy quyền thành công",
+      "failed": "Ủy quyền thất bại",
+      "retry": "Tạo lại thông tin ủy quyền",
+      "timeoutRetry": "Làm mới liên kết ủy quyền",
+      "waiting": "Đang chờ ủy quyền...",
+      "meta": "Hết hạn sau: {{expires}}s; chu kỳ thăm dò: {{interval}}s"
+    },
+    "token": {
+      "desc": "Dán token truy cập Windsurf hoặc dữ liệu JSON đã xuất.",
+      "placeholder": "Dán nội dung JSON...",
+      "import": "Nhập",
+      "importing": "Đang nhập...",
+      "importSuccessMsg": "Đã nhập {{count}} tài khoản",
+      "importFailedMsg": "Nhập thất bại: {{error}}",
+      "empty": "Vui lòng nhập Token hoặc JSON"
+    },
+    "import": {
+      "label": "Nhập",
+      "localDesc": "Nhập tài khoản Windsurf từ các phiên đăng nhập cục bộ.",
+      "localClient": "Nhập từ Windsurf cục bộ",
+      "orJson": "Hoặc nhập từ tệp JSON",
+      "importing": "Đang nhập tài khoản cục bộ...",
+      "failedMsg": "Nhập thất bại: {{error}}",
+      "pickFile": "Chọn tệp JSON để nhập"
+    },
+    "quota": {
+      "hourly": "Hạn mức 5 giờ",
+      "weekly": "Hạn mức tuần",
+      "noData": "Không có dữ liệu hạn mức",
+      "resetDone": "Đã đặt lại"
+    },
+    "credits": {
+      "title": "Gói",
+      "renewMonthly": "Tín dụng được làm mới mỗi tháng",
+      "planEndsIn": "Chu kỳ đặt lại sau {{days}} ngày",
+      "planEndsUnknown": "Không có thông tin chu kỳ",
+      "periodRange": "Chu kỳ: {{start}} - {{end}}",
+      "periodEndOnly": "Kết thúc chu kỳ: {{end}}",
+      "left": "Còn {{count}} tín dụng",
+      "leftUnknown": "Tín dụng còn lại -",
+      "promptLeft": "Còn {{remaining}}/{{total}} tín dụng prompt",
+      "promptLeftNoTotal": "Còn {{remaining}} tín dụng prompt",
+      "promptLeftUnknown": "Tín dụng prompt còn lại -",
+      "addOnAvailable": "Có {{count}} tín dụng bổ sung khả dụng",
+      "usedLine": "Đã dùng {{used}} / {{total}}",
+      "leftInline": "còn {{left}}"
+    },
+    "usage": {
+      "resetUnknown": "Hạn mức sẽ đặt lại sau -",
+      "resetLine": "Hạn mức sẽ được đặt lại {{dateText}}."
+    },
+    "time": {
+      "relativeDays": "{{days}} ngày",
+      "relativeDaysHours": "{{days}} ngày {{hours}} giờ",
+      "relativeHours": "{{hours}} giờ",
+      "relativeHoursMinutes": "{{hours}} giờ {{minutes}} phút",
+      "relativeMinutes": "{{minutes}} phút",
+      "lessThanMinute": "<1 phút",
+      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+    },
+    "search": "Tìm kiếm tài khoản...",
+    "view": {
+      "list": "Dạng danh sách",
+      "grid": "Dạng thẻ"
+    },
+    "filter": {
+      "all": "Tất cả ({{count}})",
+      "free": "FREE ({{count}})",
+      "individual": "INDIVIDUAL ({{count}})",
+      "pro": "PRO ({{count}})",
+      "business": "BUSINESS ({{count}})",
+      "enterprise": "ENTERPRISE ({{count}})"
+    },
+    "filterLabel": "Bộ lọc",
+    "sortLabel": "Sắp xếp",
+    "sort": {
+      "createdAt": "Thời gian tạo",
+      "credits": "Theo tín dụng còn lại",
+      "planEnd": "Theo thời điểm kết thúc chu kỳ",
+      "descTooltip": "Giảm dần (nhấn để chuyển Tăng dần)",
+      "ascTooltip": "Tăng dần (nhấn để chuyển Giảm dần)",
+      "toggleDirection": "Đổi hướng sắp xếp"
+    },
+    "columns": {
+      "email": "Email",
+      "plan": "Nhãn",
+      "promptCredits": "Tín dụng prompt",
+      "addOnPromptCredits": "Tín dụng prompt bổ sung",
+      "credits": "Tín dụng",
+      "actions": "Hành động"
+    },
+    "export": "Xuất",
+    "injectToVSCode": "Chuyển sang Windsurf",
+    "injecting": "Đang chèn...",
+    "injectSuccess": "Chuyển đổi hoàn tất. Windsurf đang khởi chạy.",
+    "injectRequireClose": "Vui lòng đóng Windsurf trước khi chuyển đổi.",
+    "flowNotice": {
+      "title": "Hướng dẫn tài khoản Windsurf (bấm để mở rộng/thu gọn)",
+      "desc": "Việc chuyển tài khoản yêu cầu đọc kho xác thực cục bộ của Windsurf và dùng dịch vụ thông tin xác thực hệ thống để giải mã/ghi lại; dữ liệu chỉ được xử lý trên máy cục bộ.",
+      "inject": "Chuyển đổi một lần nhấp: công cụ này đọc dữ liệu mã hóa cục bộ của Windsurf (DPAPI/Keychain/Secret Service), giải mã phiên xác thực trong state.vscdb, thay thế token Windsurf rồi mã hóa lại — mọi thao tác đều diễn ra cục bộ trên máy của bạn.",
+      "alternative": "Giải pháp thay thế: dùng cô lập đa phiên bản (khác --user-data-dir). Đăng nhập một lần cho mỗi phiên bản, sau đó khởi chạy theo phiên bản để chuyển nhanh sang môi trường tài khoản mục tiêu.",
+      "reason": "Phạm vi quyền: đọc cơ sở dữ liệu xác thực Windsurf (state.vscdb) và gọi khả năng mã hóa hệ thống (Windows DPAPI / macOS Keychain / Linux Secret Service) để giải mã/ghi lại.",
+      "storage": "Phạm vi đọc: chỉ xử lý dữ liệu liên quan đến phiên đăng nhập Windsurf; mọi quy trình đều được thực thi cục bộ."
     }
+  },
+  "platformLayout": {
+    "title": "Bố cục nền tảng",
+    "sidebarSelected": "Đã chọn trên thanh bên {{count}}/{{max}}",
+    "reset": "Đặt lại mặc định",
+    "tip": "Kéo để sắp xếp lại. Thanh bên chỉ hiển thị tối đa hai nền tảng. Nếu chỉ chọn một, chỉ một nền tảng sẽ được hiển thị.",
+    "sidebarToggle": "Hiển thị ở thanh bên",
+    "dashboardToggle": "Hiển thị trên bảng điều khiển",
+    "hiddenBadge": "Ẩn",
+    "openFromMore": "Quản lý bố cục nền tảng",
+    "dragHandleLabel": "Kéo để sắp xếp lại"
   }
 }

@@ -1,8 +1,8 @@
+use crate::modules;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
-use serde::{Deserialize, Serialize};
-use crate::modules;
 
 const HISTORY_FILE: &str = "wakeup_history.json";
 const MAX_HISTORY_ITEMS: usize = 100;
@@ -33,21 +33,20 @@ fn history_path() -> Result<PathBuf, String> {
 /// 加载唤醒历史记录
 pub fn load_history() -> Result<Vec<WakeupHistoryItem>, String> {
     let path = history_path()?;
-    
+
     if !path.exists() {
         return Ok(Vec::new());
     }
-    
-    let content = fs::read_to_string(&path)
-        .map_err(|e| format!("读取唤醒历史失败: {}", e))?;
-    
+
+    let content = fs::read_to_string(&path).map_err(|e| format!("读取唤醒历史失败: {}", e))?;
+
     if content.trim().is_empty() {
         return Ok(Vec::new());
     }
-    
-    let items: Vec<WakeupHistoryItem> = serde_json::from_str(&content)
-        .map_err(|e| format!("解析唤醒历史失败: {}", e))?;
-    
+
+    let items: Vec<WakeupHistoryItem> =
+        serde_json::from_str(&content).map_err(|e| format!("解析唤醒历史失败: {}", e))?;
+
     Ok(items)
 }
 
@@ -56,15 +55,13 @@ fn save_history(items: &[WakeupHistoryItem]) -> Result<(), String> {
     let path = history_path()?;
     let data_dir = modules::account::get_data_dir()?;
     let temp_path = data_dir.join(format!("{}.tmp", HISTORY_FILE));
-    
-    let content = serde_json::to_string_pretty(items)
-        .map_err(|e| format!("序列化唤醒历史失败: {}", e))?;
-    
-    fs::write(&temp_path, content)
-        .map_err(|e| format!("写入临时历史文件失败: {}", e))?;
-    
-    fs::rename(temp_path, path)
-        .map_err(|e| format!("替换历史文件失败: {}", e))
+
+    let content =
+        serde_json::to_string_pretty(items).map_err(|e| format!("序列化唤醒历史失败: {}", e))?;
+
+    fs::write(&temp_path, content).map_err(|e| format!("写入临时历史文件失败: {}", e))?;
+
+    fs::rename(temp_path, path).map_err(|e| format!("替换历史文件失败: {}", e))
 }
 
 /// 添加历史记录（自动去重、限制数量）
@@ -72,32 +69,33 @@ pub fn add_history_items(new_items: Vec<WakeupHistoryItem>) -> Result<(), String
     if new_items.is_empty() {
         return Ok(());
     }
-    
+
     let _lock = HISTORY_LOCK.lock().map_err(|_| "获取历史锁失败")?;
-    
+
     let mut existing = load_history().unwrap_or_default();
-    
+
     // 去重：根据 ID 过滤已存在的记录
-    let existing_ids: std::collections::HashSet<String> = existing.iter().map(|item| item.id.clone()).collect();
+    let existing_ids: std::collections::HashSet<String> =
+        existing.iter().map(|item| item.id.clone()).collect();
     let filtered_new: Vec<WakeupHistoryItem> = new_items
         .into_iter()
         .filter(|item| !existing_ids.contains(&item.id))
         .collect();
-    
+
     if filtered_new.is_empty() {
         return Ok(());
     }
-    
+
     // 新记录放前面
     let mut merged = filtered_new;
     merged.append(&mut existing);
-    
+
     // 按时间排序（最新的在前）
     merged.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
-    
+
     // 限制数量
     merged.truncate(MAX_HISTORY_ITEMS);
-    
+
     save_history(&merged)
 }
 

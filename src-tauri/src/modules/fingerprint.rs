@@ -1,7 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use uuid::Uuid;
-use serde::{Deserialize, Serialize};
 
 use crate::models::DeviceProfile;
 use crate::modules::{device, logger};
@@ -58,7 +58,7 @@ fn get_fingerprints_path() -> Result<PathBuf, String> {
 /// 加载指纹存储
 pub fn load_fingerprint_store() -> Result<FingerprintStore, String> {
     let path = get_fingerprints_path()?;
-    
+
     if !path.exists() {
         // 首次使用，尝试捕获原始指纹
         let mut store = FingerprintStore::new();
@@ -78,14 +78,13 @@ pub fn load_fingerprint_store() -> Result<FingerprintStore, String> {
         save_fingerprint_store(&store)?;
         return Ok(store);
     }
-    
-    let content = fs::read_to_string(&path)
-        .map_err(|e| format!("读取指纹存储失败: {}", e))?;
-    
+
+    let content = fs::read_to_string(&path).map_err(|e| format!("读取指纹存储失败: {}", e))?;
+
     if content.trim().is_empty() {
         return Ok(FingerprintStore::new());
     }
-    
+
     serde_json::from_str(&content).map_err(|e| {
         crate::error::file_corrupted_error(
             FINGERPRINTS_FILE,
@@ -98,21 +97,22 @@ pub fn load_fingerprint_store() -> Result<FingerprintStore, String> {
 /// 保存指纹存储
 pub fn save_fingerprint_store(store: &FingerprintStore) -> Result<(), String> {
     let path = get_fingerprints_path()?;
-    let content = serde_json::to_string_pretty(store)
-        .map_err(|e| format!("序列化指纹存储失败: {}", e))?;
-    fs::write(&path, content)
-        .map_err(|e| format!("保存指纹存储失败: {}", e))
+    let content =
+        serde_json::to_string_pretty(store).map_err(|e| format!("序列化指纹存储失败: {}", e))?;
+    fs::write(&path, content).map_err(|e| format!("保存指纹存储失败: {}", e))
 }
 
 /// 获取指纹详情
 pub fn get_fingerprint(fingerprint_id: &str) -> Result<Fingerprint, String> {
     let store = load_fingerprint_store()?;
-    
+
     if fingerprint_id == "original" {
         return store.original_baseline.ok_or("原始指纹不存在".to_string());
     }
-    
-    store.fingerprints.iter()
+
+    store
+        .fingerprints
+        .iter()
         .find(|f| f.id == fingerprint_id)
         .cloned()
         .ok_or(format!("指纹不存在: {}", fingerprint_id))
@@ -145,7 +145,10 @@ pub fn capture_fingerprint(name: String) -> Result<Fingerprint, String> {
 }
 
 /// 使用指定 profile 创建指纹
-pub fn create_fingerprint_with_profile(name: String, mut profile: DeviceProfile) -> Result<Fingerprint, String> {
+pub fn create_fingerprint_with_profile(
+    name: String,
+    mut profile: DeviceProfile,
+) -> Result<Fingerprint, String> {
     let trimmed = name.trim();
     if trimmed.is_empty() {
         return Err("指纹名称不能为空".to_string());
@@ -166,13 +169,13 @@ pub fn create_fingerprint_with_profile(name: String, mut profile: DeviceProfile)
 pub fn apply_fingerprint(fingerprint_id: &str) -> Result<String, String> {
     let fingerprint = get_fingerprint(fingerprint_id)?;
     let storage_path = device::get_storage_path()?;
-    
+
     device::write_profile(&storage_path, &fingerprint.profile)?;
-    
+
     let mut store = load_fingerprint_store()?;
     store.current_fingerprint_id = Some(fingerprint_id.to_string());
     save_fingerprint_store(&store)?;
-    
+
     logger::log_info(&format!("已应用指纹到系统: {}", fingerprint.name));
     Ok(format!("已应用指纹: {}", fingerprint.name))
 }
@@ -205,26 +208,26 @@ pub fn delete_fingerprint(fingerprint_id: &str) -> Result<(), String> {
     if fingerprint_id == "original" {
         return Err("原始指纹不可删除".to_string());
     }
-    
+
     let mut store = load_fingerprint_store()?;
-    
+
     let before = store.fingerprints.len();
     store.fingerprints.retain(|f| f.id != fingerprint_id);
-    
+
     if store.fingerprints.len() == before {
         return Err("指纹不存在".to_string());
     }
-    
+
     // 如果删除的是当前应用的指纹，切换到原始指纹
     if store.current_fingerprint_id.as_deref() == Some(fingerprint_id) {
         store.current_fingerprint_id = Some("original".to_string());
     }
-    
+
     save_fingerprint_store(&store)?;
-    
+
     // 更新所有绑定此指纹的账号，改为绑定原始指纹
     update_accounts_fingerprint(fingerprint_id, "original")?;
-    
+
     logger::log_info(&format!("已删除指纹: {}", fingerprint_id));
     Ok(())
 }
@@ -232,21 +235,22 @@ pub fn delete_fingerprint(fingerprint_id: &str) -> Result<(), String> {
 /// 更新账号的指纹绑定（当指纹被删除时）
 fn update_accounts_fingerprint(old_id: &str, new_id: &str) -> Result<(), String> {
     let accounts = crate::modules::account::list_accounts()?;
-    
+
     for mut account in accounts {
         if account.fingerprint_id.as_deref() == Some(old_id) {
             account.fingerprint_id = Some(new_id.to_string());
             crate::modules::account::save_account(&account)?;
         }
     }
-    
+
     Ok(())
 }
 
 /// 获取绑定某指纹的所有账号
 pub fn get_bound_accounts(fingerprint_id: &str) -> Result<Vec<crate::models::Account>, String> {
     let accounts = crate::modules::account::list_accounts()?;
-    Ok(accounts.into_iter()
+    Ok(accounts
+        .into_iter()
         .filter(|a| a.fingerprint_id.as_deref() == Some(fingerprint_id))
         .collect())
 }
@@ -267,25 +271,30 @@ pub struct FingerprintWithStats {
 pub fn list_fingerprints_with_stats() -> Result<Vec<FingerprintWithStats>, String> {
     let store = load_fingerprint_store()?;
     let accounts = crate::modules::account::list_accounts()?;
-    
+
     // 读取系统实际的 storage.json 获取真正的当前 machineId
     let actual_current_machine_id = if let Ok(storage_path) = device::get_storage_path() {
-        device::read_profile(&storage_path).ok().map(|p| p.machine_id)
+        device::read_profile(&storage_path)
+            .ok()
+            .map(|p| p.machine_id)
     } else {
         None
     };
-    
+
     let count_bound = |fid: &str| -> usize {
-        accounts.iter().filter(|a| a.fingerprint_id.as_deref() == Some(fid)).count()
+        accounts
+            .iter()
+            .filter(|a| a.fingerprint_id.as_deref() == Some(fid))
+            .count()
     };
-    
+
     // 判断指纹是否是当前系统应用的
     let is_current_fp = |profile: &DeviceProfile| -> bool {
         actual_current_machine_id.as_ref() == Some(&profile.machine_id)
     };
-    
+
     let mut result = Vec::new();
-    
+
     // 原始指纹
     if let Some(baseline) = store.original_baseline {
         let is_current = is_current_fp(&baseline.profile);
@@ -299,11 +308,11 @@ pub fn list_fingerprints_with_stats() -> Result<Vec<FingerprintWithStats>, Strin
             bound_account_count: count_bound(&baseline.id),
         });
     }
-    
+
     // 其余按时间倒序
     let mut others = store.fingerprints.clone();
     others.sort_by(|a, b| b.created_at.cmp(&a.created_at));
-    
+
     // 当前应用的放第二位
     let current_pos = others.iter().position(|f| is_current_fp(&f.profile));
     if let Some(pos) = current_pos {
@@ -318,7 +327,7 @@ pub fn list_fingerprints_with_stats() -> Result<Vec<FingerprintWithStats>, Strin
             bound_account_count: count_bound(&fp.id),
         });
     }
-    
+
     // 其余指纹
     for fp in others {
         result.push(FingerprintWithStats {
@@ -331,6 +340,6 @@ pub fn list_fingerprints_with_stats() -> Result<Vec<FingerprintWithStats>, Strin
             bound_account_count: count_bound(&fp.id),
         });
     }
-    
+
     Ok(result)
 }

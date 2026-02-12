@@ -31,7 +31,9 @@
     "codex": "Codex-Konten",
     "dashboard": "Dashboard",
     "instances": "Multi-Instanz",
-    "githubCopilot": "GitHub Copilot"
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
+    "morePlatforms": "Weitere Plattformen"
   },
   "settings": {
     "title": "App-Einstellungen",
@@ -93,7 +95,21 @@
       "vscodePathSelect": "Auswählen",
       "vscodePathReset": "Standard zurücksetzen",
       "antigravityAppPath": "Antigravity-App-Pfad",
-      "antigravityTitle": "Antigravity-Start"
+      "antigravityTitle": "Antigravity-Start",
+      "commonTitle": "Allgemein",
+      "antigravitySettingsTitle": "Antigravity-Einstellungen",
+      "codexSettingsTitle": "Codex-Einstellungen",
+      "githubCopilotSettingsTitle": "GitHub Copilot-Einstellungen",
+      "ghcpAutoRefresh": "GitHub Copilot-Kontingent automatisch aktualisieren",
+      "ghcpAutoRefreshDesc": "Aktualisierungsintervall im Hintergrund",
+      "windsurfSettingsTitle": "Windsurf-Einstellungen",
+      "windsurfAutoRefresh": "Windsurf-Quote automatisch aktualisieren",
+      "windsurfAutoRefreshDesc": "Hintergrundaktualisierungsfrequenz",
+      "windsurfAppPath": "Windsurf-App-Pfad",
+      "windsurfAppPathDesc": "Leer lassen, um den Standardpfad zu verwenden",
+      "windsurfAppPathPlaceholder": "Standardpfad",
+      "windsurfPathSelect": "Auswählen",
+      "windsurfPathReset": "Standard zurücksetzen"
     },
     "network": {
       "apiTitle": "Antigravity Cockpit API",
@@ -767,6 +783,15 @@
           "commandWin": "Windows: taskkill /F /PID <pid> (Übereinstimmung mit CODEX_HOME)"
         }
       }
+    },
+    "refreshSuccess": "Kontingent aktualisiert",
+    "refreshFailed": "Kontingent-Aktualisierung fehlgeschlagen: {{error}}",
+    "refreshAllSuccess": "Aktualisierung abgeschlossen, {{count}} Konto/Konten erfolgreich",
+    "refreshAllPartialFailed": "Aktualisierung abgeschlossen, {{success}} / {{total}} Konten erfolgreich, einige fehlgeschlagen",
+    "quotaError": {
+      "badge": "Kontingentfehler",
+      "generic": "Kontingent-Aktualisierung fehlgeschlagen, bitte später erneut versuchen",
+      "deactivatedWorkspace": "Workspace ist deaktiviert, bitte Konto wechseln oder neu autorisieren"
     }
   },
   "dashboard": {
@@ -846,7 +871,8 @@
       "openFolder": "Ordner öffnen",
       "edit": "Bearbeiten",
       "openRootDir": "Ordner öffnen",
-      "selectPath": "Pfad auswählen"
+      "selectPath": "Pfad auswählen",
+      "openWindow": "Fenster öffnen"
     },
     "bulkConfirm": {
       "startAll": "Alle gestoppten Instanzen starten?",
@@ -1115,10 +1141,208 @@
     "export": "Exportieren",
     "flowNotice": {
       "title": "GitHub-Copilot-Kontoleitfaden (zum Auf-/Zuklappen klicken)",
-      "desc": "Aktueller Ablauf: neues Konto autorisieren -> Kontingente abrufen und anzeigen -> Konto in der Multi-Instanz-Ansicht verknüpfen.",
-      "reason": "Warum kein Kontowechsel per Ein-Klick möglich ist: Der VS-Code-Anmeldestatus wird durch GitHub-Sitzungen und das SecretStorage der Erweiterung verwaltet; externe Apps können diese Anmeldedaten nicht ersetzen.",
-      "storage": "Speicherort der Anmeldedaten: hauptsächlich im VS-Code-SecretStorage (System-Schlüsselbund/Anmeldedatenverwaltung) und in der globalen Statusdatenbank (z. B. ~/Library/Application Support/Code/User/globalStorage/state.vscdb).",
-      "alternative": "Alternative: Multi-Instanz-Isolierung verwenden (unterschiedliche --user-data-dir). Pro Instanz einmal anmelden und danach instanzweise starten, um schnell in die Zielkontoumgebung zu wechseln."
+      "desc": "Für den Kontowechsel muss der lokale VS-Code-Auth-Speicher gelesen und der System-Anmeldedienst zum Entschlüsseln und Zurückschreiben verwendet werden; die Datenverarbeitung erfolgt nur lokal.",
+      "reason": "Berechtigungsumfang: Lesen der VS-Code-Auth-Datenbank (state.vscdb) und Aufruf der System-Verschlüsselung (Windows DPAPI / macOS Keychain / Linux Secret Service) zum Entschlüsseln und Zurückschreiben.",
+      "storage": "Lesebereich: Es werden nur GitHub-Login-Sitzungsdaten verarbeitet; alle Prozesse werden lokal ausgeführt.",
+      "alternative": "Alternative: Multi-Instanz-Isolierung verwenden (unterschiedliche --user-data-dir). Pro Instanz einmal anmelden und danach instanzweise starten, um schnell in die Zielkontoumgebung zu wechseln.",
+      "inject": "Ein-Klick-Wechsel: Dieses Tool liest das lokale Verschlüsselungsmaterial von VS Code (DPAPI/Keychain/Secret Service), entschlüsselt die Auth-Sitzung in state.vscdb, ersetzt das GitHub-Copilot-Token und verschlüsselt sie erneut – alles lokal auf deinem Gerät."
+    },
+    "injectToVSCode": "Zu VS Code wechseln",
+    "injecting": "Wird injiziert...",
+    "injectSuccess": "Das Token wurde erfolgreich in VS Code eingefügt. VS Code wird gestartet.",
+    "injectRequireClose": "Bitte schließen Sie VS Code vor dem Injizieren."
+  },
+  "quickSettings": {
+    "antigravity": {
+      "title": "Antigravity-Einstellungen",
+      "appPath": "App-Pfad"
+    },
+    "codex": {
+      "title": "Codex-Einstellungen",
+      "appPath": "App-Pfad"
+    },
+    "githubCopilot": {
+      "title": "GitHub Copilot-Einstellungen",
+      "appPath": "VS Code-Pfad"
+    },
+    "refreshInterval": "Kontingent automatisch aktualisieren",
+    "codexRefreshInterval": "Kontingent automatisch aktualisieren",
+    "ghcpRefreshInterval": "Kontingent automatisch aktualisieren",
+    "autoSwitch": {
+      "title": "Automatisch wechseln",
+      "enable": "Automatisch wechseln",
+      "threshold": "Wechselschwelle",
+      "thresholdDesc": "Automatischer Wechsel wird ausgelöst, wenn das Kontingent eines Modells unter diesen Prozentsatz fällt",
+      "hint": "Wechselt automatisch zum Konto mit dem höchsten Kontingent, wenn das Kontingent eines Modells unter den Schwellenwert fällt."
+    },
+    "customInput": "Benutzerdefiniert",
+    "apply": "Anwenden",
+    "inputMinutes": "Minuten eingeben",
+    "inputPercent": "Prozentsatz eingeben",
+    "windsurf": {
+      "title": "Windsurf-Einstellungen",
+      "appPath": "Windsurf-Pfad"
+    },
+    "windsurfRefreshInterval": "Kontingent automatisch aktualisieren"
+  },
+  "privacy": {
+    "hideSensitive": "E-Mails ausblenden",
+    "showSensitive": "E-Mails anzeigen"
+  },
+  "windsurf": {
+    "title": "Windsurf-Konten verwalten",
+    "subtitle": "Verwalte deine Windsurf-Konten",
+    "overview": {
+      "title": "Kontoübersicht"
+    },
+    "instances": {
+      "title": "Multi-Instanz",
+      "subtitle": "Unabhängige Konfiguration pro Instanz, paralleler Betrieb mit mehreren Konten.",
+      "unsupported": {
+        "title": "Auf diesem System nicht unterstützt",
+        "desc": "Windsurf Multi-Instanz ist derzeit nur auf macOS verfügbar."
+      },
+      "quota": {
+        "inline": "Inline Suggestions",
+        "chat": "Chat messages"
+      }
+    },
+    "addAccount": "Konto hinzufügen",
+    "refreshAll": "Alle aktualisieren",
+    "refreshQuota": "Kontingent aktualisieren",
+    "empty": {
+      "title": "Keine Konten",
+      "description": "Klicke auf \"Konto hinzufügen\", um zu starten"
+    },
+    "noMatch": {
+      "title": "Keine passenden Konten",
+      "desc": "Versuchen Sie, Ihre Suche oder Filter anzupassen"
+    },
+    "addModal": {
+      "title": "Windsurf-Konto hinzufügen",
+      "oauth": "OAuth-Anmeldung",
+      "token": "JSON-Import",
+      "import": "Lokaler Import"
+    },
+    "oauth": {
+      "desc": "Klicke unten und schließe die Windsurf-Windsurf-Autorisierung im Browser ab.",
+      "preparing": "Autorisierungslink wird vorbereitet...",
+      "openBrowser": "Im Browser öffnen",
+      "hint": "Nach der Autorisierung wird dieses Fenster automatisch aktualisiert",
+      "success": "Autorisierung erfolgreich",
+      "failed": "Autorisierung fehlgeschlagen",
+      "retry": "Autorisierungsinfos neu generieren",
+      "timeoutRetry": "Autorisierungslink aktualisieren",
+      "waiting": "Warte auf Autorisierung...",
+      "meta": "Läuft ab in: {{expires}}s; Abfrageintervall: {{interval}}s"
+    },
+    "token": {
+      "desc": "Fügen Sie Ihr Windsurf-Windsurf-Access-Token oder exportierte JSON-Daten ein.",
+      "placeholder": "JSON-Inhalt einfügen...",
+      "import": "Importieren",
+      "importing": "Importiere...",
+      "importSuccessMsg": "{{count}} Konto/Konten importiert",
+      "importFailedMsg": "Import fehlgeschlagen: {{error}}",
+      "empty": "Bitte Token oder JSON eingeben"
+    },
+    "import": {
+      "label": "Importieren",
+      "localDesc": "Windsurf-Konten aus lokal angemeldeten Sitzungen importieren.",
+      "localClient": "Aus lokalem Windsurf importieren",
+      "orJson": "Oder aus JSON-Datei importieren",
+      "importing": "Lokales Konto wird importiert...",
+      "failedMsg": "Import fehlgeschlagen: {{error}}",
+      "pickFile": "JSON-Datei zum Import auswählen"
+    },
+    "quota": {
+      "hourly": "5-Stunden-Kontingent",
+      "weekly": "Wöchentliches Kontingent",
+      "noData": "Keine Kontingentdaten",
+      "resetDone": "Zurückgesetzt"
+    },
+    "credits": {
+      "title": "Tarif",
+      "renewMonthly": "Credits werden jeden Monat erneuert",
+      "planEndsIn": "Zyklus wird in {{days}} Tagen zurückgesetzt",
+      "planEndsUnknown": "Zykluszeit nicht verfügbar",
+      "periodRange": "Zyklus: {{start}} - {{end}}",
+      "periodEndOnly": "Zyklusende: {{end}}",
+      "left": "{{count}} Credits verbleibend",
+      "leftUnknown": "Verbleibende Credits -",
+      "promptLeft": "{{remaining}}/{{total}} Prompt-Credits verbleibend",
+      "promptLeftNoTotal": "{{remaining}} Prompt-Credits verbleibend",
+      "promptLeftUnknown": "Verbleibende Prompt-Credits -",
+      "addOnAvailable": "{{count}} Zusatz-Credits verfügbar",
+      "usedLine": "{{used}} / {{total}} verwendet",
+      "leftInline": "{{left}} verbleibend"
+    },
+    "usage": {
+      "resetUnknown": "Kontingent wird zurückgesetzt -",
+      "resetLine": "Kontingent wird {{dateText}} zurückgesetzt."
+    },
+    "time": {
+      "relativeDays": "{{days}} T",
+      "relativeDaysHours": "{{days}} T {{hours}} Std",
+      "relativeHours": "{{hours}} Std",
+      "relativeHoursMinutes": "{{hours}} Std {{minutes}} Min",
+      "relativeMinutes": "{{minutes}} Min",
+      "lessThanMinute": "<1 Min",
+      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+    },
+    "search": "Konten suchen...",
+    "view": {
+      "list": "Listenansicht",
+      "grid": "Kartenansicht"
+    },
+    "filter": {
+      "all": "Alle ({{count}})",
+      "free": "FREE ({{count}})",
+      "individual": "INDIVIDUAL ({{count}})",
+      "pro": "PRO ({{count}})",
+      "business": "BUSINESS ({{count}})",
+      "enterprise": "ENTERPRISE ({{count}})"
+    },
+    "filterLabel": "Filtern",
+    "sortLabel": "Sortieren",
+    "sort": {
+      "createdAt": "Erstelldatum",
+      "credits": "Nach verbleibenden Credits",
+      "planEnd": "Nach Zyklusende",
+      "descTooltip": "Absteigend (Klicken für Aufsteigend)",
+      "ascTooltip": "Aufsteigend (Klicken für Absteigend)",
+      "toggleDirection": "Sortierrichtung ändern"
+    },
+    "columns": {
+      "email": "E-Mail",
+      "plan": "Tag",
+      "promptCredits": "Prompt-Credits",
+      "addOnPromptCredits": "Zusatz-Prompt-Credits",
+      "credits": "Credits",
+      "actions": "Aktionen"
+    },
+    "export": "Exportieren",
+    "injectToVSCode": "Zu Windsurf wechseln",
+    "injecting": "Wird injiziert...",
+    "injectSuccess": "Wechsel abgeschlossen. Windsurf wird gestartet.",
+    "injectRequireClose": "Bitte schließen Sie Windsurf vor dem Wechsel.",
+    "flowNotice": {
+      "title": "Windsurf-Windsurf-Kontoleitfaden (zum Auf-/Zuklappen klicken)",
+      "desc": "Für den Kontowechsel muss der lokale VS-Code-Auth-Speicher gelesen und der System-Anmeldedienst zum Entschlüsseln und Zurückschreiben verwendet werden; die Datenverarbeitung erfolgt nur lokal.",
+      "inject": "Ein-Klick-Wechsel: Dieses Tool liest das lokale Verschlüsselungsmaterial von Windsurf (DPAPI/Keychain/Secret Service), entschlüsselt die Auth-Sitzung in state.vscdb, ersetzt das Windsurf-Windsurf-Token und verschlüsselt sie erneut – alles lokal auf deinem Gerät.",
+      "alternative": "Alternative: Multi-Instanz-Isolierung verwenden (unterschiedliche --user-data-dir). Pro Instanz einmal anmelden und danach instanzweise starten, um schnell in die Zielkontoumgebung zu wechseln.",
+      "reason": "Berechtigungsumfang: Lesen der VS-Code-Auth-Datenbank (state.vscdb) und Aufruf der System-Verschlüsselung (Windows DPAPI / macOS Keychain / Linux Secret Service) zum Entschlüsseln und Zurückschreiben.",
+      "storage": "Lesebereich: Es werden nur Windsurf-Login-Sitzungsdaten verarbeitet; alle Prozesse werden lokal ausgeführt."
     }
+  },
+  "platformLayout": {
+    "title": "Plattformlayout",
+    "sidebarSelected": "In der Seitenleiste ausgewählt {{count}}/{{max}}",
+    "reset": "Auf Standard zurücksetzen",
+    "tip": "Zum Neuanordnen ziehen. In der Seitenleiste können maximal zwei Plattformen angezeigt werden. Wenn nur eine ausgewählt ist, wird nur eine angezeigt.",
+    "sidebarToggle": "In Seitenleiste anzeigen",
+    "dashboardToggle": "Im Dashboard anzeigen",
+    "hiddenBadge": "Ausgeblendet",
+    "openFromMore": "Plattformlayout verwalten",
+    "dragHandleLabel": "Zum Neuanordnen ziehen"
   }
 }

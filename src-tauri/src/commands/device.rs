@@ -2,22 +2,32 @@ use crate::models;
 use crate::modules;
 
 #[tauri::command]
-pub async fn get_device_profiles(account_id: String) -> Result<modules::account::DeviceProfiles, String> {
+pub async fn get_device_profiles(
+    account_id: String,
+) -> Result<modules::account::DeviceProfiles, String> {
     modules::get_device_profiles(&account_id)
 }
 
 #[tauri::command]
-pub async fn bind_device_profile(account_id: String, mode: String) -> Result<models::DeviceProfile, String> {
+pub async fn bind_device_profile(
+    account_id: String,
+    mode: String,
+) -> Result<models::DeviceProfile, String> {
     modules::bind_device_profile(&account_id, &mode)
 }
 
 #[tauri::command]
-pub async fn list_device_versions(account_id: String) -> Result<modules::account::DeviceProfiles, String> {
+pub async fn list_device_versions(
+    account_id: String,
+) -> Result<modules::account::DeviceProfiles, String> {
     modules::list_device_versions(&account_id)
 }
 
 #[tauri::command]
-pub async fn restore_device_version(account_id: String, version_id: String) -> Result<models::DeviceProfile, String> {
+pub async fn restore_device_version(
+    account_id: String,
+    version_id: String,
+) -> Result<models::DeviceProfile, String> {
     modules::restore_device_version(&account_id, &version_id)
 }
 
@@ -37,7 +47,10 @@ pub async fn open_device_folder() -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn bind_device_profile_with_profile(account_id: String, profile: models::DeviceProfile) -> Result<models::DeviceProfile, String> {
+pub async fn bind_device_profile_with_profile(
+    account_id: String,
+    profile: models::DeviceProfile,
+) -> Result<models::DeviceProfile, String> {
     modules::bind_device_profile_with_profile(&account_id, profile)
 }
 
@@ -57,22 +70,29 @@ pub async fn preview_current_profile() -> Result<models::DeviceProfile, String> 
 // ==================== 指纹管理命令 ====================
 
 #[tauri::command]
-pub async fn list_fingerprints() -> Result<Vec<modules::fingerprint::FingerprintWithStats>, String> {
+pub async fn list_fingerprints() -> Result<Vec<modules::fingerprint::FingerprintWithStats>, String>
+{
     modules::fingerprint::list_fingerprints_with_stats()
 }
 
 #[tauri::command]
-pub async fn get_fingerprint(fingerprint_id: String) -> Result<modules::fingerprint::Fingerprint, String> {
+pub async fn get_fingerprint(
+    fingerprint_id: String,
+) -> Result<modules::fingerprint::Fingerprint, String> {
     modules::fingerprint::get_fingerprint(&fingerprint_id)
 }
 
 #[tauri::command]
-pub async fn generate_new_fingerprint(name: String) -> Result<modules::fingerprint::Fingerprint, String> {
+pub async fn generate_new_fingerprint(
+    name: String,
+) -> Result<modules::fingerprint::Fingerprint, String> {
     modules::fingerprint::generate_fingerprint(name)
 }
 
 #[tauri::command]
-pub async fn capture_current_fingerprint(name: String) -> Result<modules::fingerprint::Fingerprint, String> {
+pub async fn capture_current_fingerprint(
+    name: String,
+) -> Result<modules::fingerprint::Fingerprint, String> {
     modules::fingerprint::capture_fingerprint(name)
 }
 

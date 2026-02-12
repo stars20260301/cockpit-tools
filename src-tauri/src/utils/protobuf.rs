@@ -132,7 +132,7 @@ pub fn extract_refresh_token(data: &[u8]) -> Option<String> {
         let (tag, new_offset) = read_varint(data, offset).ok()?;
         let wire_type = (tag & 7) as u8;
         let field_num = (tag >> 3) as u32;
-        
+
         if field_num == 6 && wire_type == 2 {
             // 找到 Field 6，读取其长度和内容
             let (length, content_offset) = read_varint(data, new_offset).ok()?;
@@ -141,14 +141,14 @@ pub fn extract_refresh_token(data: &[u8]) -> Option<String> {
                 return None;
             }
             let oauth_data = &data[content_offset..content_offset + length];
-            
+
             // 在 OAuthTokenInfo 中找 Field 3 (refresh_token)
             return extract_string_field(oauth_data, 3);
         }
-        
+
         offset = skip_field(data, new_offset, wire_type).ok()?;
     }
-    
+
     None
 }
 
@@ -159,7 +159,7 @@ fn extract_string_field(data: &[u8], target_field: u32) -> Option<String> {
         let (tag, new_offset) = read_varint(data, offset).ok()?;
         let wire_type = (tag & 7) as u8;
         let field_num = (tag >> 3) as u32;
-        
+
         if field_num == target_field && wire_type == 2 {
             let (length, content_offset) = read_varint(data, new_offset).ok()?;
             let length = length as usize;
@@ -169,9 +169,9 @@ fn extract_string_field(data: &[u8], target_field: u32) -> Option<String> {
             let value = &data[content_offset..content_offset + length];
             return String::from_utf8(value.to_vec()).ok();
         }
-        
+
         offset = skip_field(data, new_offset, wire_type).ok()?;
     }
-    
+
     None
 }

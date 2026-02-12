@@ -1,15 +1,17 @@
-use tauri::AppHandle;
 use crate::models;
 use crate::modules;
+use tauri::AppHandle;
 
 #[tauri::command]
 pub async fn start_oauth_login(app_handle: AppHandle) -> Result<models::Account, String> {
     modules::logger::log_info("开始 OAuth 授权流程...");
 
-    let token_res = modules::oauth_server::start_oauth_flow(app_handle.clone()).await.map_err(|e| {
-        modules::logger::log_error(&format!("OAuth 流程失败: {}", e));
-        e
-    })?;
+    let token_res = modules::oauth_server::start_oauth_flow(app_handle.clone())
+        .await
+        .map_err(|e| {
+            modules::logger::log_error(&format!("OAuth 流程失败: {}", e));
+            e
+        })?;
 
     modules::logger::log_info("OAuth 授权成功，检查 refresh_token...");
 
@@ -19,18 +21,25 @@ pub async fn start_oauth_login(app_handle: AppHandle) -> Result<models::Account,
          解决方案：\n\
          1. 访问 https://myaccount.google.com/permissions\n\
          2. 撤销 'Antigravity Tools' 的访问权限\n\
-         3. 重新进行 OAuth 授权".to_string();
+         3. 重新进行 OAuth 授权"
+            .to_string();
         modules::logger::log_error(&msg);
         msg
     })?;
 
     modules::logger::log_info("获取用户信息...");
-    let user_info = modules::oauth::get_user_info(&token_res.access_token).await.map_err(|e| {
-        modules::logger::log_error(&format!("获取用户信息失败: {}", e));
-        e
-    })?;
+    let user_info = modules::oauth::get_user_info(&token_res.access_token)
+        .await
+        .map_err(|e| {
+            modules::logger::log_error(&format!("获取用户信息失败: {}", e));
+            e
+        })?;
 
-    modules::logger::log_info(&format!("用户: {} ({})", user_info.email, user_info.name.as_deref().unwrap_or("无名称")));
+    modules::logger::log_info(&format!(
+        "用户: {} ({})",
+        user_info.email,
+        user_info.name.as_deref().unwrap_or("无名称")
+    ));
 
     let token_data = models::TokenData::new(
         token_res.access_token,
@@ -45,16 +54,17 @@ pub async fn start_oauth_login(app_handle: AppHandle) -> Result<models::Account,
         user_info.email.clone(),
         user_info.get_display_name(),
         token_data,
-    ).map_err(|e| {
+    )
+    .map_err(|e| {
         modules::logger::log_error(&format!("保存账号失败: {}", e));
         e
     })?;
 
     modules::logger::log_info(&format!("账号添加成功: {}", account.email));
-    
+
     // 广播数据变更通知
     modules::websocket::broadcast_data_changed("oauth_login");
-    
+
     Ok(account)
 }
 
@@ -62,10 +72,12 @@ pub async fn start_oauth_login(app_handle: AppHandle) -> Result<models::Account,
 pub async fn complete_oauth_login(app_handle: AppHandle) -> Result<models::Account, String> {
     modules::logger::log_info("完成 OAuth 授权流程...");
 
-    let token_res = modules::oauth_server::complete_oauth_flow(app_handle.clone()).await.map_err(|e| {
-        modules::logger::log_error(&format!("OAuth 流程失败: {}", e));
-        e
-    })?;
+    let token_res = modules::oauth_server::complete_oauth_flow(app_handle.clone())
+        .await
+        .map_err(|e| {
+            modules::logger::log_error(&format!("OAuth 流程失败: {}", e));
+            e
+        })?;
 
     modules::logger::log_info("OAuth 授权成功，检查 refresh_token...");
 
@@ -75,18 +87,25 @@ pub async fn complete_oauth_login(app_handle: AppHandle) -> Result<models::Accou
          解决方案：\n\
          1. 访问 https://myaccount.google.com/permissions\n\
          2. 撤销 'Antigravity Tools' 的访问权限\n\
-         3. 重新进行 OAuth 授权".to_string();
+         3. 重新进行 OAuth 授权"
+            .to_string();
         modules::logger::log_error(&msg);
         msg
     })?;
 
     modules::logger::log_info("获取用户信息...");
-    let user_info = modules::oauth::get_user_info(&token_res.access_token).await.map_err(|e| {
-        modules::logger::log_error(&format!("获取用户信息失败: {}", e));
-        e
-    })?;
+    let user_info = modules::oauth::get_user_info(&token_res.access_token)
+        .await
+        .map_err(|e| {
+            modules::logger::log_error(&format!("获取用户信息失败: {}", e));
+            e
+        })?;
 
-    modules::logger::log_info(&format!("用户: {} ({})", user_info.email, user_info.name.as_deref().unwrap_or("无名称")));
+    modules::logger::log_info(&format!(
+        "用户: {} ({})",
+        user_info.email,
+        user_info.name.as_deref().unwrap_or("无名称")
+    ));
 
     let token_data = models::TokenData::new(
         token_res.access_token,
@@ -101,7 +120,8 @@ pub async fn complete_oauth_login(app_handle: AppHandle) -> Result<models::Accou
         user_info.email.clone(),
         user_info.get_display_name(),
         token_data,
-    ).map_err(|e| {
+    )
+    .map_err(|e| {
         modules::logger::log_error(&format!("保存账号失败: {}", e));
         e
     })?;

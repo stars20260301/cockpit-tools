@@ -79,9 +79,10 @@ fn find_available_port() -> Result<u16, String> {
             drop(listener);
             Ok(OAUTH_CALLBACK_PORT)
         }
-        Err(e) if e.kind() == ErrorKind::AddrInUse => {
-            Err(format!("{}:{}", OAUTH_PORT_IN_USE_CODE, OAUTH_CALLBACK_PORT))
-        }
+        Err(e) if e.kind() == ErrorKind::AddrInUse => Err(format!(
+            "{}:{}",
+            OAUTH_PORT_IN_USE_CODE, OAUTH_CALLBACK_PORT
+        )),
         Err(e) => Err(format!("无法绑定端口 {}: {}", OAUTH_CALLBACK_PORT, e)),
     }
 }
@@ -137,14 +138,17 @@ fn to_start_response(state: &OAuthState) -> CodexOAuthLoginStartResponse {
 
 fn clear_oauth_state_if_matches(expected_state: &str, expected_login_id: &str) {
     let mut oauth_state = OAUTH_STATE.lock().unwrap();
-    if oauth_state.as_ref().is_some_and(|s| {
-        s.state == expected_state && s.login_id == expected_login_id
-    }) {
+    if oauth_state
+        .as_ref()
+        .is_some_and(|s| s.state == expected_state && s.login_id == expected_login_id)
+    {
         *oauth_state = None;
     }
 }
 
-pub async fn start_oauth_login(app_handle: AppHandle) -> Result<CodexOAuthLoginStartResponse, String> {
+pub async fn start_oauth_login(
+    app_handle: AppHandle,
+) -> Result<CodexOAuthLoginStartResponse, String> {
     {
         let oauth_state = OAUTH_STATE.lock().unwrap();
         if let Some(state) = oauth_state.as_ref() {
@@ -184,8 +188,14 @@ pub async fn start_oauth_login(app_handle: AppHandle) -> Result<CodexOAuthLoginS
     let expected_login_id = login_id.clone();
     let callback_url = redirect_uri.clone();
     tokio::spawn(async move {
-        if let Err(e) =
-            start_callback_server(port, expected_state, expected_login_id, callback_url, app_handle_clone).await
+        if let Err(e) = start_callback_server(
+            port,
+            expected_state,
+            expected_login_id,
+            callback_url,
+            app_handle_clone,
+        )
+        .await
         {
             logger::log_error(&format!("OAuth 回调服务器错误: {}", e));
         }
@@ -208,8 +218,8 @@ async fn start_callback_server(
 ) -> Result<(), String> {
     use tiny_http::{Response, Server};
 
-    let server =
-        Server::http(format!("127.0.0.1:{}", port)).map_err(|e| format!("启动服务器失败: {}", e))?;
+    let server = Server::http(format!("127.0.0.1:{}", port))
+        .map_err(|e| format!("启动服务器失败: {}", e))?;
     let timeout = std::time::Duration::from_secs(300);
 
     logger::log_info(&format!(
@@ -226,9 +236,7 @@ async fn start_callback_server(
         let should_stop = {
             let oauth_state = OAUTH_STATE.lock().unwrap();
             match oauth_state.as_ref() {
-                Some(state) => {
-                    state.state != expected_state || state.login_id != expected_login_id
-                }
+                Some(state) => state.state != expected_state || state.login_id != expected_login_id,
                 None => true,
             }
         };
@@ -286,7 +294,8 @@ async fn start_callback_server(
                     logger::log_warn(&format!(
                         "Codex OAuth 回调缺少 code: login_id={}, params={}",
                         expected_login_id,
-                        serde_json::to_string(&params).unwrap_or_else(|_| "<serialize_failed>".to_string())
+                        serde_json::to_string(&params)
+                            .unwrap_or_else(|_| "<serialize_failed>".to_string())
                     ));
                     let response = Response::from_string("Missing code").with_status_code(400);
                     let _ = request.respond(response);
@@ -492,7 +501,10 @@ pub async fn complete_oauth_login(login_id: &str) -> Result<CodexTokens, String>
             return Err("OAuth loginId 不匹配".to_string());
         }
 
-        let code = state.code.clone().ok_or("授权尚未完成，请先在浏览器中授权")?;
+        let code = state
+            .code
+            .clone()
+            .ok_or("授权尚未完成，请先在浏览器中授权")?;
         logger::log_info(&format!(
             "Codex OAuth 准备完成登录: attempt_id={}, login_id={}",
             attempt_id, login_id
@@ -543,8 +555,7 @@ pub fn cancel_oauth_flow_for(login_id: Option<&str>) -> Result<(), String> {
         };
         logger::log_info(&format!(
             "Codex OAuth 收到取消请求: current_login_id={}, current_port={}",
-            current.login_id,
-            current.port,
+            current.login_id, current.port,
         ));
 
         if let Some(login_id) = login_id {

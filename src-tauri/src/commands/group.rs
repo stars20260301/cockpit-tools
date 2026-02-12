@@ -23,7 +23,7 @@ pub fn save_group_settings(
     settings.group_order = groupOrder;
     settings.updated_at = chrono::Utc::now().timestamp_millis();
     settings.updated_by = group_settings::ConfigSource::Desktop;
-    
+
     group_settings::update_group_settings(settings)
 }
 
@@ -76,7 +76,7 @@ pub fn update_group_order(order: Vec<String>) -> Result<(), String> {
 pub fn get_display_groups() -> Result<Vec<DisplayGroup>, String> {
     let settings = group_settings::load_group_settings();
     let group_ids = settings.get_ordered_groups(Some(4));
-    
+
     let groups: Vec<DisplayGroup> = group_ids
         .iter()
         .map(|gid| {
@@ -88,7 +88,7 @@ pub fn get_display_groups() -> Result<Vec<DisplayGroup>, String> {
             }
         })
         .collect();
-    
+
     Ok(groups)
 }
 

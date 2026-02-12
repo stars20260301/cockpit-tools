@@ -38,9 +38,13 @@ impl Serialize for AppError {
         S: serde::Serializer,
     {
         use serde::ser::SerializeMap;
-        
+
         match self {
-            AppError::FileCorrupted { file_name, file_path, original_error } => {
+            AppError::FileCorrupted {
+                file_name,
+                file_path,
+                original_error,
+            } => {
                 let mut map = serializer.serialize_map(Some(4))?;
                 map.serialize_entry("error_type", "file_corrupted")?;
                 map.serialize_entry("file_name", file_name)?;
@@ -60,7 +64,8 @@ pub fn file_corrupted_error(file_name: &str, file_path: &str, original_error: &s
         "file_name": file_name,
         "file_path": file_path,
         "original_error": original_error
-    }).to_string()
+    })
+    .to_string()
 }
 
 pub type AppResult<T> = Result<T, AppError>;

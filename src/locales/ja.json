@@ -31,7 +31,9 @@
     "codex": "Codex アカウント",
     "dashboard": "ダッシュボード",
     "instances": "マルチインスタンス",
-    "githubCopilot": "GitHub Copilot"
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
+    "morePlatforms": "その他のプラットフォーム"
   },
   "settings": {
     "title": "アプリ設定",
@@ -93,7 +95,21 @@
       "vscodePathSelect": "選択",
       "vscodePathReset": "既定に戻す",
       "antigravityAppPath": "Antigravity アプリのパス",
-      "antigravityTitle": "Antigravity 起動"
+      "antigravityTitle": "Antigravity 起動",
+      "commonTitle": "共通",
+      "antigravitySettingsTitle": "Antigravity 設定",
+      "codexSettingsTitle": "Codex 設定",
+      "githubCopilotSettingsTitle": "GitHub Copilot 設定",
+      "ghcpAutoRefresh": "GitHub Copilot クォータの自動更新",
+      "ghcpAutoRefreshDesc": "バックグラウンド更新頻度",
+      "windsurfSettingsTitle": "Windsurf 設定",
+      "windsurfAutoRefresh": "Windsurf 自動更新クォータ",
+      "windsurfAutoRefreshDesc": "バックグラウンドでの更新頻度",
+      "windsurfAppPath": "Windsurf アプリのパス",
+      "windsurfAppPathDesc": "空欄の場合は既定のパスを使用します",
+      "windsurfAppPathPlaceholder": "既定のパス",
+      "windsurfPathSelect": "選択",
+      "windsurfPathReset": "既定に戻す"
     },
     "network": {
       "apiTitle": "Antigravity Cockpit API",
@@ -154,7 +170,7 @@
       "actions": "操作"
     },
     "status": {
-      "current": "使用中",
+      "current": "現在",
       "disabled": "無効",
       "authInvalid": "Invalid credentials",
       "refreshFailed": "Refresh failed",
@@ -767,6 +783,15 @@
           "commandWin": "Windows: taskkill /F /PID <pid> (CODEX_HOME に一致するもの)"
         }
       }
+    },
+    "refreshSuccess": "クォータを更新しました",
+    "refreshFailed": "クォータの更新に失敗しました: {{error}}",
+    "refreshAllSuccess": "更新完了、{{count}} アカウント成功",
+    "refreshAllPartialFailed": "更新完了、{{success}} / {{total}} アカウント成功、一部失敗",
+    "quotaError": {
+      "badge": "クォータエラー",
+      "generic": "クォータの更新に失敗しました。後でもう一度お試しください",
+      "deactivatedWorkspace": "ワークスペースが無効です。アカウントを切り替えるか再認証してください"
     }
   },
   "dashboard": {
@@ -846,7 +871,8 @@
       "openFolder": "フォルダーを開く",
       "edit": "編集",
       "openRootDir": "フォルダーを開く",
-      "selectPath": "フォルダーを選択"
+      "selectPath": "フォルダーを選択",
+      "openWindow": "ウィンドウを開く"
     },
     "bulkConfirm": {
       "startAll": "停止中のすべてのインスタンスを開始しますか？",
@@ -1115,10 +1141,208 @@
     "export": "エクスポート",
     "flowNotice": {
       "title": "GitHub Copilot アカウントガイド（クリックで展開/折りたたみ）",
-      "desc": "現在の流れ: 新しいアカウントを認可 -> クォータを取得して表示 -> マルチインスタンス画面でアカウントを紐付け。",
-      "reason": "ワンクリックでアカウント切り替えができない理由: VS Code のログイン状態は GitHub セッションと拡張機能の SecretStorage で管理されており、外部アプリからこれらの認証情報を置き換えることはできません。",
-      "storage": "ログイン関連データの保存先: 主に VS Code の SecretStorage（システムのキーチェーン/資格情報マネージャー）とグローバル状態データベース（例: ~/Library/Application Support/Code/User/globalStorage/state.vscdb）。",
-      "alternative": "代替案: マルチインスタンス分離（異なる --user-data-dir）を利用します。インスタンスごとに一度ログインすれば、以後はインスタンス単位で起動して目的のアカウント環境へ素早く切り替えられます。"
+      "desc": "アカウント切り替えでは、VS Code のローカル認証ストレージを読み取り、システムの資格情報サービスを使って復号・再書き込みを行う必要があります。データは端末内のみで処理されます。",
+      "reason": "必要な権限: VS Code 認証データベース（state.vscdb）を読み取り、システム暗号化機能（Windows DPAPI / macOS Keychain / Linux Secret Service）を呼び出して復号・再書き込みを行います。",
+      "storage": "読み取り範囲: GitHub ログインセッション関連データのみを処理し、すべての処理はローカルで実行されます。",
+      "alternative": "代替案: マルチインスタンス分離（異なる --user-data-dir）を利用します。インスタンスごとに一度ログインすれば、以後はインスタンス単位で起動して目的のアカウント環境へ素早く切り替えられます。",
+      "inject": "ワンクリック切り替え: このツールはローカルの VS Code 暗号化情報（DPAPI/Keychain/Secret Service）を読み取り、state.vscdb 内の認証セッションを復号して GitHub Copilot トークンを置き換え、再暗号化します。処理はすべて端末内で完結します。"
+    },
+    "injectToVSCode": "VS Codeに切り替え",
+    "injecting": "注入中...",
+    "injectSuccess": "トークンをVS Codeに正常に注入しました。VS Codeを起動しています。",
+    "injectRequireClose": "注入する前にVS Codeを閉じてください。"
+  },
+  "quickSettings": {
+    "antigravity": {
+      "title": "Antigravity 設定",
+      "appPath": "アプリパス"
+    },
+    "codex": {
+      "title": "Codex 設定",
+      "appPath": "アプリパス"
+    },
+    "githubCopilot": {
+      "title": "GitHub Copilot 設定",
+      "appPath": "VS Code パス"
+    },
+    "refreshInterval": "クォータ自動更新",
+    "codexRefreshInterval": "クォータ自動更新",
+    "ghcpRefreshInterval": "クォータ自動更新",
+    "autoSwitch": {
+      "title": "自動切替",
+      "enable": "自動切替",
+      "threshold": "切替閾値",
+      "thresholdDesc": "任意のモデルのクォータがこのパーセンテージを下回ると自動切替がトリガーされます",
+      "hint": "任意のモデルのクォータが閾値を下回ると、最もクォータの多いアカウントに自動的に切り替えます。"
+    },
+    "customInput": "カスタム",
+    "apply": "適用",
+    "inputMinutes": "分数を入力",
+    "inputPercent": "パーセントを入力",
+    "windsurf": {
+      "title": "Windsurf 設定",
+      "appPath": "Windsurf パス"
+    },
+    "windsurfRefreshInterval": "クォータ自動更新"
+  },
+  "privacy": {
+    "hideSensitive": "メールを隠す",
+    "showSensitive": "メールを表示"
+  },
+  "windsurf": {
+    "title": "Windsurf アカウント管理",
+    "subtitle": "Windsurf アカウントを管理します",
+    "overview": {
+      "title": "アカウント概要"
+    },
+    "instances": {
+      "title": "マルチインスタンス",
+      "subtitle": "インスタンスごとの独立設定、複数アカウントでの並列運用。",
+      "unsupported": {
+        "title": "このシステムでは非対応",
+        "desc": "Windsurfマルチインスタンスは現在macOSでのみ利用可能です。"
+      },
+      "quota": {
+        "inline": "Inline Suggestions",
+        "chat": "Chat messages"
+      }
+    },
+    "addAccount": "アカウントを追加",
+    "refreshAll": "すべて更新",
+    "refreshQuota": "クォータ更新",
+    "empty": {
+      "title": "アカウントなし",
+      "description": "「アカウントを追加」から Windsurf アカウントを管理できます"
+    },
+    "noMatch": {
+      "title": "一致するアカウントなし",
+      "desc": "検索条件を変更してください"
+    },
+    "addModal": {
+      "title": "Windsurf アカウントを追加",
+      "oauth": "OAuth ログイン",
+      "token": "JSON インポート",
+      "import": "ローカルインポート"
+    },
+    "oauth": {
+      "desc": "下のボタンをクリックし、ブラウザで Windsurf の認可を完了してください。",
+      "preparing": "認可リンクを準備中...",
+      "openBrowser": "ブラウザで開く",
+      "hint": "認可完了後、このウィンドウは自動更新されます",
+      "success": "認可成功",
+      "failed": "認可失敗",
+      "retry": "認可情報を再生成",
+      "timeoutRetry": "認可リンクを更新",
+      "waiting": "認可待ち...",
+      "meta": "有効期限: {{expires}}s; ポーリング間隔: {{interval}}s"
+    },
+    "token": {
+      "desc": "Windsurf のアクセストークン、またはエクスポートした JSON データを貼り付けてください。",
+      "placeholder": "JSON を貼り付け...",
+      "import": "インポート",
+      "importing": "インポート中...",
+      "importSuccessMsg": "{{count}} 件のアカウントをインポートしました",
+      "importFailedMsg": "インポート失敗: {{error}}",
+      "empty": "Token または JSON を入力してください"
+    },
+    "import": {
+      "label": "インポート",
+      "localDesc": "ローカルでログイン済みのセッションから Windsurf アカウントをインポート。",
+      "localClient": "ローカル Windsurf からインポート",
+      "orJson": "または JSON ファイルからインポート",
+      "importing": "ローカルアカウントをインポート中...",
+      "failedMsg": "インポート失敗: {{error}}",
+      "pickFile": "インポートする JSON ファイルを選択"
+    },
+    "quota": {
+      "hourly": "5 時間クォータ",
+      "weekly": "週次クォータ",
+      "noData": "クォータデータなし",
+      "resetDone": "リセット済み"
+    },
+    "credits": {
+      "title": "プラン",
+      "renewMonthly": "クレジットは毎月更新されます",
+      "planEndsIn": "{{days}} 日後にサイクルがリセットされます",
+      "planEndsUnknown": "サイクル時刻は利用できません",
+      "periodRange": "サイクル: {{start}} - {{end}}",
+      "periodEndOnly": "サイクル終了: {{end}}",
+      "left": "残り {{count}} クレジット",
+      "leftUnknown": "残りクレジット -",
+      "promptLeft": "残り {{remaining}}/{{total}} プロンプトクレジット",
+      "promptLeftNoTotal": "残り {{remaining}} プロンプトクレジット",
+      "promptLeftUnknown": "残りプロンプトクレジット -",
+      "addOnAvailable": "追加クレジット {{count}} が利用可能",
+      "usedLine": "{{used}} / {{total}} 使用済み",
+      "leftInline": "残り {{left}}"
+    },
+    "usage": {
+      "resetUnknown": "利用枠のリセットまで -",
+      "resetLine": "利用枠は{{dateText}}にリセットされます。"
+    },
+    "time": {
+      "relativeDays": "{{days}}日",
+      "relativeDaysHours": "{{days}}日{{hours}}時間",
+      "relativeHours": "{{hours}}時間",
+      "relativeHoursMinutes": "{{hours}}時間{{minutes}}分",
+      "relativeMinutes": "{{minutes}}分",
+      "lessThanMinute": "<1分",
+      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+    },
+    "search": "アカウントを検索...",
+    "view": {
+      "list": "リスト表示",
+      "grid": "カード表示"
+    },
+    "filter": {
+      "all": "すべて ({{count}})",
+      "free": "FREE ({{count}})",
+      "individual": "INDIVIDUAL ({{count}})",
+      "pro": "PRO ({{count}})",
+      "business": "BUSINESS ({{count}})",
+      "enterprise": "ENTERPRISE ({{count}})"
+    },
+    "filterLabel": "フィルター",
+    "sortLabel": "並べ替え",
+    "sort": {
+      "createdAt": "作成日時",
+      "credits": "残りクレジット順",
+      "planEnd": "サイクル終了時刻順",
+      "descTooltip": "降順（クリックで昇順へ）",
+      "ascTooltip": "昇順（クリックで降順へ）",
+      "toggleDirection": "順序を切り替え"
+    },
+    "columns": {
+      "email": "メール",
+      "plan": "タグ",
+      "promptCredits": "プロンプトクレジット",
+      "addOnPromptCredits": "追加プロンプトクレジット",
+      "credits": "クレジット",
+      "actions": "操作"
+    },
+    "export": "エクスポート",
+    "injectToVSCode": "Windsurfに切り替え",
+    "injecting": "注入中...",
+    "injectSuccess": "切り替えが完了しました。Windsurf を起動しています。",
+    "injectRequireClose": "切り替える前に Windsurf を閉じてください。",
+    "flowNotice": {
+      "title": "Windsurf アカウントガイド（クリックで展開/折りたたみ）",
+      "desc": "アカウント切り替えでは、Windsurf のローカル認証ストレージを読み取り、システムの資格情報サービスを使って復号・再書き込みを行う必要があります。データは端末内のみで処理されます。",
+      "inject": "ワンクリック切り替え: このツールはローカルの Windsurf 暗号化情報（DPAPI/Keychain/Secret Service）を読み取り、state.vscdb 内の認証セッションを復号して Windsurf トークンを置き換え、再暗号化します。処理はすべて端末内で完結します。",
+      "alternative": "代替案: マルチインスタンス分離（異なる --user-data-dir）を利用します。インスタンスごとに一度ログインすれば、以後はインスタンス単位で起動して目的のアカウント環境へ素早く切り替えられます。",
+      "reason": "必要な権限: Windsurf 認証データベース（state.vscdb）を読み取り、システム暗号化機能（Windows DPAPI / macOS Keychain / Linux Secret Service）を呼び出して復号・再書き込みを行います。",
+      "storage": "読み取り範囲: Windsurf ログインセッション関連データのみを処理し、すべての処理はローカルで実行されます。"
     }
+  },
+  "platformLayout": {
+    "title": "プラットフォームレイアウト",
+    "sidebarSelected": "サイドバーで選択済み {{count}}/{{max}}",
+    "reset": "デフォルトにリセット",
+    "tip": "ドラッグして並び替え。サイドバーには最大2つまで表示できます。1つだけ選択した場合は1つだけ表示されます。",
+    "sidebarToggle": "サイドバーに表示",
+    "dashboardToggle": "ダッシュボードに表示",
+    "hiddenBadge": "非表示",
+    "openFromMore": "プラットフォームレイアウトを管理",
+    "dragHandleLabel": "ドラッグして並び替え"
   }
 }

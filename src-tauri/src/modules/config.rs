@@ -55,6 +55,12 @@ pub struct UserConfig {
     /// Codex 自动刷新间隔（分钟），-1 表示禁用
     #[serde(default = "default_codex_auto_refresh")]
     pub codex_auto_refresh_minutes: i32,
+    /// GitHub Copilot 自动刷新间隔（分钟），-1 表示禁用
+    #[serde(default = "default_ghcp_auto_refresh")]
+    pub ghcp_auto_refresh_minutes: i32,
+    /// Windsurf 自动刷新间隔（分钟），-1 表示禁用
+    #[serde(default = "default_windsurf_auto_refresh")]
+    pub windsurf_auto_refresh_minutes: i32,
     /// 窗口关闭行为
     #[serde(default = "default_close_behavior")]
     pub close_behavior: CloseWindowBehavior,
@@ -70,9 +76,18 @@ pub struct UserConfig {
     /// VS Code 启动路径（为空则使用默认路径）
     #[serde(default = "default_vscode_app_path")]
     pub vscode_app_path: String,
+    /// Windsurf 启动路径（为空则使用默认路径）
+    #[serde(default = "default_windsurf_app_path")]
+    pub windsurf_app_path: String,
     /// 切换 Codex 时是否自动重启 OpenCode
     #[serde(default = "default_opencode_sync_on_switch")]
     pub opencode_sync_on_switch: bool,
+    /// 是否启用自动切号
+    #[serde(default = "default_auto_switch_enabled")]
+    pub auto_switch_enabled: bool,
+    /// 自动切号阈值（百分比），任意模型配额低于此值触发
+    #[serde(default = "default_auto_switch_threshold")]
+    pub auto_switch_threshold: i32,
 }
 
 /// 窗口关闭行为
@@ -93,18 +108,57 @@ impl Default for CloseWindowBehavior {
     }
 }
 
-fn default_ws_enabled() -> bool { true }
-fn default_ws_port() -> u16 { DEFAULT_WS_PORT }
-fn default_language() -> String { "zh-cn".to_string() }
-fn default_theme() -> String { "system".to_string() }
-fn default_auto_refresh() -> i32 { 10 } // 默认 10 分钟
-fn default_codex_auto_refresh() -> i32 { 10 } // 默认 10 分钟
-fn default_close_behavior() -> CloseWindowBehavior { CloseWindowBehavior::Ask }
-fn default_opencode_app_path() -> String { String::new() }
-fn default_antigravity_app_path() -> String { String::new() }
-fn default_codex_app_path() -> String { String::new() }
-fn default_vscode_app_path() -> String { String::new() }
-fn default_opencode_sync_on_switch() -> bool { true }
+fn default_ws_enabled() -> bool {
+    true
+}
+fn default_ws_port() -> u16 {
+    DEFAULT_WS_PORT
+}
+fn default_language() -> String {
+    "zh-cn".to_string()
+}
+fn default_theme() -> String {
+    "system".to_string()
+}
+fn default_auto_refresh() -> i32 {
+    10
+} // 默认 10 分钟
+fn default_codex_auto_refresh() -> i32 {
+    10
+} // 默认 10 分钟
+fn default_ghcp_auto_refresh() -> i32 {
+    10
+} // 默认 10 分钟
+fn default_windsurf_auto_refresh() -> i32 {
+    10
+} // 默认 10 分钟
+fn default_close_behavior() -> CloseWindowBehavior {
+    CloseWindowBehavior::Ask
+}
+fn default_opencode_app_path() -> String {
+    String::new()
+}
+fn default_antigravity_app_path() -> String {
+    String::new()
+}
+fn default_codex_app_path() -> String {
+    String::new()
+}
+fn default_vscode_app_path() -> String {
+    String::new()
+}
+fn default_windsurf_app_path() -> String {
+    String::new()
+}
+fn default_opencode_sync_on_switch() -> bool {
+    true
+}
+fn default_auto_switch_enabled() -> bool {
+    false
+}
+fn default_auto_switch_threshold() -> i32 {
+    5
+}
 
 impl Default for UserConfig {
     fn default() -> Self {
@@ -115,12 +169,17 @@ impl Default for UserConfig {
             theme: default_theme(),
             auto_refresh_minutes: default_auto_refresh(),
             codex_auto_refresh_minutes: default_codex_auto_refresh(),
+            ghcp_auto_refresh_minutes: default_ghcp_auto_refresh(),
+            windsurf_auto_refresh_minutes: default_windsurf_auto_refresh(),
             close_behavior: default_close_behavior(),
             opencode_app_path: default_opencode_app_path(),
             antigravity_app_path: default_antigravity_app_path(),
             codex_app_path: default_codex_app_path(),
             vscode_app_path: default_vscode_app_path(),
+            windsurf_app_path: default_windsurf_app_path(),
             opencode_sync_on_switch: default_opencode_sync_on_switch(),
+            auto_switch_enabled: default_auto_switch_enabled(),
+            auto_switch_threshold: default_auto_switch_threshold(),
         }
     }
 }
@@ -174,45 +233,42 @@ pub fn get_user_config_path() -> Result<PathBuf, String> {
 /// 加载用户配置
 pub fn load_user_config() -> Result<UserConfig, String> {
     let config_path = get_user_config_path()?;
-    
+
     if !config_path.exists() {
         return Ok(UserConfig::default());
     }
-    
-    let content = fs::read_to_string(&config_path)
-        .map_err(|e| format!("读取配置文件失败: {}", e))?;
-    
-    serde_json::from_str(&content)
-        .map_err(|e| format!("解析配置文件失败: {}", e))
+
+    let content =
+        fs::read_to_string(&config_path).map_err(|e| format!("读取配置文件失败: {}", e))?;
+
+    serde_json::from_str(&content).map_err(|e| format!("解析配置文件失败: {}", e))
 }
 
 /// 保存用户配置
 pub fn save_user_config(config: &UserConfig) -> Result<(), String> {
     let config_path = get_user_config_path()?;
     let data_dir = get_data_dir()?;
-    
+
     // 确保目录存在
     if !data_dir.exists() {
-        fs::create_dir_all(&data_dir)
-            .map_err(|e| format!("创建配置目录失败: {}", e))?;
+        fs::create_dir_all(&data_dir).map_err(|e| format!("创建配置目录失败: {}", e))?;
     }
-    
-    let json = serde_json::to_string_pretty(config)
-        .map_err(|e| format!("序列化配置失败: {}", e))?;
-    
-    fs::write(&config_path, json)
-        .map_err(|e| format!("写入配置文件失败: {}", e))?;
-    
+
+    let json =
+        serde_json::to_string_pretty(config).map_err(|e| format!("序列化配置失败: {}", e))?;
+
+    fs::write(&config_path, json).map_err(|e| format!("写入配置文件失败: {}", e))?;
+
     // 更新运行时状态
     if let Ok(mut state) = get_runtime_state().write() {
         state.user_config = config.clone();
     }
-    
+
     crate::modules::logger::log_info(&format!(
         "[Config] 用户配置已保存: ws_enabled={}, ws_port={}",
         config.ws_enabled, config.ws_port
     ));
-    
+
     Ok(())
 }
 
@@ -241,25 +297,23 @@ pub fn get_actual_port() -> Option<u16> {
 pub fn save_server_status(status: &ServerStatus) -> Result<(), String> {
     let status_path = get_server_status_path()?;
     let data_dir = get_data_dir()?;
-    
+
     // 确保目录存在
     if !data_dir.exists() {
-        fs::create_dir_all(&data_dir)
-            .map_err(|e| format!("创建配置目录失败: {}", e))?;
+        fs::create_dir_all(&data_dir).map_err(|e| format!("创建配置目录失败: {}", e))?;
     }
-    
+
     // 写入状态文件
-    let json = serde_json::to_string_pretty(status)
-        .map_err(|e| format!("序列化状态失败: {}", e))?;
-    
-    fs::write(&status_path, json)
-        .map_err(|e| format!("写入状态文件失败: {}", e))?;
-    
+    let json =
+        serde_json::to_string_pretty(status).map_err(|e| format!("序列化状态失败: {}", e))?;
+
+    fs::write(&status_path, json).map_err(|e| format!("写入状态文件失败: {}", e))?;
+
     crate::modules::logger::log_info(&format!(
         "[Config] 服务状态已保存: ws_port={}, pid={}",
         status.ws_port, status.pid
     ));
-    
+
     Ok(())
 }
 
@@ -269,15 +323,15 @@ pub fn init_server_status(actual_port: u16) -> Result<(), String> {
     if let Ok(mut state) = get_runtime_state().write() {
         state.actual_port = Some(actual_port);
     }
-    
+
     let status = ServerStatus {
         ws_port: actual_port,
         version: env!("CARGO_PKG_VERSION").to_string(),
         pid: std::process::id(),
         started_at: chrono::Utc::now().timestamp(),
     };
-    
+
     save_server_status(&status)?;
-    
+
     Ok(())
 }

@@ -1,8 +1,10 @@
+use crate::models::codex::{CodexAccount, CodexQuota, CodexTokens};
+use crate::modules::{
+    codex_account, codex_oauth, codex_quota, config, logger, opencode_auth, process,
+};
 use tauri::AppHandle;
 #[cfg(target_os = "macos")]
 use tauri::Emitter;
-use crate::models::codex::{CodexAccount, CodexQuota, CodexTokens};
-use crate::modules::{codex_account, codex_quota, codex_oauth, config, logger, opencode_auth, process};
 
 /// 列出所有 Codex 账号
 #[tauri::command]
@@ -18,9 +20,12 @@ pub fn get_current_codex_account() -> Result<Option<CodexAccount>, String> {
 
 /// 切换 Codex 账号（包含 token 刷新检查）
 #[tauri::command]
-pub async fn switch_codex_account(app: AppHandle, account_id: String) -> Result<CodexAccount, String> {
+pub async fn switch_codex_account(
+    app: AppHandle,
+    account_id: String,
+) -> Result<CodexAccount, String> {
     let _ = codex_account::prepare_account_for_injection(&account_id).await?;
-    
+
     // 切换账号（写入 auth.json）
     let account = codex_account::switch_account(&account_id)?;
 
@@ -32,7 +37,10 @@ pub async fn switch_codex_account(app: AppHandle, account_id: String) -> Result<
     ) {
         logger::log_warn(&format!("更新 Codex 默认实例绑定账号失败: {}", e));
     } else {
-        logger::log_info(&format!("已同步更新 Codex 默认实例绑定账号: {}", account_id));
+        logger::log_info(&format!(
+            "已同步更新 Codex 默认实例绑定账号: {}",
+            account_id
+        ));
     }
 
     let mut opencode_updated = false;
@@ -55,7 +63,8 @@ pub async fn switch_codex_account(app: AppHandle, account_id: String) -> Result<
             } else {
                 logger::log_info("OpenCode 未在运行，准备启动");
             }
-            if let Err(e) = process::start_opencode_with_path(Some(&user_config.opencode_app_path)) {
+            if let Err(e) = process::start_opencode_with_path(Some(&user_config.opencode_app_path))
+            {
                 logger::log_warn(&format!("OpenCode 启动失败: {}", e));
             }
         } else {
@@ -68,18 +77,11 @@ pub async fn switch_codex_account(app: AppHandle, account_id: String) -> Result<
     #[cfg(target_os = "macos")]
     {
         if process::is_codex_running() {
-            logger::log_info("检测到 Codex 正在运行，正在关闭...");
-            if let Err(e) = process::close_codex(20) {
-                logger::log_warn(&format!("Codex 关闭失败: {}", e));
-            }
+            logger::log_info("检测到 Codex 正在运行，将按默认实例 PID 逻辑重启");
         }
-
-        match process::start_codex_default() {
-            Ok(pid) => {
-                if let Err(e) = crate::modules::codex_instance::update_default_pid(Some(pid)) {
-                    logger::log_warn(&format!("更新 Codex 默认实例 PID 失败: {}", e));
-                }
-            }
+        match crate::commands::codex_instance::codex_start_instance("__default__".to_string()).await
+        {
+            Ok(_) => {}
             Err(e) => {
                 logger::log_warn(&format!("Codex 启动失败: {}", e));
                 if e.starts_with("APP_PATH_NOT_FOUND:") {
@@ -146,7 +148,9 @@ pub async fn refresh_current_codex_quota(app: AppHandle) -> Result<(), String> {
         let _ = crate::modules::tray::update_tray_menu(&app);
         Ok(())
     } else {
-        Err(result.err().unwrap_or_else(|| "刷新 Codex 配额失败".to_string()))
+        Err(result
+            .err()
+            .unwrap_or_else(|| "刷新 Codex 配额失败".to_string()))
     }
 }
 
@@ -284,27 +288,33 @@ pub fn codex_oauth_login_cancel(login_id: Option<String>) -> Result<(), String> 
 
 /// 通过 Token 添加账号
 #[tauri::command]
-pub async fn add_codex_account_with_token(id_token: String, access_token: String, refresh_token: Option<String>) -> Result<CodexAccount, String> {
+pub async fn add_codex_account_with_token(
+    id_token: String,
+    access_token: String,
+    refresh_token: Option<String>,
+) -> Result<CodexAccount, String> {
     let tokens = CodexTokens {
         id_token,
         access_token,
         refresh_token,
     };
-    
+
     let account = codex_account::upsert_account(tokens)?;
-    
+
     // 刷新配额
     if let Err(e) = codex_quota::refresh_account_quota(&account.id).await {
         logger::log_error(&format!("刷新配额失败: {}", e));
     }
-    
-    codex_account::load_account(&account.id)
-        .ok_or_else(|| "账号保存后无法读取".to_string())
+
+    codex_account::load_account(&account.id).ok_or_else(|| "账号保存后无法读取".to_string())
 }
 
 /// 检查 Codex OAuth 端口是否被占用
 #[tauri::command]
-pub async fn update_codex_account_tags(account_id: String, tags: Vec<String>) -> Result<CodexAccount, String> {
+pub async fn update_codex_account_tags(
+    account_id: String,
+    tags: Vec<String>,
+) -> Result<CodexAccount, String> {
     codex_account::update_account_tags(&account_id, tags)
 }
 

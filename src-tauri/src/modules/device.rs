@@ -24,7 +24,8 @@ pub fn get_storage_path() -> Result<PathBuf, String> {
     #[cfg(target_os = "macos")]
     {
         let home = dirs::home_dir().ok_or("无法获取 Home 目录")?;
-        let path = home.join("Library/Application Support/Antigravity/User/globalStorage/storage.json");
+        let path =
+            home.join("Library/Application Support/Antigravity/User/globalStorage/storage.json");
         if path.exists() {
             return Ok(path);
         }
@@ -32,7 +33,8 @@ pub fn get_storage_path() -> Result<PathBuf, String> {
 
     #[cfg(target_os = "windows")]
     {
-        let appdata = std::env::var("APPDATA").map_err(|_| "无法获取 APPDATA 环境变量".to_string())?;
+        let appdata =
+            std::env::var("APPDATA").map_err(|_| "无法获取 APPDATA 环境变量".to_string())?;
         let path = PathBuf::from(appdata).join("Antigravity\\User\\globalStorage\\storage.json");
         if path.exists() {
             return Ok(path);
@@ -75,7 +77,8 @@ fn get_machine_id_path() -> Result<PathBuf, String> {
 
     #[cfg(target_os = "windows")]
     {
-        let appdata = std::env::var("APPDATA").map_err(|_| "无法获取 APPDATA 环境变量".to_string())?;
+        let appdata =
+            std::env::var("APPDATA").map_err(|_| "无法获取 APPDATA 环境变量".to_string())?;
         return Ok(PathBuf::from(appdata).join("Antigravity\\machineid"));
     }
 
@@ -90,8 +93,8 @@ fn get_machine_id_path() -> Result<PathBuf, String> {
 }
 
 fn is_valid_uuid(value: &str) -> bool {
-    use std::sync::LazyLock;
     use regex::Regex;
+    use std::sync::LazyLock;
     static UUID_RE: LazyLock<Regex> = LazyLock::new(|| {
         Regex::new(r"(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$").unwrap()
     });
@@ -143,7 +146,10 @@ fn read_state_service_machine_id_value() -> Option<String> {
 fn sync_state_service_machine_id_value(service_id: &str) -> Result<(), String> {
     let db_path = get_state_db_path()?;
     if !db_path.exists() {
-        logger::log_warn(&format!("state.vscdb 不存在，跳过 serviceMachineId 同步: {:?}", db_path));
+        logger::log_warn(&format!(
+            "state.vscdb 不存在，跳过 serviceMachineId 同步: {:?}",
+            db_path
+        ));
         return Ok(());
     }
 
@@ -151,11 +157,13 @@ fn sync_state_service_machine_id_value(service_id: &str) -> Result<(), String> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS ItemTable (key TEXT PRIMARY KEY, value TEXT);",
         [],
-    ).map_err(|e| format!("创建 ItemTable 失败: {}", e))?;
+    )
+    .map_err(|e| format!("创建 ItemTable 失败: {}", e))?;
     conn.execute(
         "INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('storage.serviceMachineId', ?1);",
         [service_id],
-    ).map_err(|e| format!("写入 storage.serviceMachineId 失败: {}", e))?;
+    )
+    .map_err(|e| format!("写入 storage.serviceMachineId 失败: {}", e))?;
     logger::log_info("已同步 storage.serviceMachineId 至 state.vscdb");
     Ok(())
 }
@@ -199,8 +207,10 @@ pub fn ensure_service_machine_id(profile: &mut DeviceProfile) -> bool {
 
 /// 从 storage.json 读取当前设备指纹
 pub fn read_profile(storage_path: &Path) -> Result<DeviceProfile, String> {
-    let content = fs::read_to_string(storage_path).map_err(|e| format!("读取 storage.json 失败: {}", e))?;
-    let json: Value = serde_json::from_str(&content).map_err(|e| format!("解析 storage.json 失败: {}", e))?;
+    let content =
+        fs::read_to_string(storage_path).map_err(|e| format!("读取 storage.json 失败: {}", e))?;
+    let json: Value =
+        serde_json::from_str(&content).map_err(|e| format!("解析 storage.json 失败: {}", e))?;
 
     let get_field = |key: &str| -> Option<String> {
         if let Some(obj) = json.get("telemetry").and_then(|v| v.as_object()) {
@@ -208,7 +218,10 @@ pub fn read_profile(storage_path: &Path) -> Result<DeviceProfile, String> {
                 return Some(v.to_string());
             }
         }
-        if let Some(v) = json.get(format!("telemetry.{key}")).and_then(|v| v.as_str()) {
+        if let Some(v) = json
+            .get(format!("telemetry.{key}"))
+            .and_then(|v| v.as_str())
+        {
             return Some(v.to_string());
         }
         None
@@ -232,8 +245,10 @@ pub fn write_profile(storage_path: &Path, profile: &DeviceProfile) -> Result<(),
         return Err(format!("storage.json 不存在: {:?}", storage_path));
     }
 
-    let content = fs::read_to_string(storage_path).map_err(|e| format!("读取 storage.json 失败: {}", e))?;
-    let mut json: Value = serde_json::from_str(&content).map_err(|e| format!("解析 storage.json 失败: {}", e))?;
+    let content =
+        fs::read_to_string(storage_path).map_err(|e| format!("读取 storage.json 失败: {}", e))?;
+    let mut json: Value =
+        serde_json::from_str(&content).map_err(|e| format!("解析 storage.json 失败: {}", e))?;
 
     // 确保 telemetry 是对象
     if !json.get("telemetry").map_or(false, |v| v.is_object()) {
@@ -245,18 +260,39 @@ pub fn write_profile(storage_path: &Path, profile: &DeviceProfile) -> Result<(),
     }
 
     if let Some(telemetry) = json.get_mut("telemetry").and_then(|v| v.as_object_mut()) {
-        telemetry.insert("machineId".to_string(), Value::String(profile.machine_id.clone()));
-        telemetry.insert("macMachineId".to_string(), Value::String(profile.mac_machine_id.clone()));
-        telemetry.insert("devDeviceId".to_string(), Value::String(profile.dev_device_id.clone()));
+        telemetry.insert(
+            "machineId".to_string(),
+            Value::String(profile.machine_id.clone()),
+        );
+        telemetry.insert(
+            "macMachineId".to_string(),
+            Value::String(profile.mac_machine_id.clone()),
+        );
+        telemetry.insert(
+            "devDeviceId".to_string(),
+            Value::String(profile.dev_device_id.clone()),
+        );
         telemetry.insert("sqmId".to_string(), Value::String(profile.sqm_id.clone()));
     }
 
     // 同时写入扁平键，兼容旧格式
     if let Some(map) = json.as_object_mut() {
-        map.insert("telemetry.machineId".to_string(), Value::String(profile.machine_id.clone()));
-        map.insert("telemetry.macMachineId".to_string(), Value::String(profile.mac_machine_id.clone()));
-        map.insert("telemetry.devDeviceId".to_string(), Value::String(profile.dev_device_id.clone()));
-        map.insert("telemetry.sqmId".to_string(), Value::String(profile.sqm_id.clone()));
+        map.insert(
+            "telemetry.machineId".to_string(),
+            Value::String(profile.machine_id.clone()),
+        );
+        map.insert(
+            "telemetry.macMachineId".to_string(),
+            Value::String(profile.mac_machine_id.clone()),
+        );
+        map.insert(
+            "telemetry.devDeviceId".to_string(),
+            Value::String(profile.dev_device_id.clone()),
+        );
+        map.insert(
+            "telemetry.sqmId".to_string(),
+            Value::String(profile.sqm_id.clone()),
+        );
     }
 
     // serviceMachineId 验证
@@ -293,7 +329,10 @@ pub fn load_global_original() -> Option<DeviceProfile> {
                     // 如果原始备份里没有 serviceMachineId，补充
                     if !is_valid_uuid(&profile.service_machine_id) {
                         let sys_id = get_service_machine_id();
-                        logger::log_info(&format!("原始备份缺少 serviceMachineId，已从系统补充: {}", sys_id));
+                        logger::log_info(&format!(
+                            "原始备份缺少 serviceMachineId，已从系统补充: {}",
+                            sys_id
+                        ));
                         profile.service_machine_id = sys_id;
                         let _ = save_global_original_force(&profile);
                     }
@@ -309,7 +348,8 @@ pub fn load_global_original() -> Option<DeviceProfile> {
 fn save_global_original_force(profile: &DeviceProfile) -> Result<(), String> {
     let dir = get_data_dir()?;
     let path = dir.join(GLOBAL_BASELINE);
-    let content = serde_json::to_string_pretty(profile).map_err(|e| format!("序列化失败: {}", e))?;
+    let content =
+        serde_json::to_string_pretty(profile).map_err(|e| format!("序列化失败: {}", e))?;
     fs::write(&path, content).map_err(|e| format!("写入失败: {}", e))
 }
 

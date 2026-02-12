@@ -24,9 +24,9 @@ pub mod menu_ids {
 /// 创建系统托盘
 pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<TrayIcon<R>, tauri::Error> {
     info!("[Tray] 正在创建系统托盘...");
-    
+
     let menu = build_tray_menu(app)?;
-    
+
     let tray = TrayIconBuilder::with_id(TRAY_ID)
         .icon(app.default_window_icon().unwrap().clone())
         .menu(&menu)
@@ -35,7 +35,7 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<TrayIcon<R>,
         .on_menu_event(handle_menu_event)
         .on_tray_icon_event(handle_tray_event)
         .build(app)?;
-    
+
     info!("[Tray] 系统托盘创建成功");
     Ok(tray)
 }
@@ -45,10 +45,10 @@ fn build_tray_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<Menu<R>, tau
     // 获取当前语言
     let config = crate::modules::config::get_user_config();
     let lang = &config.language;
-    
+
     // 获取账号信息（暂时使用占位符，后续动态更新）
     let (ag_info, codex_info) = get_account_display_info();
-    
+
     // 创建菜单项
     let show_window = MenuItem::with_id(
         app,
@@ -57,7 +57,7 @@ fn build_tray_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<Menu<R>, tau
         true,
         None::<&str>,
     )?;
-    
+
     let refresh_quota = MenuItem::with_id(
         app,
         menu_ids::REFRESH_QUOTA,
@@ -65,7 +65,7 @@ fn build_tray_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<Menu<R>, tau
         true,
         None::<&str>,
     )?;
-    
+
     let settings = MenuItem::with_id(
         app,
         menu_ids::SETTINGS,
@@ -73,7 +73,7 @@ fn build_tray_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<Menu<R>, tau
         true,
         None::<&str>,
     )?;
-    
+
     let quit = MenuItem::with_id(
         app,
         menu_ids::QUIT,
@@ -81,7 +81,7 @@ fn build_tray_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<Menu<R>, tau
         true,
         None::<&str>,
     )?;
-    
+
     // Antigravity 子菜单
     let mut ag_items: Vec<MenuItem<R>> = Vec::new();
     ag_items.push(MenuItem::with_id(
@@ -104,14 +104,9 @@ fn build_tray_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<Menu<R>, tau
         .iter()
         .map(|item| item as &dyn IsMenuItem<R>)
         .collect();
-    let ag_submenu = Submenu::with_id_and_items(
-        app,
-        "antigravity_submenu",
-        "Antigravity",
-        true,
-        &ag_refs,
-    )?;
-    
+    let ag_submenu =
+        Submenu::with_id_and_items(app, "antigravity_submenu", "Antigravity", true, &ag_refs)?;
+
     // Codex 子菜单
     let mut codex_items: Vec<MenuItem<R>> = Vec::new();
     codex_items.push(MenuItem::with_id(
@@ -134,14 +129,9 @@ fn build_tray_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<Menu<R>, tau
         .iter()
         .map(|item| item as &dyn IsMenuItem<R>)
         .collect();
-    let codex_submenu = Submenu::with_id_and_items(
-        app,
-        "codex_submenu",
-        "Codex",
-        true,
-        &codex_refs,
-    )?;
-    
+    let codex_submenu =
+        Submenu::with_id_and_items(app, "codex_submenu", "Codex", true, &codex_refs)?;
+
     // 构建完整菜单
     let menu = Menu::with_id_and_items(
         app,
@@ -158,7 +148,7 @@ fn build_tray_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<Menu<R>, tau
             &quit,
         ],
     )?;
-    
+
     Ok(menu)
 }
 
@@ -172,7 +162,7 @@ struct AccountDisplayInfo {
 fn get_account_display_info() -> (AccountDisplayInfo, AccountDisplayInfo) {
     let config = crate::modules::config::get_user_config();
     let lang = &config.language;
-    
+
     // 获取 Antigravity 当前账号
     let ag_info = match crate::modules::account::get_current_account() {
         Ok(Some(account)) => {
@@ -192,7 +182,7 @@ fn get_account_display_info() -> (AccountDisplayInfo, AccountDisplayInfo) {
             quota_lines: vec!["—".to_string()],
         },
     };
-    
+
     // 获取 Codex 当前账号
     let codex_info = if let Some(account) = crate::modules::codex_account::get_current_account() {
         let mut quota_lines = if let Some(quota) = &account.quota {
@@ -227,14 +217,11 @@ fn get_account_display_info() -> (AccountDisplayInfo, AccountDisplayInfo) {
             quota_lines: vec!["—".to_string()],
         }
     };
-    
+
     (ag_info, codex_info)
 }
 
-fn build_model_quota_lines(
-    lang: &str,
-    models: &[crate::models::quota::ModelQuota],
-) -> Vec<String> {
+fn build_model_quota_lines(lang: &str, models: &[crate::models::quota::ModelQuota]) -> Vec<String> {
     let mut lines = Vec::new();
     for model in models.iter().take(4) {
         let reset_text = format_reset_time(&model.reset_time);
@@ -291,14 +278,14 @@ fn format_reset_time(reset_time: &str) -> String {
     if let Ok(reset) = chrono::DateTime::parse_from_rfc3339(reset_time) {
         let now = chrono::Utc::now();
         let duration = reset.signed_duration_since(now);
-        
+
         if duration.num_seconds() <= 0 {
             return "已重置".to_string();
         }
-        
+
         let hours = duration.num_hours();
         let minutes = duration.num_minutes() % 60;
-        
+
         if hours > 0 {
             format!("{}h {}m", hours, minutes)
         } else {
@@ -313,7 +300,7 @@ fn format_reset_time(reset_time: &str) -> String {
 fn handle_menu_event<R: Runtime>(app: &tauri::AppHandle<R>, event: tauri::menu::MenuEvent) {
     let id = event.id().as_ref();
     logger::log_info(&format!("[Tray] 菜单点击: {}", id));
-    
+
     match id {
         menu_ids::SHOW_WINDOW => {
             if let Some(window) = app.get_webview_window("main") {
@@ -409,7 +396,7 @@ fn get_text(key: &str, lang: &str) -> String {
         ("loading", "zh-cn") => "加载中...".to_string(),
         ("reset", "zh-cn") => "重置".to_string(),
         ("reset_done", "zh-cn") => "已重置".to_string(),
-        
+
         // 繁体中文
         ("show_window", "zh-tw") => "顯示主視窗".to_string(),
         ("refresh_quota", "zh-tw") => "🔄 重新整理配額".to_string(),
@@ -419,7 +406,7 @@ fn get_text(key: &str, lang: &str) -> String {
         ("loading", "zh-tw") => "載入中...".to_string(),
         ("reset", "zh-tw") => "重置".to_string(),
         ("reset_done", "zh-tw") => "已重置".to_string(),
-        
+
         // 英文
         ("show_window", "en") => "Show Window".to_string(),
         ("refresh_quota", "en") => "🔄 Refresh Quota".to_string(),
@@ -429,7 +416,7 @@ fn get_text(key: &str, lang: &str) -> String {
         ("loading", "en") => "Loading...".to_string(),
         ("reset", "en") => "Reset".to_string(),
         ("reset_done", "en") => "Reset done".to_string(),
-        
+
         // 日语
         ("show_window", "ja") => "ウィンドウを表示".to_string(),
         ("refresh_quota", "ja") => "🔄 クォータを更新".to_string(),
@@ -439,7 +426,7 @@ fn get_text(key: &str, lang: &str) -> String {
         ("loading", "ja") => "読み込み中...".to_string(),
         ("reset", "ja") => "リセット".to_string(),
         ("reset_done", "ja") => "リセット済み".to_string(),
-        
+
         // 俄语
         ("show_window", "ru") => "Показать окно".to_string(),
         ("refresh_quota", "ru") => "🔄 Обновить квоту".to_string(),
@@ -449,7 +436,7 @@ fn get_text(key: &str, lang: &str) -> String {
         ("loading", "ru") => "Загрузка...".to_string(),
         ("reset", "ru") => "Сброс".to_string(),
         ("reset_done", "ru") => "Сброс выполнен".to_string(),
-        
+
         // 默认英文
         ("show_window", _) => "Show Window".to_string(),
         ("refresh_quota", _) => "🔄 Refresh Quota".to_string(),
@@ -459,7 +446,7 @@ fn get_text(key: &str, lang: &str) -> String {
         ("loading", _) => "Loading...".to_string(),
         ("reset", _) => "Reset".to_string(),
         ("reset_done", _) => "Reset done".to_string(),
-        
+
         _ => key.to_string(),
     }
 }

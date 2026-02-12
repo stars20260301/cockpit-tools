@@ -300,6 +300,75 @@
   border-radius: var(--radius-sm);
 }
 
+.ghcp-accounts-page .windsurf-credit-item {
+  gap: 6px;
+}
+
+.ghcp-accounts-page .windsurf-credit-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ghcp-accounts-page .windsurf-credit-meta-row.table {
+  margin-bottom: 2px;
+}
+
+.ghcp-accounts-page .windsurf-credit-used,
+.ghcp-accounts-page .windsurf-credit-left {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  letter-spacing: -0.2px;
+}
+
+.ghcp-accounts-page .windsurf-credit-left {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.ghcp-accounts-page .windsurf-plan-cycle {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-tertiary);
+}
+
+.ghcp-accounts-page .windsurf-plan-cycle-note {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.ghcp-accounts-page .windsurf-plan-cycle-summary {
+  font-size: 12px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.ghcp-accounts-page .windsurf-plan-cycle-detail {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.ghcp-accounts-page .windsurf-cycle-line {
+  margin-top: 2px;
+}
+
+.ghcp-accounts-page .windsurf-cycle-text {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.ghcp-accounts-page .windsurf-table-credit-item {
+  min-width: 220px;
+}
+
 /* 卡片底部 */
 .ghcp-account-card .card-footer {
   display: flex;

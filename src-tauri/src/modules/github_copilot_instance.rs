@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 use std::sync::Mutex;
 
 use chrono::Utc;
@@ -42,7 +42,9 @@ pub fn update_default_settings(
     extra_args: Option<String>,
     follow_local_account: Option<bool>,
 ) -> Result<DefaultInstanceSettings, String> {
-    let _lock = GHCP_INSTANCE_STORE_LOCK.lock().map_err(|_| "无法获取实例锁")?;
+    let _lock = GHCP_INSTANCE_STORE_LOCK
+        .lock()
+        .map_err(|_| "无法获取实例锁")?;
     let mut store = load_instance_store()?;
     let settings = &mut store.default_settings;
 
@@ -74,8 +76,8 @@ pub fn get_default_vscode_user_data_dir() -> Result<PathBuf, String> {
 
     #[cfg(target_os = "windows")]
     {
-        let appdata = std::env::var("APPDATA")
-            .map_err(|_| "无法获取 APPDATA 环境变量".to_string())?;
+        let appdata =
+            std::env::var("APPDATA").map_err(|_| "无法获取 APPDATA 环境变量".to_string())?;
         return Ok(PathBuf::from(appdata).join("Code"));
     }
 
@@ -98,8 +100,8 @@ pub fn get_default_instances_root_dir() -> Result<PathBuf, String> {
 
     #[cfg(target_os = "windows")]
     {
-        let appdata = std::env::var("APPDATA")
-            .map_err(|_| "无法获取 APPDATA 环境变量".to_string())?;
+        let appdata =
+            std::env::var("APPDATA").map_err(|_| "无法获取 APPDATA 环境变量".to_string())?;
         return Ok(PathBuf::from(appdata).join(".antigravity_cockpit\\instances\\github_copilot"));
     }
 
@@ -123,7 +125,9 @@ pub fn get_instance_defaults() -> Result<InstanceDefaults, String> {
 }
 
 pub fn create_instance(params: CreateInstanceParams) -> Result<InstanceProfile, String> {
-    let _lock = GHCP_INSTANCE_STORE_LOCK.lock().map_err(|_| "无法获取实例锁")?;
+    let _lock = GHCP_INSTANCE_STORE_LOCK
+        .lock()
+        .map_err(|_| "无法获取实例锁")?;
     let mut store = load_instance_store()?;
 
     let name = instance_store::normalize_name(&params.name)?;
@@ -198,7 +202,11 @@ pub fn create_instance(params: CreateInstanceParams) -> Result<InstanceProfile, 
         name,
         user_data_dir,
         extra_args: params.extra_args.trim().to_string(),
-        bind_account_id: if create_empty { None } else { params.bind_account_id },
+        bind_account_id: if create_empty {
+            None
+        } else {
+            params.bind_account_id
+        },
         created_at: Utc::now().timestamp_millis(),
         last_launched_at: None,
         last_pid: None,
@@ -210,7 +218,9 @@ pub fn create_instance(params: CreateInstanceParams) -> Result<InstanceProfile, 
 }
 
 pub fn update_instance(params: UpdateInstanceParams) -> Result<InstanceProfile, String> {
-    let _lock = GHCP_INSTANCE_STORE_LOCK.lock().map_err(|_| "无法获取实例锁")?;
+    let _lock = GHCP_INSTANCE_STORE_LOCK
+        .lock()
+        .map_err(|_| "无法获取实例锁")?;
     let mut store = load_instance_store()?;
     let index = store
         .instances
@@ -247,7 +257,9 @@ pub fn update_instance(params: UpdateInstanceParams) -> Result<InstanceProfile, 
 }
 
 pub fn delete_instance(instance_id: &str) -> Result<(), String> {
-    let _lock = GHCP_INSTANCE_STORE_LOCK.lock().map_err(|_| "无法获取实例锁")?;
+    let _lock = GHCP_INSTANCE_STORE_LOCK
+        .lock()
+        .map_err(|_| "无法获取实例锁")?;
     let mut store = load_instance_store()?;
     let index = store
         .instances
@@ -267,7 +279,9 @@ pub fn delete_instance(instance_id: &str) -> Result<(), String> {
 }
 
 pub fn update_instance_after_start(instance_id: &str, pid: u32) -> Result<InstanceProfile, String> {
-    let _lock = GHCP_INSTANCE_STORE_LOCK.lock().map_err(|_| "无法获取实例锁")?;
+    let _lock = GHCP_INSTANCE_STORE_LOCK
+        .lock()
+        .map_err(|_| "无法获取实例锁")?;
     let mut store = load_instance_store()?;
     let mut updated = None;
     for instance in &mut store.instances {
@@ -284,7 +298,9 @@ pub fn update_instance_after_start(instance_id: &str, pid: u32) -> Result<Instan
 }
 
 pub fn update_instance_pid(instance_id: &str, pid: Option<u32>) -> Result<InstanceProfile, String> {
-    let _lock = GHCP_INSTANCE_STORE_LOCK.lock().map_err(|_| "无法获取实例锁")?;
+    let _lock = GHCP_INSTANCE_STORE_LOCK
+        .lock()
+        .map_err(|_| "无法获取实例锁")?;
     let mut store = load_instance_store()?;
     let mut updated = None;
     for instance in &mut store.instances {
@@ -300,7 +316,9 @@ pub fn update_instance_pid(instance_id: &str, pid: Option<u32>) -> Result<Instan
 }
 
 pub fn update_default_pid(pid: Option<u32>) -> Result<DefaultInstanceSettings, String> {
-    let _lock = GHCP_INSTANCE_STORE_LOCK.lock().map_err(|_| "无法获取实例锁")?;
+    let _lock = GHCP_INSTANCE_STORE_LOCK
+        .lock()
+        .map_err(|_| "无法获取实例锁")?;
     let mut store = load_instance_store()?;
     store.default_settings.last_pid = pid;
     let updated = store.default_settings.clone();
@@ -309,7 +327,9 @@ pub fn update_default_pid(pid: Option<u32>) -> Result<DefaultInstanceSettings, S
 }
 
 pub fn clear_all_pids() -> Result<(), String> {
-    let _lock = GHCP_INSTANCE_STORE_LOCK.lock().map_err(|_| "无法获取实例锁")?;
+    let _lock = GHCP_INSTANCE_STORE_LOCK
+        .lock()
+        .map_err(|_| "无法获取实例锁")?;
     let mut store = load_instance_store()?;
     store.default_settings.last_pid = None;
     for instance in &mut store.instances {

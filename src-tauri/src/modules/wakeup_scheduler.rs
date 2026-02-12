@@ -121,7 +121,9 @@ fn normalize_schedule(raw: ScheduleConfig) -> ScheduleConfigNormalized {
         .filter(|times| !times.is_empty())
         .unwrap_or_else(|| vec!["08:00".to_string()]);
     let interval_hours = raw.interval_hours.unwrap_or(4).max(1);
-    let interval_start_time = raw.interval_start_time.unwrap_or_else(|| "07:00".to_string());
+    let interval_start_time = raw
+        .interval_start_time
+        .unwrap_or_else(|| "07:00".to_string());
     let interval_end_time = raw.interval_end_time.unwrap_or_else(|| "22:00".to_string());
     let max_output_tokens = raw.max_output_tokens.unwrap_or(0).max(0);
     let fallback_times = raw
@@ -195,10 +197,18 @@ fn parse_time_to_minutes(value: &str) -> Option<i32> {
 }
 
 fn is_in_time_window(start: Option<&String>, end: Option<&String>, now: DateTime<Local>) -> bool {
-    let Some(start) = start else { return true; };
-    let Some(end) = end else { return true; };
-    let Some(start_minutes) = parse_time_to_minutes(start) else { return true; };
-    let Some(end_minutes) = parse_time_to_minutes(end) else { return true; };
+    let Some(start) = start else {
+        return true;
+    };
+    let Some(end) = end else {
+        return true;
+    };
+    let Some(start_minutes) = parse_time_to_minutes(start) else {
+        return true;
+    };
+    let Some(end_minutes) = parse_time_to_minutes(end) else {
+        return true;
+    };
     let current_minutes = (now.hour() as i32) * 60 + now.minute() as i32;
 
     if start_minutes <= end_minutes {
@@ -208,7 +218,10 @@ fn is_in_time_window(start: Option<&String>, end: Option<&String>, now: DateTime
     }
 }
 
-fn next_run_time(schedule: &ScheduleConfigNormalized, after: DateTime<Local>) -> Option<DateTime<Local>> {
+fn next_run_time(
+    schedule: &ScheduleConfigNormalized,
+    after: DateTime<Local>,
+) -> Option<DateTime<Local>> {
     let mut results: Vec<DateTime<Local>> = Vec::new();
     if schedule.repeat_mode == "daily" && !schedule.daily_times.is_empty() {
         let mut times = schedule.daily_times.clone();
@@ -225,7 +238,10 @@ fn next_run_time(schedule: &ScheduleConfigNormalized, after: DateTime<Local>) ->
                 }
             }
         }
-    } else if schedule.repeat_mode == "weekly" && !schedule.weekly_days.is_empty() && !schedule.weekly_times.is_empty() {
+    } else if schedule.repeat_mode == "weekly"
+        && !schedule.weekly_days.is_empty()
+        && !schedule.weekly_times.is_empty()
+    {
         let mut times = schedule.weekly_times.clone();
         times.sort();
         for day_offset in 0..14 {
@@ -255,8 +271,14 @@ fn next_run_time(schedule: &ScheduleConfigNormalized, after: DateTime<Local>) ->
         let interval = schedule.interval_hours.max(1);
 
         for day_offset in 0..7 {
-            for h in (parse_time_to_minutes(&start_time).unwrap_or(0) / 60..=end_hour).step_by(interval as usize) {
-                let time = format!("{:02}:{:02}", h, parse_time_to_minutes(&start_time).unwrap_or(0) % 60);
+            for h in (parse_time_to_minutes(&start_time).unwrap_or(0) / 60..=end_hour)
+                .step_by(interval as usize)
+            {
+                let time = format!(
+                    "{:02}:{:02}",
+                    h,
+                    parse_time_to_minutes(&start_time).unwrap_or(0) % 60
+                );
                 if let Some(candidate) = build_datetime(after, day_offset, &time) {
                     if candidate > after {
                         results.push(candidate);
@@ -363,20 +385,29 @@ fn normalize_max_tokens(value: i32) -> u32 {
     }
 }
 
-fn should_trigger_on_reset(state: &mut ResetState, model_key: &str, reset_at: &str, remaining_percent: i32) -> bool {
+fn should_trigger_on_reset(
+    state: &mut ResetState,
+    model_key: &str,
+    reset_at: &str,
+    remaining_percent: i32,
+) -> bool {
     if remaining_percent < 100 {
-        state.last_reset_remaining.insert(model_key.to_string(), remaining_percent);
+        state
+            .last_reset_remaining
+            .insert(model_key.to_string(), remaining_percent);
         return false;
     }
 
     let now = chrono::Utc::now().timestamp_millis();
     if let Some(last_reset_at) = state.last_reset_trigger_timestamps.get(model_key) {
-        if let Ok(last_reset_time) = DateTime::parse_from_rfc3339(last_reset_at)
-            .map(|dt| dt.timestamp_millis())
+        if let Ok(last_reset_time) =
+            DateTime::parse_from_rfc3339(last_reset_at).map(|dt| dt.timestamp_millis())
         {
             let safe_time = last_reset_time + RESET_SAFETY_MARGIN_MS;
             if now < safe_time {
-                state.last_reset_remaining.insert(model_key.to_string(), remaining_percent);
+                state
+                    .last_reset_remaining
+                    .insert(model_key.to_string(), remaining_percent);
                 return false;
             }
         }
@@ -384,23 +415,33 @@ fn should_trigger_on_reset(state: &mut ResetState, model_key: &str, reset_at: &s
 
     if let Some(last_trigger_at) = state.last_reset_trigger_at.get(model_key) {
         if now - *last_trigger_at < RESET_TRIGGER_COOLDOWN_MS {
-            state.last_reset_remaining.insert(model_key.to_string(), remaining_percent);
+            state
+                .last_reset_remaining
+                .insert(model_key.to_string(), remaining_percent);
             return false;
         }
     }
 
     if state.last_reset_trigger_timestamps.get(model_key) == Some(&reset_at.to_string()) {
-        state.last_reset_remaining.insert(model_key.to_string(), remaining_percent);
+        state
+            .last_reset_remaining
+            .insert(model_key.to_string(), remaining_percent);
         return false;
     }
 
-    state.last_reset_remaining.insert(model_key.to_string(), remaining_percent);
+    state
+        .last_reset_remaining
+        .insert(model_key.to_string(), remaining_percent);
     true
 }
 
 fn mark_reset_triggered(state: &mut ResetState, model_key: &str, reset_at: &str) {
-    state.last_reset_trigger_timestamps.insert(model_key.to_string(), reset_at.to_string());
-    state.last_reset_trigger_at.insert(model_key.to_string(), chrono::Utc::now().timestamp_millis());
+    state
+        .last_reset_trigger_timestamps
+        .insert(model_key.to_string(), reset_at.to_string());
+    state
+        .last_reset_trigger_at
+        .insert(model_key.to_string(), chrono::Utc::now().timestamp_millis());
 }
 
 async fn run_scheduler_once(app: &AppHandle) {
@@ -452,7 +493,13 @@ async fn run_scheduler_once(app: &AppHandle) {
 
 async fn handle_quota_reset_task(app: &AppHandle, task: &WakeupTask, now: DateTime<Local>) {
     let mut should_run_fallback = false;
-    if task.schedule.time_window_enabled && !is_in_time_window(task.schedule.time_window_start.as_ref(), task.schedule.time_window_end.as_ref(), now) {
+    if task.schedule.time_window_enabled
+        && !is_in_time_window(
+            task.schedule.time_window_start.as_ref(),
+            task.schedule.time_window_end.as_ref(),
+            now,
+        )
+    {
         let current_minutes = (now.hour() as i32) * 60 + now.minute() as i32;
         for time in &task.schedule.fallback_times {
             if let Some(minutes) = parse_time_to_minutes(time) {
@@ -477,7 +524,11 @@ async fn handle_quota_reset_task(app: &AppHandle, task: &WakeupTask, now: DateTi
         .schedule
         .selected_accounts
         .iter()
-        .filter_map(|email| accounts.iter().find(|acc| acc.email.eq_ignore_ascii_case(email)))
+        .filter_map(|email| {
+            accounts
+                .iter()
+                .find(|acc| acc.email.eq_ignore_ascii_case(email))
+        })
         .collect();
 
     if selected_accounts.is_empty() {
@@ -500,7 +551,12 @@ async fn handle_quota_reset_task(app: &AppHandle, task: &WakeupTask, now: DateTi
                     .map(|q| q.models.as_slice())
                     .unwrap_or(&[]);
                 if let Some(quota) = quota_models.iter().find(|item| item.name == *model_id) {
-                    if should_trigger_on_reset(reset_state, model_id, &quota.reset_time, quota.percentage) {
+                    if should_trigger_on_reset(
+                        reset_state,
+                        model_id,
+                        &quota.reset_time,
+                        quota.percentage,
+                    ) {
                         models_to_trigger.insert(model_id.clone());
                         mark_reset_triggered(reset_state, model_id, &quota.reset_time);
                     }
@@ -511,15 +567,32 @@ async fn handle_quota_reset_task(app: &AppHandle, task: &WakeupTask, now: DateTi
     };
 
     if !models_to_trigger.is_empty() {
-        run_task_with_models(app, task, "quota_reset", models_to_trigger.into_iter().collect()).await;
+        run_task_with_models(
+            app,
+            task,
+            "quota_reset",
+            models_to_trigger.into_iter().collect(),
+        )
+        .await;
     }
 }
 
 async fn run_task(app: &AppHandle, task: &WakeupTask, trigger_source: &str) {
-    run_task_with_models(app, task, trigger_source, task.schedule.selected_models.clone()).await;
+    run_task_with_models(
+        app,
+        task,
+        trigger_source,
+        task.schedule.selected_models.clone(),
+    )
+    .await;
 }
 
-async fn run_task_with_models(app: &AppHandle, task: &WakeupTask, trigger_source: &str, models: Vec<String>) {
+async fn run_task_with_models(
+    app: &AppHandle,
+    task: &WakeupTask,
+    trigger_source: &str,
+    models: Vec<String>,
+) {
     if models.is_empty() {
         return;
     }
@@ -533,7 +606,11 @@ async fn run_task_with_models(app: &AppHandle, task: &WakeupTask, trigger_source
         .schedule
         .selected_accounts
         .iter()
-        .filter_map(|email| accounts.iter().find(|acc| acc.email.eq_ignore_ascii_case(email)))
+        .filter_map(|email| {
+            accounts
+                .iter()
+                .find(|acc| acc.email.eq_ignore_ascii_case(email))
+        })
         .collect();
 
     if selected_accounts.is_empty() {
@@ -549,7 +626,13 @@ async fn run_task_with_models(app: &AppHandle, task: &WakeupTask, trigger_source
         .schedule
         .custom_prompt
         .as_ref()
-        .and_then(|p| if p.trim().is_empty() { None } else { Some(p.trim().to_string()) })
+        .and_then(|p| {
+            if p.trim().is_empty() {
+                None
+            } else {
+                Some(p.trim().to_string())
+            }
+        })
         .unwrap_or_else(|| DEFAULT_PROMPT.to_string());
     let max_tokens = normalize_max_tokens(task.schedule.max_output_tokens);
 
@@ -557,14 +640,22 @@ async fn run_task_with_models(app: &AppHandle, task: &WakeupTask, trigger_source
     for account in &selected_accounts {
         for model in &models {
             let started = chrono::Utc::now();
-            let result = modules::wakeup::trigger_wakeup(&account.id, model, &prompt, max_tokens).await;
-            let duration = chrono::Utc::now().signed_duration_since(started).num_milliseconds().max(0) as u64;
+            let result =
+                modules::wakeup::trigger_wakeup(&account.id, model, &prompt, max_tokens).await;
+            let duration = chrono::Utc::now()
+                .signed_duration_since(started)
+                .num_milliseconds()
+                .max(0) as u64;
             let (success, message) = match result {
                 Ok(resp) => (true, Some(resp.reply)),
                 Err(err) => (false, Some(err.to_string())),
             };
             history.push(modules::wakeup_history::WakeupHistoryItem {
-                id: format!("{}-{}", chrono::Utc::now().timestamp_millis(), history.len()),
+                id: format!(
+                    "{}-{}",
+                    chrono::Utc::now().timestamp_millis(),
+                    history.len()
+                ),
                 timestamp: chrono::Utc::now().timestamp_millis(),
                 trigger_type: "auto".to_string(),
                 trigger_source: trigger_source.to_string(),
@@ -588,7 +679,9 @@ async fn run_task_with_models(app: &AppHandle, task: &WakeupTask, trigger_source
                 item.last_run_at = Some(executed_at);
             }
         });
-        guard.last_fallback_run_at.insert(task.id.clone(), executed_at);
+        guard
+            .last_fallback_run_at
+            .insert(task.id.clone(), executed_at);
         // 记录本地执行时间，防止被前端同步覆盖导致重复执行
         guard.last_executed_at.insert(task.id.clone(), executed_at);
     }

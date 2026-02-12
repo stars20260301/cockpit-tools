@@ -30,6 +30,8 @@ struct QuotaResponse {
 
 #[derive(Debug, Deserialize)]
 struct ModelInfo {
+    #[serde(rename = "displayName")]
+    display_name: Option<String>,
     #[serde(rename = "quotaInfo")]
     quota_info: Option<QuotaInfo>,
 }
@@ -102,19 +104,33 @@ pub fn apply_cached_quota(account: &mut Account, source: &str) -> Result<bool, S
 
     let mut quota = QuotaData::new();
     quota.last_updated = cache_updated;
-    quota.subscription_tier = account.quota.as_ref().and_then(|q| q.subscription_tier.clone());
-    quota.is_forbidden = account.quota.as_ref().map(|q| q.is_forbidden).unwrap_or(false);
+    quota.subscription_tier = account
+        .quota
+        .as_ref()
+        .and_then(|q| q.subscription_tier.clone());
+    quota.is_forbidden = account
+        .quota
+        .as_ref()
+        .map(|q| q.is_forbidden)
+        .unwrap_or(false);
 
     let parsed = serde_json::from_value::<QuotaResponse>(record.payload.clone())
         .map_err(|e| format!("Failed to parse api cache payload: {}", e))?;
     for (name, info) in parsed.models {
+        let display_name = info
+            .display_name
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(str::to_string);
         if let Some(quota_info) = info.quota_info {
-            let percentage = quota_info.remaining_fraction
+            let percentage = quota_info
+                .remaining_fraction
                 .map(|f| (f * 100.0) as i32)
                 .unwrap_or(0);
             let reset_time = quota_info.reset_time.unwrap_or_default();
             if name.contains("gemini") || name.contains("claude") {
-                quota.add_model(name, percentage, reset_time);
+                quota.add_model(name, display_name, percentage, reset_time);
             }
         }
     }

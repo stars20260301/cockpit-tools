@@ -1,10 +1,12 @@
+use crate::modules::logger;
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
-use crate::modules::logger;
 
 const GITHUB_API_URL: &str = "https://api.github.com/repos/jlcodes99/cockpit-tools/releases/latest";
-const CHANGELOG_EN_URL: &str = "https://raw.githubusercontent.com/jlcodes99/cockpit-tools/main/CHANGELOG.md";
-const CHANGELOG_ZH_URL: &str = "https://raw.githubusercontent.com/jlcodes99/cockpit-tools/main/CHANGELOG.zh-CN.md";
+const CHANGELOG_EN_URL: &str =
+    "https://raw.githubusercontent.com/jlcodes99/cockpit-tools/main/CHANGELOG.md";
+const CHANGELOG_ZH_URL: &str =
+    "https://raw.githubusercontent.com/jlcodes99/cockpit-tools/main/CHANGELOG.zh-CN.md";
 const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 const DEFAULT_CHECK_INTERVAL_HOURS: u64 = 24;
 
@@ -62,15 +64,11 @@ pub async fn check_for_updates() -> Result<UpdateInfo, String> {
 
     logger::log_info("正在从 GitHub 检查新版本...");
 
-    let response = client
-        .get(GITHUB_API_URL)
-        .send()
-        .await
-        .map_err(|e| {
-            let err_msg = format!("Failed to fetch release info: {}", e);
-            logger::log_error(&err_msg);
-            err_msg
-        })?;
+    let response = client.get(GITHUB_API_URL).send().await.map_err(|e| {
+        let err_msg = format!("Failed to fetch release info: {}", e);
+        logger::log_error(&err_msg);
+        err_msg
+    })?;
 
     if !response.status().is_success() {
         return Err(format!("GitHub API returned status: {}", response.status()));
@@ -88,15 +86,23 @@ pub async fn check_for_updates() -> Result<UpdateInfo, String> {
     let has_update = compare_versions(&latest_version, &current_version);
 
     if has_update {
-        logger::log_info(&format!("发现新版本: {} (当前版本: {})", latest_version, current_version));
+        logger::log_info(&format!(
+            "发现新版本: {} (当前版本: {})",
+            latest_version, current_version
+        ));
     } else {
-        logger::log_info(&format!("已是最新版本: {} (与远程版本 {} 一致)", current_version, latest_version));
+        logger::log_info(&format!(
+            "已是最新版本: {} (与远程版本 {} 一致)",
+            current_version, latest_version
+        ));
     }
 
     // Fetch changelog content for release notes
     let (release_notes, release_notes_zh) = if has_update {
-        let notes_en = fetch_changelog_for_version(&client, CHANGELOG_EN_URL, &latest_version).await;
-        let notes_zh = fetch_changelog_for_version(&client, CHANGELOG_ZH_URL, &latest_version).await;
+        let notes_en =
+            fetch_changelog_for_version(&client, CHANGELOG_EN_URL, &latest_version).await;
+        let notes_zh =
+            fetch_changelog_for_version(&client, CHANGELOG_ZH_URL, &latest_version).await;
         (notes_en, notes_zh)
     } else {
         (String::new(), String::new())
@@ -132,7 +138,7 @@ fn extract_version_notes(changelog: &str, version: &str) -> String {
     let mut result = Vec::new();
     let mut in_target_version = false;
     let version_header = format!("## [{}]", version);
-    
+
     for line in changelog.lines() {
         if line.starts_with("## [") {
             if line.contains(&version_header) || line.starts_with(&version_header) {
@@ -143,7 +149,7 @@ fn extract_version_notes(changelog: &str, version: &str) -> String {
                 break;
             }
         }
-        
+
         if in_target_version {
             // Skip empty lines at start
             if result.is_empty() && line.trim().is_empty() {
@@ -156,22 +162,19 @@ fn extract_version_notes(changelog: &str, version: &str) -> String {
             result.push(line);
         }
     }
-    
+
     // Trim trailing empty lines
     while result.last().map(|s| s.trim().is_empty()).unwrap_or(false) {
         result.pop();
     }
-    
+
     result.join("\n")
 }
 
 /// Compare two semantic versions (e.g., "0.2.0" vs "0.1.0")
 fn compare_versions(latest: &str, current: &str) -> bool {
-    let parse_version = |v: &str| -> Vec<u32> {
-        v.split('.')
-            .filter_map(|s| s.parse::<u32>().ok())
-            .collect()
-    };
+    let parse_version =
+        |v: &str| -> Vec<u32> { v.split('.').filter_map(|s| s.parse::<u32>().ok()).collect() };
 
     let latest_parts = parse_version(latest);
     let current_parts = parse_version(current);
@@ -229,20 +232,19 @@ pub fn load_update_settings() -> Result<UpdateSettings, String> {
     let content = std::fs::read_to_string(&settings_path)
         .map_err(|e| format!("Failed to read settings file: {}", e))?;
 
-    serde_json::from_str(&content)
-        .map_err(|e| format!("Failed to parse settings: {}", e))
+    serde_json::from_str(&content).map_err(|e| format!("Failed to parse settings: {}", e))
 }
 
 /// Save update settings to config file
 pub fn save_update_settings(settings: &UpdateSettings) -> Result<(), String> {
     let data_dir = get_data_dir()?;
-    
+
     // Ensure directory exists
     if !data_dir.exists() {
         std::fs::create_dir_all(&data_dir)
             .map_err(|e| format!("Failed to create data dir: {}", e))?;
     }
-    
+
     let settings_path = data_dir.join("update_settings.json");
 
     let content = serde_json::to_string_pretty(settings)

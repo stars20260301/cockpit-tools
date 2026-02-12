@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 use tauri::Manager;
 
 use crate::modules;
+use crate::modules::config::{self, CloseWindowBehavior, UserConfig, DEFAULT_WS_PORT};
 use crate::modules::websocket;
-use crate::modules::config::{self, UserConfig, CloseWindowBehavior, DEFAULT_WS_PORT};
 
 /// 网络服务配置（前端使用）
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -29,6 +29,10 @@ pub struct GeneralConfig {
     pub auto_refresh_minutes: i32,
     /// Codex 自动刷新间隔（分钟），-1 表示禁用
     pub codex_auto_refresh_minutes: i32,
+    /// GitHub Copilot 自动刷新间隔（分钟），-1 表示禁用
+    pub ghcp_auto_refresh_minutes: i32,
+    /// Windsurf 自动刷新间隔（分钟），-1 表示禁用
+    pub windsurf_auto_refresh_minutes: i32,
     /// 窗口关闭行为: "ask", "minimize", "quit"
     pub close_behavior: String,
     /// OpenCode 启动路径（为空则使用默认路径）
@@ -39,8 +43,14 @@ pub struct GeneralConfig {
     pub codex_app_path: String,
     /// VS Code 启动路径（为空则使用默认路径）
     pub vscode_app_path: String,
+    /// Windsurf 启动路径（为空则使用默认路径）
+    pub windsurf_app_path: String,
     /// 切换 Codex 时是否自动重启 OpenCode
     pub opencode_sync_on_switch: bool,
+    /// 是否启用自动切号
+    pub auto_switch_enabled: bool,
+    /// 自动切号阈值（百分比）
+    pub auto_switch_threshold: i32,
 }
 
 #[tauri::command]
@@ -97,7 +107,7 @@ pub fn get_downloads_dir() -> Result<String, String> {
 pub fn get_network_config() -> Result<NetworkConfig, String> {
     let user_config = config::get_user_config();
     let actual_port = config::get_actual_port();
-    
+
     Ok(NetworkConfig {
         ws_enabled: user_config.ws_enabled,
         ws_port: user_config.ws_port,
@@ -111,7 +121,7 @@ pub fn get_network_config() -> Result<NetworkConfig, String> {
 pub fn save_network_config(ws_enabled: bool, ws_port: u16) -> Result<bool, String> {
     let current = config::get_user_config();
     let needs_restart = current.ws_port != ws_port || current.ws_enabled != ws_enabled;
-    
+
     let new_config = UserConfig {
         ws_enabled,
         ws_port,
@@ -120,16 +130,21 @@ pub fn save_network_config(ws_enabled: bool, ws_port: u16) -> Result<bool, Strin
         theme: current.theme,
         auto_refresh_minutes: current.auto_refresh_minutes,
         codex_auto_refresh_minutes: current.codex_auto_refresh_minutes,
+        ghcp_auto_refresh_minutes: current.ghcp_auto_refresh_minutes,
+        windsurf_auto_refresh_minutes: current.windsurf_auto_refresh_minutes,
         close_behavior: current.close_behavior,
         opencode_app_path: current.opencode_app_path,
         antigravity_app_path: current.antigravity_app_path,
         codex_app_path: current.codex_app_path,
         vscode_app_path: current.vscode_app_path,
+        windsurf_app_path: current.windsurf_app_path,
         opencode_sync_on_switch: current.opencode_sync_on_switch,
+        auto_switch_enabled: current.auto_switch_enabled,
+        auto_switch_threshold: current.auto_switch_threshold,
     };
-    
+
     config::save_user_config(&new_config)?;
-    
+
     Ok(needs_restart)
 }
 
@@ -137,24 +152,29 @@ pub fn save_network_config(ws_enabled: bool, ws_port: u16) -> Result<bool, Strin
 #[tauri::command]
 pub fn get_general_config() -> Result<GeneralConfig, String> {
     let user_config = config::get_user_config();
-    
+
     let close_behavior_str = match user_config.close_behavior {
         CloseWindowBehavior::Ask => "ask",
         CloseWindowBehavior::Minimize => "minimize",
         CloseWindowBehavior::Quit => "quit",
     };
-    
+
     Ok(GeneralConfig {
         language: user_config.language,
         theme: user_config.theme,
         auto_refresh_minutes: user_config.auto_refresh_minutes,
         codex_auto_refresh_minutes: user_config.codex_auto_refresh_minutes,
+        ghcp_auto_refresh_minutes: user_config.ghcp_auto_refresh_minutes,
+        windsurf_auto_refresh_minutes: user_config.windsurf_auto_refresh_minutes,
         close_behavior: close_behavior_str.to_string(),
         opencode_app_path: user_config.opencode_app_path,
         antigravity_app_path: user_config.antigravity_app_path,
         codex_app_path: user_config.codex_app_path,
         vscode_app_path: user_config.vscode_app_path,
+        windsurf_app_path: user_config.windsurf_app_path,
         opencode_sync_on_switch: user_config.opencode_sync_on_switch,
+        auto_switch_enabled: user_config.auto_switch_enabled,
+        auto_switch_threshold: user_config.auto_switch_threshold,
     })
 }
 
@@ -165,30 +185,38 @@ pub fn save_general_config(
     theme: String,
     auto_refresh_minutes: i32,
     codex_auto_refresh_minutes: i32,
+    ghcp_auto_refresh_minutes: Option<i32>,
+    windsurf_auto_refresh_minutes: Option<i32>,
     close_behavior: String,
     opencode_app_path: String,
     antigravity_app_path: String,
     codex_app_path: String,
     vscode_app_path: String,
+    windsurf_app_path: Option<String>,
     opencode_sync_on_switch: bool,
+    auto_switch_enabled: Option<bool>,
+    auto_switch_threshold: Option<i32>,
 ) -> Result<(), String> {
     let current = config::get_user_config();
     let normalized_opencode_path = opencode_app_path.trim().to_string();
     let normalized_antigravity_path = antigravity_app_path.trim().to_string();
     let normalized_codex_path = codex_app_path.trim().to_string();
     let normalized_vscode_path = vscode_app_path.trim().to_string();
+    let normalized_windsurf_path = windsurf_app_path
+        .map(|value| value.trim().to_string())
+        .unwrap_or_else(|| current.windsurf_app_path.clone());
     // 标准化语言代码为小写，确保与插件端格式一致
     let normalized_language = language.to_lowercase();
     let language_changed = current.language != normalized_language;
     let language_for_broadcast = normalized_language.clone();
-    
+
     // 解析关闭行为
     let close_behavior_enum = match close_behavior.as_str() {
         "minimize" => CloseWindowBehavior::Minimize,
         "quit" => CloseWindowBehavior::Quit,
         _ => CloseWindowBehavior::Ask,
     };
-    
+
     let new_config = UserConfig {
         // 保留网络设置不变
         ws_enabled: current.ws_enabled,
@@ -198,27 +226,34 @@ pub fn save_general_config(
         theme,
         auto_refresh_minutes,
         codex_auto_refresh_minutes,
+        ghcp_auto_refresh_minutes: ghcp_auto_refresh_minutes
+            .unwrap_or(current.ghcp_auto_refresh_minutes),
+        windsurf_auto_refresh_minutes: windsurf_auto_refresh_minutes
+            .unwrap_or(current.windsurf_auto_refresh_minutes),
         close_behavior: close_behavior_enum,
         opencode_app_path: normalized_opencode_path,
         antigravity_app_path: normalized_antigravity_path,
         codex_app_path: normalized_codex_path,
         vscode_app_path: normalized_vscode_path,
+        windsurf_app_path: normalized_windsurf_path,
         opencode_sync_on_switch,
+        auto_switch_enabled: auto_switch_enabled.unwrap_or(current.auto_switch_enabled),
+        auto_switch_threshold: auto_switch_threshold.unwrap_or(current.auto_switch_threshold),
     };
-    
+
     config::save_user_config(&new_config)?;
 
     if language_changed {
         // 广播语言变更（如果有客户端连接，会通过 WebSocket 发送）
         websocket::broadcast_language_changed(&language_for_broadcast, "desktop");
-        
+
         // 同时写入共享文件（供插件端离线时启动读取）
         // 因为无法确定插件端是否收到了 WebSocket 消息，保守策略是总是写入
         // 但为了减少写入，可以检查是否有客户端连接
         // 这里简化处理：总是写入，插件端启动时会比较时间戳
         modules::sync_settings::write_sync_setting("language", &normalized_language);
     }
-    
+
     Ok(())
 }
 
@@ -230,6 +265,7 @@ pub fn set_app_path(app: String, path: String) -> Result<(), String> {
         "antigravity" => current.antigravity_app_path = normalized_path,
         "codex" => current.codex_app_path = normalized_path,
         "vscode" => current.vscode_app_path = normalized_path,
+        "windsurf" => current.windsurf_app_path = normalized_path,
         "opencode" => current.opencode_app_path = normalized_path,
         _ => return Err("未知应用类型".to_string()),
     }
@@ -238,9 +274,13 @@ pub fn set_app_path(app: String, path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn detect_app_path(app: String) -> Result<Option<String>, String> {
+pub fn detect_app_path(app: String, force: Option<bool>) -> Result<Option<String>, String> {
+    let force = force.unwrap_or(false);
     match app.as_str() {
-        "antigravity" | "codex" | "vscode" | "opencode" => Ok(modules::process::detect_and_save_app_path(app.as_str())),
+        "windsurf" => Ok(modules::windsurf_instance::detect_and_save_windsurf_launch_path(force)),
+        "antigravity" | "codex" | "vscode" | "opencode" => Ok(
+            modules::process::detect_and_save_app_path(app.as_str(), force),
+        ),
         _ => Err("未知应用类型".to_string()),
     }
 }
@@ -256,9 +296,16 @@ pub fn set_wakeup_override(enabled: bool) -> Result<(), String> {
 /// action: "minimize" | "quit"
 /// remember: 是否记住选择
 #[tauri::command]
-pub fn handle_window_close(window: tauri::Window, action: String, remember: bool) -> Result<(), String> {
-    modules::logger::log_info(&format!("[Window] 用户选择: action={}, remember={}", action, remember));
-    
+pub fn handle_window_close(
+    window: tauri::Window,
+    action: String,
+    remember: bool,
+) -> Result<(), String> {
+    modules::logger::log_info(&format!(
+        "[Window] 用户选择: action={}, remember={}",
+        action, remember
+    ));
+
     // 如果需要记住选择，更新配置
     if remember {
         let current = config::get_user_config();
@@ -267,16 +314,16 @@ pub fn handle_window_close(window: tauri::Window, action: String, remember: bool
             "quit" => CloseWindowBehavior::Quit,
             _ => CloseWindowBehavior::Ask,
         };
-        
+
         let new_config = UserConfig {
             close_behavior,
             ..current
         };
-        
+
         config::save_user_config(&new_config)?;
         modules::logger::log_info(&format!("[Window] 已保存关闭行为设置: {}", action));
     }
-    
+
     // 执行操作
     match action.as_str() {
         "minimize" => {
@@ -290,7 +337,7 @@ pub fn handle_window_close(window: tauri::Window, action: String, remember: bool
             return Err("无效的操作".to_string());
         }
     }
-    
+
     Ok(())
 }
 
@@ -298,11 +345,10 @@ pub fn handle_window_close(window: tauri::Window, action: String, remember: bool
 #[tauri::command]
 pub async fn open_folder(path: String) -> Result<(), String> {
     let folder_path = std::path::Path::new(&path);
-    
+
     // 如果目录不存在则创建
     if !folder_path.exists() {
-        std::fs::create_dir_all(folder_path)
-            .map_err(|e| format!("创建文件夹失败: {}", e))?;
+        std::fs::create_dir_all(folder_path).map_err(|e| format!("创建文件夹失败: {}", e))?;
     }
 
     #[cfg(target_os = "macos")]
@@ -336,25 +382,23 @@ pub async fn open_folder(path: String) -> Result<(), String> {
 #[tauri::command]
 pub async fn delete_corrupted_file(path: String) -> Result<(), String> {
     let file_path = std::path::Path::new(&path);
-    
+
     if !file_path.exists() {
         // 文件不存在，直接返回成功
         return Ok(());
     }
-    
+
     // 创建备份文件名
     let timestamp = chrono::Utc::now().timestamp();
     let backup_name = format!("{}.corrupted.{}", path, timestamp);
-    
+
     // 备份文件
-    std::fs::rename(&path, &backup_name)
-        .map_err(|e| format!("备份损坏文件失败: {}", e))?;
-    
+    std::fs::rename(&path, &backup_name).map_err(|e| format!("备份损坏文件失败: {}", e))?;
+
     modules::logger::log_info(&format!(
-        "已备份并删除损坏文件: {} -> {}", 
-        path, 
-        backup_name
+        "已备份并删除损坏文件: {} -> {}",
+        path, backup_name
     ));
-    
+
     Ok(())
 }

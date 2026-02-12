@@ -31,7 +31,9 @@
     "codex": "Codex Hesapları",
     "dashboard": "Gösterge Paneli",
     "instances": "Çoklu Örnek",
-    "githubCopilot": "GitHub Copilot"
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
+    "morePlatforms": "Daha Fazla Platform"
   },
   "settings": {
     "title": "Uygulama Ayarları",
@@ -93,7 +95,21 @@
       "vscodePathSelect": "Seç",
       "vscodePathReset": "Varsayılana sıfırla",
       "antigravityAppPath": "Antigravity Uygulama Yolu",
-      "antigravityTitle": "Antigravity Başlatma"
+      "antigravityTitle": "Antigravity Başlatma",
+      "commonTitle": "Genel",
+      "antigravitySettingsTitle": "Antigravity Ayarları",
+      "codexSettingsTitle": "Codex Ayarları",
+      "githubCopilotSettingsTitle": "GitHub Copilot Ayarları",
+      "ghcpAutoRefresh": "GitHub Copilot kota otomatik yenileme",
+      "ghcpAutoRefreshDesc": "Arka plan güncelleme sıklığı",
+      "windsurfSettingsTitle": "Windsurf Ayarları",
+      "windsurfAutoRefresh": "Windsurf kota otomatik yenileme",
+      "windsurfAutoRefreshDesc": "Arka plan güncelleme sıklığı",
+      "windsurfAppPath": "Windsurf Uygulama Yolu",
+      "windsurfAppPathDesc": "Varsayılan yolu kullanmak için boş bırakın",
+      "windsurfAppPathPlaceholder": "Varsayılan yol",
+      "windsurfPathSelect": "Seç",
+      "windsurfPathReset": "Varsayılana sıfırla"
     },
     "network": {
       "apiTitle": "Antigravity Cockpit API",
@@ -767,6 +783,15 @@
           "commandWin": "Windows: taskkill /F /PID <pid> (CODEX_HOME ile eşleşen)"
         }
       }
+    },
+    "refreshSuccess": "Kota yenilendi",
+    "refreshFailed": "Kota yenileme başarısız: {{error}}",
+    "refreshAllSuccess": "Yenileme tamamlandı, {{count}} hesap başarılı",
+    "refreshAllPartialFailed": "Yenileme tamamlandı, {{success}} / {{total}} hesap başarılı, bazıları başarısız",
+    "quotaError": {
+      "badge": "Kota hatası",
+      "generic": "Kota yenileme başarısız, lütfen daha sonra tekrar deneyin",
+      "deactivatedWorkspace": "Çalışma alanı devre dışı, hesap değiştirin veya yeniden yetkilendirin"
     }
   },
   "dashboard": {
@@ -846,7 +871,8 @@
       "openFolder": "Klasörü aç",
       "edit": "Düzenle",
       "openRootDir": "Klasörü aç",
-      "selectPath": "Yol seç"
+      "selectPath": "Yol seç",
+      "openWindow": "Pencereyi aç"
     },
     "bulkConfirm": {
       "startAll": "Tüm durdurulmuş oturumlar başlatılsın mı?",
@@ -1115,10 +1141,208 @@
     "export": "Dışa aktar",
     "flowNotice": {
       "title": "GitHub Copilot hesap kılavuzu (genişletmek/daraltmak için tıklayın)",
-      "desc": "Mevcut akış: yeni hesabı yetkilendir -> kotaları çekip göster -> çoklu örnek görünümünde hesabı bağla.",
-      "reason": "Neden tek tıkla hesap değişimi yok: VS Code oturum durumu GitHub oturumları ve eklenti SecretStorage tarafından yönetilir; harici uygulamalar bu kimlik bilgilerini değiştiremez.",
-      "storage": "Oturum verilerinin konumu: ağırlıklı olarak VS Code SecretStorage (sistem anahtar zinciri/kimlik bilgisi yöneticisi) ve genel durum veritabanı (ör. ~/Library/Application Support/Code/User/globalStorage/state.vscdb).",
-      "alternative": "Alternatif: çoklu örnek izolasyonunu kullanın (farklı --user-data-dir). Her örnek için bir kez giriş yapın, ardından hedef hesap ortamına hızlı geçiş için örnek bazında başlatın."
+      "desc": "Hesap değiştirme, VS Code yerel kimlik doğrulama deposunun okunmasını ve şifre çözme/geri yazma için sistem kimlik bilgisi hizmetinin kullanılmasını gerektirir; veriler yalnızca yerelde işlenir.",
+      "reason": "İzin kapsamı: VS Code kimlik doğrulama veritabanını (state.vscdb) okumak ve şifre çözme/geri yazma için sistem şifreleme yeteneklerini (Windows DPAPI / macOS Keychain / Linux Secret Service) çağırmak.",
+      "storage": "Okuma kapsamı: yalnızca GitHub oturum açma oturumu ile ilgili veriler işlenir; tüm işlemler yerel olarak yürütülür.",
+      "alternative": "Alternatif: çoklu örnek izolasyonunu kullanın (farklı --user-data-dir). Her örnek için bir kez giriş yapın, ardından hedef hesap ortamına hızlı geçiş için örnek bazında başlatın.",
+      "inject": "Tek tıkla geçiş: Bu araç VS Code'un yerel şifreleme materyalini (DPAPI/Keychain/Secret Service) okur, state.vscdb içindeki kimlik doğrulama oturumunu çözer, GitHub Copilot belirtecini değiştirir ve yeniden şifreler — tüm işlem cihazınızda yerel olarak yapılır."
+    },
+    "injectToVSCode": "VS Code'a geç",
+    "injecting": "Enjekte ediliyor...",
+    "injectSuccess": "Belirteç VS Code'a başarıyla enjekte edildi. VS Code başlatılıyor.",
+    "injectRequireClose": "Enjeksiyondan önce lütfen VS Code'u kapatın."
+  },
+  "quickSettings": {
+    "antigravity": {
+      "title": "Antigravity Ayarları",
+      "appPath": "Uygulama Yolu"
+    },
+    "codex": {
+      "title": "Codex Ayarları",
+      "appPath": "Uygulama Yolu"
+    },
+    "githubCopilot": {
+      "title": "GitHub Copilot Ayarları",
+      "appPath": "VS Code Yolu"
+    },
+    "refreshInterval": "Kotayı otomatik yenile",
+    "codexRefreshInterval": "Kotayı otomatik yenile",
+    "ghcpRefreshInterval": "Kotayı otomatik yenile",
+    "autoSwitch": {
+      "title": "Otomatik Geçiş",
+      "enable": "Otomatik Geçiş",
+      "threshold": "Geçiş Eşiği",
+      "thresholdDesc": "Herhangi bir modelin kotası bu yüzdenin altına düştüğünde otomatik geçiş tetiklenir",
+      "hint": "Herhangi bir modelin kotası eşiğin altına düştüğünde en yüksek kotaya sahip hesaba otomatik olarak geçiş yapar."
+    },
+    "customInput": "Özel",
+    "apply": "Uygula",
+    "inputMinutes": "Dakika girin",
+    "inputPercent": "Yüzde girin",
+    "windsurf": {
+      "title": "Windsurf Ayarları",
+      "appPath": "Windsurf Yolu"
+    },
+    "windsurfRefreshInterval": "Kotayı otomatik yenile"
+  },
+  "privacy": {
+    "hideSensitive": "E-postaları gizle",
+    "showSensitive": "E-postaları göster"
+  },
+  "windsurf": {
+    "title": "Windsurf Hesap Yönetimi",
+    "subtitle": "Windsurf hesaplarınızı yönetin",
+    "overview": {
+      "title": "Hesap Genel Bakışı"
+    },
+    "instances": {
+      "title": "Çoklu Örnek",
+      "subtitle": "Örnek başına bağımsız yapılandırma, birden fazla hesapla paralel çalışma.",
+      "unsupported": {
+        "title": "Bu sistemde desteklenmiyor",
+        "desc": "Windsurf çoklu örnek şu anda yalnızca macOS'ta kullanılabilir."
+      },
+      "quota": {
+        "inline": "Inline Suggestions",
+        "chat": "Chat messages"
+      }
+    },
+    "addAccount": "Hesap ekle",
+    "refreshAll": "Tümünü yenile",
+    "refreshQuota": "Kotayı yenile",
+    "empty": {
+      "title": "Hesap yok",
+      "description": "\"Hesap ekle\"ye tıklayın"
+    },
+    "noMatch": {
+      "title": "Eşleşen hesap yok",
+      "desc": "Aramanızı veya filtrelerinizi ayarlamayı deneyin"
+    },
+    "addModal": {
+      "title": "Windsurf hesabı ekle",
+      "oauth": "OAuth girişi",
+      "token": "JSON içe aktar",
+      "import": "Yerel içe aktar"
+    },
+    "oauth": {
+      "desc": "Aşağıdaki düğmeye tıklayın ve tarayıcıda Windsurf yetkilendirmesini tamamlayın.",
+      "preparing": "Yetkilendirme bağlantısı hazırlanıyor...",
+      "openBrowser": "Tarayıcıda aç",
+      "hint": "Yetkilendirme tamamlanınca bu pencere otomatik güncellenir",
+      "success": "Yetkilendirme başarılı",
+      "failed": "Yetkilendirme başarısız",
+      "retry": "Yetkilendirme bilgisini yeniden oluştur",
+      "timeoutRetry": "Yetkilendirme bağlantısını yenile",
+      "waiting": "Yetkilendirme bekleniyor...",
+      "meta": "Süre bitimine: {{expires}}s; yoklama aralığı: {{interval}}s"
+    },
+    "token": {
+      "desc": "Windsurf erişim belirtecini veya dışa aktarılan JSON verisini yapıştırın.",
+      "placeholder": "JSON içeriğini yapıştırın...",
+      "import": "İçe aktar",
+      "importing": "İçe aktarılıyor...",
+      "importSuccessMsg": "{{count}} hesap içe aktarıldı",
+      "importFailedMsg": "İçe aktarma başarısız: {{error}}",
+      "empty": "Token veya JSON girin"
+    },
+    "import": {
+      "label": "İçe aktar",
+      "localDesc": "Yerelde oturum açılmış oturumlardan Windsurf hesaplarını içe aktar.",
+      "localClient": "Yerel Windsurf'ten içe aktar",
+      "orJson": "Veya JSON dosyasından içe aktar",
+      "importing": "Yerel hesap içe aktarılıyor...",
+      "failedMsg": "İçe aktarma başarısız: {{error}}",
+      "pickFile": "İçe aktarılacak JSON dosyasını seçin"
+    },
+    "quota": {
+      "hourly": "5 saatlik kota",
+      "weekly": "Haftalık kota",
+      "noData": "Kota verisi yok",
+      "resetDone": "Sıfırlandı"
+    },
+    "credits": {
+      "title": "Plan",
+      "renewMonthly": "Krediler her ay yenilenir",
+      "planEndsIn": "Döngü {{days}} gün içinde sıfırlanır",
+      "planEndsUnknown": "Döngü zamanı kullanılamıyor",
+      "periodRange": "Döngü: {{start}} - {{end}}",
+      "periodEndOnly": "Döngü sonu: {{end}}",
+      "left": "{{count}} kredi kaldı",
+      "leftUnknown": "Kalan krediler -",
+      "promptLeft": "{{remaining}}/{{total}} istem kredisi kaldı",
+      "promptLeftNoTotal": "{{remaining}} istem kredisi kaldı",
+      "promptLeftUnknown": "Kalan istem kredileri -",
+      "addOnAvailable": "{{count}} ek kredi kullanılabilir",
+      "usedLine": "{{used}} / {{total}} kullanıldı",
+      "leftInline": "{{left}} kaldı"
+    },
+    "usage": {
+      "resetUnknown": "Kota sıfırlanmasına kalan -",
+      "resetLine": "Kota {{dateText}} tarihinde sıfırlanır."
+    },
+    "time": {
+      "relativeDays": "{{days}} g",
+      "relativeDaysHours": "{{days}} g {{hours}} sa",
+      "relativeHours": "{{hours}} sa",
+      "relativeHoursMinutes": "{{hours}} sa {{minutes}} dk",
+      "relativeMinutes": "{{minutes}} dk",
+      "lessThanMinute": "<1 dk",
+      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+    },
+    "search": "Hesap ara...",
+    "view": {
+      "list": "Liste görünümü",
+      "grid": "Kart görünümü"
+    },
+    "filter": {
+      "all": "Tümü ({{count}})",
+      "free": "FREE ({{count}})",
+      "individual": "INDIVIDUAL ({{count}})",
+      "pro": "PRO ({{count}})",
+      "business": "BUSINESS ({{count}})",
+      "enterprise": "ENTERPRISE ({{count}})"
+    },
+    "filterLabel": "Filtre",
+    "sortLabel": "Sırala",
+    "sort": {
+      "createdAt": "Oluşturulma tarihi",
+      "credits": "Kalan kredilere göre",
+      "planEnd": "Döngü bitişine göre",
+      "descTooltip": "Azalan (Artan için tıkla)",
+      "ascTooltip": "Artan (Azalan için tıkla)",
+      "toggleDirection": "Sıralama yönünü değiştir"
+    },
+    "columns": {
+      "email": "E-posta",
+      "plan": "Etiket",
+      "promptCredits": "İstem kredileri",
+      "addOnPromptCredits": "Ek istem kredileri",
+      "credits": "Krediler",
+      "actions": "İşlemler"
+    },
+    "export": "Dışa aktar",
+    "injectToVSCode": "Windsurf'a geç",
+    "injecting": "Enjekte ediliyor...",
+    "injectSuccess": "Geçiş tamamlandı. Windsurf başlatılıyor.",
+    "injectRequireClose": "Geçiş yapmadan önce lütfen Windsurf'ü kapatın.",
+    "flowNotice": {
+      "title": "Windsurf hesap kılavuzu (genişletmek/daraltmak için tıklayın)",
+      "desc": "Hesap değiştirme, Windsurf yerel kimlik doğrulama deposunun okunmasını ve şifre çözme/geri yazma için sistem kimlik bilgisi hizmetinin kullanılmasını gerektirir; veriler yalnızca yerelde işlenir.",
+      "inject": "Tek tıkla geçiş: Bu araç Windsurf'un yerel şifreleme materyalini (DPAPI/Keychain/Secret Service) okur, state.vscdb içindeki kimlik doğrulama oturumunu çözer, Windsurf belirtecini değiştirir ve yeniden şifreler — tüm işlem cihazınızda yerel olarak yapılır.",
+      "alternative": "Alternatif: çoklu örnek izolasyonunu kullanın (farklı --user-data-dir). Her örnek için bir kez giriş yapın, ardından hedef hesap ortamına hızlı geçiş için örnek bazında başlatın.",
+      "reason": "İzin kapsamı: Windsurf kimlik doğrulama veritabanını (state.vscdb) okumak ve şifre çözme/geri yazma için sistem şifreleme yeteneklerini (Windows DPAPI / macOS Keychain / Linux Secret Service) çağırmak.",
+      "storage": "Okuma kapsamı: yalnızca Windsurf oturum açma oturumu ile ilgili veriler işlenir; tüm işlemler yerel olarak yürütülür."
     }
+  },
+  "platformLayout": {
+    "title": "Platform Düzeni",
+    "sidebarSelected": "Kenar çubuğunda seçili {{count}}/{{max}}",
+    "reset": "Varsayılana sıfırla",
+    "tip": "Sıralamayı değiştirmek için sürükleyin. Kenar çubuğunda en fazla iki platform gösterilebilir. Yalnızca bir platform seçilirse yalnızca bir platform gösterilir.",
+    "sidebarToggle": "Kenar çubuğunda göster",
+    "dashboardToggle": "Panoda göster",
+    "hiddenBadge": "Gizli",
+    "openFromMore": "Platform düzenini yönet",
+    "dragHandleLabel": "Sürükleyerek sırala"
   }
 }

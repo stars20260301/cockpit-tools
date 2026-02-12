@@ -31,7 +31,9 @@
     "codex": "Codex 帳號",
     "dashboard": "儀表板",
     "instances": "多開實例",
-    "githubCopilot": "GitHub Copilot"
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
+    "morePlatforms": "更多平台"
   },
   "settings": {
     "title": "應用程式設定",
@@ -93,7 +95,21 @@
       "vscodePathSelect": "選擇",
       "vscodePathReset": "重設預設值",
       "antigravityAppPath": "Antigravity 啟動路徑",
-      "antigravityTitle": "Antigravity 啟動"
+      "antigravityTitle": "Antigravity 啟動",
+      "commonTitle": "通用",
+      "antigravitySettingsTitle": "Antigravity 設定",
+      "codexSettingsTitle": "Codex 設定",
+      "githubCopilotSettingsTitle": "GitHub Copilot 設定",
+      "ghcpAutoRefresh": "GitHub Copilot 自動重新整理配額",
+      "ghcpAutoRefreshDesc": "背景更新頻率",
+      "windsurfSettingsTitle": "Windsurf 設定",
+      "windsurfAutoRefresh": "Windsurf 自動刷新配額",
+      "windsurfAutoRefreshDesc": "背景自動更新頻率",
+      "windsurfAppPath": "Windsurf 啟動路徑",
+      "windsurfAppPathDesc": "留空則使用預設路徑",
+      "windsurfAppPathPlaceholder": "預設路徑",
+      "windsurfPathSelect": "選擇",
+      "windsurfPathReset": "重設預設值"
     },
     "network": {
       "apiTitle": "Antigravity Cockpit API",
@@ -154,7 +170,7 @@
       "actions": "操作"
     },
     "status": {
-      "current": "目前使用",
+      "current": "目前",
       "disabled": "已停用",
       "authInvalid": "憑證失效",
       "refreshFailed": "刷新失敗",
@@ -767,6 +783,15 @@
           "commandWin": "Windows: taskkill /F /PID <pid>（匹配 CODEX_HOME）"
         }
       }
+    },
+    "refreshSuccess": "配額已重新整理",
+    "refreshFailed": "配額重新整理失敗：{{error}}",
+    "refreshAllSuccess": "重新整理完成，成功 {{count}} 個帳號",
+    "refreshAllPartialFailed": "重新整理完成，成功 {{success}} / {{total}} 個帳號，部分失敗",
+    "quotaError": {
+      "badge": "配額異常",
+      "generic": "配額重新整理失敗，請稍後再試",
+      "deactivatedWorkspace": "工作區已停用，請切換帳號或重新授權"
     }
   },
   "dashboard": {
@@ -846,7 +871,8 @@
       "openFolder": "打開目錄",
       "edit": "編輯",
       "openRootDir": "打開目錄",
-      "selectPath": "選擇路徑"
+      "selectPath": "選擇路徑",
+      "openWindow": "定位視窗"
     },
     "bulkConfirm": {
       "startAll": "是否啟動所有已停止的實例？",
@@ -1115,10 +1141,208 @@
     "export": "匯出",
     "flowNotice": {
       "title": "GitHub Copilot 帳號指南（點擊展開/收合）",
-      "desc": "目前流程：授權新帳號 -> 查詢並顯示額度 -> 在多開檢視中綁定帳號。",
-      "reason": "為何無法一鍵切換帳號：VS Code 的登入狀態由 GitHub 工作階段與擴充套件 SecretStorage 管理，外部應用無法替換這些憑證。",
-      "storage": "登入資料位置：主要在 VS Code SecretStorage（系統鑰匙圈/憑證管理器）與全域狀態資料庫（例如 ~/Library/Application Support/Code/User/globalStorage/state.vscdb）。",
-      "alternative": "替代方案：使用多開隔離（不同 --user-data-dir）。每個實例登入一次，之後按實例啟動即可快速切換到目標帳號環境。"
+      "desc": "切換帳號時需要讀取 VS Code 本機認證儲存，並呼叫系統憑證服務完成解密與回寫；資料僅在本機處理。",
+      "reason": "權限需求：讀取 VS Code 認證資料庫（state.vscdb），並呼叫系統加密能力（Windows DPAPI / macOS Keychain / Linux Secret Service）進行解密與寫回。",
+      "storage": "讀取範圍：僅處理 GitHub 登入工作階段相關資料，所有流程均在本機執行。",
+      "alternative": "替代方案：使用多開隔離（不同 --user-data-dir）。每個實例登入一次，之後按實例啟動即可快速切換到目標帳號環境。",
+      "inject": "一鍵切換：本工具會讀取本機 VS Code 加密材料（DPAPI/Keychain/Secret Service），解密 state.vscdb 中的驗證工作階段，替換 GitHub Copilot 權杖後再加密，全部流程都在本機完成。"
+    },
+    "injectToVSCode": "切換到 VS Code",
+    "injecting": "注入中...",
+    "injectSuccess": "已成功將權杖注入 VS Code，VS Code 正在啟動。",
+    "injectRequireClose": "注入前請先關閉 VS Code。"
+  },
+  "quickSettings": {
+    "antigravity": {
+      "title": "Antigravity 設定",
+      "appPath": "啟動路徑"
+    },
+    "codex": {
+      "title": "Codex 設定",
+      "appPath": "啟動路徑"
+    },
+    "githubCopilot": {
+      "title": "GitHub Copilot 設定",
+      "appPath": "VS Code 路徑"
+    },
+    "refreshInterval": "配額自動重新整理",
+    "codexRefreshInterval": "配額自動重新整理",
+    "ghcpRefreshInterval": "配額自動重新整理",
+    "autoSwitch": {
+      "title": "自動切換",
+      "enable": "自動切換",
+      "threshold": "切換閾值",
+      "thresholdDesc": "任意模型配額低於此百分比時觸發自動切換",
+      "hint": "當任意模型配額低於閾值時，自動切換到配額最高的帳號。"
+    },
+    "customInput": "自訂",
+    "apply": "確定",
+    "inputMinutes": "輸入分鐘數",
+    "inputPercent": "輸入百分比",
+    "windsurf": {
+      "title": "Windsurf 設定",
+      "appPath": "Windsurf 路徑"
+    },
+    "windsurfRefreshInterval": "配額自動重新整理"
+  },
+  "privacy": {
+    "hideSensitive": "隱藏電子郵件",
+    "showSensitive": "顯示電子郵件"
+  },
+  "windsurf": {
+    "title": "Windsurf 帳號管理",
+    "subtitle": "管理您的 Windsurf 帳號",
+    "overview": {
+      "title": "帳號總覽"
+    },
+    "instances": {
+      "title": "多開實例",
+      "subtitle": "多實例獨立配置，多帳號並行運行。",
+      "unsupported": {
+        "title": "暫不支援目前系統",
+        "desc": "Windsurf 多開實例僅支援 macOS，請在 macOS 上使用。"
+      },
+      "quota": {
+        "inline": "Inline Suggestions",
+        "chat": "Chat messages"
+      }
+    },
+    "addAccount": "新增帳號",
+    "refreshAll": "全部刷新",
+    "refreshQuota": "刷新配額",
+    "empty": {
+      "title": "暫無帳號",
+      "description": "點擊「新增帳號」開始管理您的 Windsurf 帳號"
+    },
+    "noMatch": {
+      "title": "沒有匹配的帳號",
+      "desc": "請嘗試調整搜尋或篩選條件"
+    },
+    "addModal": {
+      "title": "新增 Windsurf 帳號",
+      "oauth": "OAuth 登入",
+      "token": "JSON 匯入",
+      "import": "本機匯入"
+    },
+    "oauth": {
+      "desc": "點擊下方按鈕，在瀏覽器中完成 Windsurf 授權。",
+      "preparing": "正在準備授權連結...",
+      "openBrowser": "在瀏覽器中開啟",
+      "hint": "完成授權後，此視窗將自動更新",
+      "success": "授權成功",
+      "failed": "授權失敗",
+      "retry": "重新產生授權資訊",
+      "timeoutRetry": "更新授權連結",
+      "waiting": "等待授權中...",
+      "meta": "有效期限：{{expires}}s；輪詢間隔：{{interval}}s"
+    },
+    "token": {
+      "desc": "貼上 Windsurf 存取權杖或匯出的 JSON 資料。",
+      "placeholder": "貼上 JSON 內容...",
+      "import": "匯入",
+      "importing": "匯入中...",
+      "importSuccessMsg": "成功匯入 {{count}} 個帳號",
+      "importFailedMsg": "匯入失敗: {{error}}",
+      "empty": "請輸入 Token 或 JSON"
+    },
+    "import": {
+      "label": "匯入",
+      "localDesc": "從本機已登入的會話匯入 Windsurf 帳號。",
+      "localClient": "從本機 Windsurf 匯入",
+      "orJson": "或從 JSON 檔案匯入",
+      "importing": "正在匯入本地帳號...",
+      "failedMsg": "匯入失敗: {{error}}",
+      "pickFile": "選擇要匯入的 JSON 檔案"
+    },
+    "quota": {
+      "hourly": "5 小時配額",
+      "weekly": "週配額",
+      "noData": "暫無配額資料",
+      "resetDone": "已重置"
+    },
+    "credits": {
+      "title": "方案",
+      "renewMonthly": "點數每月自動重置",
+      "planEndsIn": "配額週期剩餘 {{days}} 天",
+      "planEndsUnknown": "配額週期時間未知",
+      "periodRange": "週期：{{start}} - {{end}}",
+      "periodEndOnly": "週期結束：{{end}}",
+      "left": "剩餘 {{count}} 點數",
+      "leftUnknown": "剩餘點數 -",
+      "promptLeft": "剩餘 {{remaining}}/{{total}} prompt 點數",
+      "promptLeftNoTotal": "剩餘 {{remaining}} prompt 點數",
+      "promptLeftUnknown": "剩餘 prompt 點數 -",
+      "addOnAvailable": "{{count}} add-on 點數可用",
+      "usedLine": "已使用 {{used}} / {{total}}",
+      "leftInline": "剩餘 {{left}}"
+    },
+    "usage": {
+      "resetUnknown": "額度重置倒數 -",
+      "resetLine": "額度將於 {{dateText}} 重置。"
+    },
+    "time": {
+      "relativeDays": "{{days}}天",
+      "relativeDaysHours": "{{days}}天{{hours}}小時",
+      "relativeHours": "{{hours}}小時",
+      "relativeHoursMinutes": "{{hours}}小時{{minutes}}分鐘",
+      "relativeMinutes": "{{minutes}}分鐘",
+      "lessThanMinute": "<1分鐘",
+      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+    },
+    "search": "搜尋帳號...",
+    "view": {
+      "list": "列表檢視",
+      "grid": "卡片檢視"
+    },
+    "filter": {
+      "all": "全部 ({{count}})",
+      "free": "FREE ({{count}})",
+      "individual": "INDIVIDUAL ({{count}})",
+      "pro": "PRO ({{count}})",
+      "business": "BUSINESS ({{count}})",
+      "enterprise": "ENTERPRISE ({{count}})"
+    },
+    "filterLabel": "篩選",
+    "sortLabel": "排序",
+    "sort": {
+      "createdAt": "按建立時間",
+      "credits": "依剩餘點數排序",
+      "planEnd": "依配額週期結束時間排序",
+      "descTooltip": "目前：降序，點擊切換為升序",
+      "ascTooltip": "目前：升序，點擊切換為降序",
+      "toggleDirection": "切換排序方向"
+    },
+    "columns": {
+      "email": "電子郵件",
+      "plan": "標籤",
+      "promptCredits": "User Prompt 點數",
+      "addOnPromptCredits": "Add-on Prompt 點數",
+      "credits": "點數",
+      "actions": "操作"
+    },
+    "export": "匯出",
+    "injectToVSCode": "切換到 Windsurf",
+    "injecting": "注入中...",
+    "injectSuccess": "已完成切換，Windsurf 正在啟動。",
+    "injectRequireClose": "請先關閉 Windsurf 再進行切換。",
+    "flowNotice": {
+      "title": "Windsurf 帳號指南（點擊展開/收合）",
+      "desc": "切換帳號時需要讀取 Windsurf 本機認證儲存，並呼叫系統憑證服務完成解密與回寫；資料僅在本機處理。",
+      "inject": "一鍵切換：本工具會讀取本機 Windsurf 加密材料（DPAPI/Keychain/Secret Service），解密 state.vscdb 中的驗證工作階段，替換 Windsurf 權杖後再加密，全部流程都在本機完成。",
+      "alternative": "替代方案：使用多開隔離（不同 --user-data-dir）。每個實例登入一次，之後按實例啟動即可快速切換到目標帳號環境。",
+      "reason": "權限需求：讀取 Windsurf 認證資料庫（state.vscdb），並呼叫系統加密能力（Windows DPAPI / macOS Keychain / Linux Secret Service）進行解密與寫回。",
+      "storage": "讀取範圍：僅處理 Windsurf 登入工作階段相關資料，所有流程均在本機執行。"
     }
+  },
+  "platformLayout": {
+    "title": "平台佈局",
+    "sidebarSelected": "側邊欄已選擇 {{count}}/{{max}}",
+    "reset": "恢復預設",
+    "tip": "拖曳可排序；側邊欄最多可顯示兩個平台。若只選擇一個，側邊欄只顯示一個。",
+    "sidebarToggle": "側邊欄顯示",
+    "dashboardToggle": "儀表板顯示",
+    "hiddenBadge": "已隱藏",
+    "openFromMore": "管理平台佈局",
+    "dragHandleLabel": "拖曳排序"
   }
 }

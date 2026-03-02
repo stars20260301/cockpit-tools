@@ -12,6 +12,7 @@ interface SideNavProps {
   onOpenPlatformLayout: () => void;
   easterEggClickCount: number;
   onEasterEggTriggerClick: () => void;
+  hasBreakoutSession: boolean;
 }
 
 interface FlyingRocket {
@@ -33,6 +34,7 @@ export function SideNav({
   onOpenPlatformLayout,
   easterEggClickCount,
   onEasterEggTriggerClick,
+  hasBreakoutSession,
 }: SideNavProps) {
   const { t } = useTranslation();
   const [flyingRockets, setFlyingRockets] = useState<FlyingRocket[]>([]);
@@ -52,6 +54,11 @@ export function SideNav({
   const isMoreActive = !!currentPlatformId && !sidebarVisiblePlatformIds.includes(currentPlatformId);
 
   const handleLogoClick = useCallback(() => {
+    if (hasBreakoutSession) {
+      onEasterEggTriggerClick();
+      return;
+    }
+
     const newRocket: FlyingRocket = {
       id: rocketIdRef.current++,
       x: (Math.random() - 0.5) * 40, // 随机水平偏移
@@ -65,7 +72,7 @@ export function SideNav({
     }, 1500);
 
     onEasterEggTriggerClick();
-  }, [onEasterEggTriggerClick]);
+  }, [hasBreakoutSession, onEasterEggTriggerClick]);
 
   useEffect(() => {
     if (!showMore) return;
@@ -84,12 +91,14 @@ export function SideNav({
       <div className="nav-brand" style={{ position: 'relative', zIndex: 10 }}>
          <div 
            ref={logoRef}
-           className="brand-logo rocket-easter-egg" 
+           className={`brand-logo rocket-easter-egg${hasBreakoutSession ? ' rocket-easter-egg-active' : ''}`}
            onClick={handleLogoClick}
+           title={hasBreakoutSession ? t('breakout.resumeGameNav', '继续游戏') : undefined}
          >
            <Rocket size={20} />
+           {hasBreakoutSession && <span className="rocket-session-indicator" aria-hidden="true" />}
            {/* 点击计数器保持在里面，跟随缩放 */}
-           {easterEggClickCount > 0 && (
+           {!hasBreakoutSession && easterEggClickCount > 0 && (
              <span className="rocket-click-count">{easterEggClickCount}</span>
            )}
          </div>

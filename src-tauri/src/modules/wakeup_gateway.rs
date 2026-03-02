@@ -31,12 +31,13 @@ pub const INTERNAL_HEALTH_CHECK_PATH: &str = "/__ag_internal__/wakeup/health";
 const REQUEST_READ_TIMEOUT: Duration = Duration::from_secs(10);
 const MAX_HTTP_REQUEST_BYTES: usize = 512 * 1024;
 const DEFAULT_THINKING_TEXT: &str = "Thinking";
-const OFFICIAL_LS_START_TIMEOUT: Duration = Duration::from_secs(15);
+// 对齐官方扩展 waitForLanguageServerStart 的 60s 等待窗口，降低冷启动慢时误判失败。
+const OFFICIAL_LS_START_TIMEOUT: Duration = Duration::from_secs(60);
 const OFFICIAL_LS_POLL_TIMEOUT: Duration = Duration::from_secs(60);
 const OFFICIAL_LS_POLL_INTERVAL: Duration = Duration::from_millis(250);
 const OFFICIAL_LS_CLOUD_CODE_DAILY: &str = "https://daily-cloudcode-pa.googleapis.com";
 const OFFICIAL_LS_CLOUD_CODE_PROD: &str = "https://cloudcode-pa.googleapis.com";
-const OFFICIAL_LS_APP_DATA_DIR_PREFIX: &str = "antigravity-cockpit-tools-wakeup-ls";
+const OFFICIAL_LS_DEFAULT_APP_DATA_DIR: &str = "antigravity";
 #[cfg(target_os = "windows")]
 const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
@@ -685,6 +686,16 @@ fn official_ls_cloud_code_endpoint(token: &crate::models::token::TokenData) -> &
     }
 }
 
+fn official_ls_app_data_dir_name() -> String {
+    if let Ok(v) = std::env::var("AG_WAKEUP_OFFICIAL_LS_APP_DATA_DIR") {
+        let trimmed = v.trim();
+        if !trimmed.is_empty() {
+            return trimmed.to_string();
+        }
+    }
+    OFFICIAL_LS_DEFAULT_APP_DATA_DIR.to_string()
+}
+
 fn official_antigravity_info_plist_path() -> &'static str {
     "/Applications/Antigravity.app/Contents/Info.plist"
 }
@@ -968,6 +979,8 @@ fn build_official_ls_local_client(timeout_secs: u64) -> Result<reqwest::Client, 
         .timeout(std::time::Duration::from_secs(timeout_secs))
         .no_proxy()
         .danger_accept_invalid_certs(true)
+        // 本地回环 HTTPS 连接统一关闭 SNI，避免服务端记录 IP-SNI 非法告警。
+        .tls_sni(false)
         .build()
         .map_err(|e| format!("创建官方 LS 本地客户端失败: {}", e))
 }
@@ -1636,11 +1649,8 @@ async fn start_official_ls_process(
     let mut extension_server = start_official_ls_extension_server(token).await?;
     let ls_csrf = uuid::Uuid::new_v4().to_string();
     let cloud_code_endpoint = official_ls_cloud_code_endpoint(token);
-    let app_data_dir = format!(
-        "{}-{}",
-        OFFICIAL_LS_APP_DATA_DIR_PREFIX,
-        account_id.chars().take(8).collect::<String>()
-    );
+    // 对齐官方扩展：app_data_dir 使用固定 IDE 级目录（默认 antigravity），而非按账号拆分。
+    let app_data_dir = official_ls_app_data_dir_name();
 
     let mut cmd = Command::new(&binary_path);
     cmd.arg("--enable_lsp")

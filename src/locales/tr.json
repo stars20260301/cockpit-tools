@@ -1437,7 +1437,14 @@
     "rankingShort": "Yerel",
     "rankingEmpty": "Henüz yerel kayıt yok",
     "rankingClear": "Yerel sıralamayı temizle",
-    "rankingRankShort": "#{{rank}}"
+    "rankingRankShort": "#{{rank}}",
+    "minimize": "Küçült",
+    "resumeGameNav": "Oyuna devam et",
+    "closeConfirmTitle": "Bu oyunu bitir?",
+    "closeConfirmDesc": "Kapatınca bu oyun bitecek ve ilerleme korunmayacak.",
+    "closeContinue": "Oyuna devam",
+    "closeMinimize": "Küçült ve koru",
+    "closeEnd": "Bitir ve kapat"
   },
   "announcement": {
     "title": "Bildirimler",

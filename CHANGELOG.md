@@ -7,6 +7,22 @@ All notable changes to Cockpit Tools will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
+## [0.9.10] - 2026-03-02
+
+### Changed
+- **Official-aligned wakeup execution stability**: Extended official LS startup wait to 60s, aligned client-gateway trajectory polling window to 60s, and switched `app_data_dir` to an official-style IDE-level directory (`antigravity`, overridable by `AG_WAKEUP_OFFICIAL_LS_APP_DATA_DIR`).
+- **Wakeup gateway error-handling flow now mirrors long-running cascade behavior**: When trajectory status remains `RUNNING`, intermediate `errorMessage` steps are treated as transient and polling continues before final fail/success decision.
+- **Antigravity plan badge rendering unified across account surfaces**: Centralized tier badge mapping via `getAntigravityTierBadge` and reused it in Accounts and verification detail surfaces.
+- **Instance account selector ordering now follows Accounts sorting across all platforms**: Account dropdown ordering in multi-instance views now reuses each platform’s Accounts sort logic (Antigravity / Codex / GitHub Copilot / Windsurf / Kiro), avoiding cross-page ordering drift.
+- **Accounts sort preferences are now persisted for all platforms**: Sort field and sort direction in all account pages now persist to local storage and are restored after restart.
+- **Instances list sort preferences are now persisted per platform**: Instance list sort field (`createdAt` / `lastLaunchedAt`) and direction now persist by app type, so restart no longer resets instance list sorting.
+
+### Fixed
+- **Temporary upstream failures now self-retry once in wakeup path**: `temporary`/HTTP 5xx style payloads from `AG_WAKEUP_ERROR_JSON` now trigger a delayed one-time retry before returning failure.
+- **Wakeup verification detail now shows backend user-facing error message**: Detail list now renders `lastMessage` (with truncation), so messages like `Agent execution terminated due to error.` are visible.
+- **Wakeup tasks now respect privacy masking for account emails**: Masking is now applied in task cards, test selectors, history rows, and copied debug text.
+
+---
 ## [0.9.9] - 2026-03-02
 
 ### Added

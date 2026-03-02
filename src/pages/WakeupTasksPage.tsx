@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { confirm as confirmDialog } from '@tauri-apps/plugin-dialog';
 import { openUrl } from '@tauri-apps/plugin-opener';
@@ -12,6 +12,11 @@ import {
   getAntigravityModelDisplayName,
   type AntigravityModelOption,
 } from '../utils/antigravityModels';
+import {
+  isPrivacyModeEnabledByDefault,
+  maskSensitiveValue,
+  PRIVACY_MODE_CHANGED_EVENT,
+} from '../utils/privacy';
 import { OverviewTabsHeader } from '../components/OverviewTabsHeader';
 
 const TASKS_STORAGE_KEY = 'agtools.wakeup.tasks';
@@ -460,6 +465,9 @@ export function WakeupTasksPage({ onNavigate }: WakeupPageProps) {
   const [testing, setTesting] = useState(false);
   const [showTestModal, setShowTestModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [privacyModeEnabled, setPrivacyModeEnabled] = useState<boolean>(() =>
+    isPrivacyModeEnabledByDefault(),
+  );
 
   const [showModal, setShowModal] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
@@ -523,6 +531,10 @@ export function WakeupTasksPage({ onNavigate }: WakeupPageProps) {
     return map;
   }, [filteredModels]);
   const modelConstantRef = useRef(modelConstantById);
+  const maskAccountText = useCallback(
+    (value?: string | null) => maskSensitiveValue(value, privacyModeEnabled),
+    [privacyModeEnabled],
+  );
 
   useEffect(() => {
     tasksRef.current = tasks;
@@ -561,6 +573,28 @@ export function WakeupTasksPage({ onNavigate }: WakeupPageProps) {
       console.error('唤醒互斥通知失败:', error);
     });
   }, [wakeupEnabled]);
+
+  useEffect(() => {
+    const syncPrivacyMode = () => {
+      setPrivacyModeEnabled(isPrivacyModeEnabledByDefault());
+    };
+
+    const handlePrivacyModeChanged = (event: Event) => {
+      const detail = (event as CustomEvent<boolean>).detail;
+      if (typeof detail === 'boolean') {
+        setPrivacyModeEnabled(detail);
+      } else {
+        syncPrivacyMode();
+      }
+    };
+
+    window.addEventListener(PRIVACY_MODE_CHANGED_EVENT, handlePrivacyModeChanged as EventListener);
+    window.addEventListener('focus', syncPrivacyMode);
+    return () => {
+      window.removeEventListener(PRIVACY_MODE_CHANGED_EVENT, handlePrivacyModeChanged as EventListener);
+      window.removeEventListener('focus', syncPrivacyMode);
+    };
+  }, []);
 
   useEffect(() => {
     invoke('wakeup_sync_state', { enabled: wakeupEnabled, tasks }).catch((error) => {
@@ -755,7 +789,7 @@ export function WakeupTasksPage({ onNavigate }: WakeupPageProps) {
     if (payload.trajectoryId) lines.push(`Trajectory ID: ${payload.trajectoryId}`);
     if (typeof payload.errorCode === 'number') lines.push(`Error Code: ${payload.errorCode}`);
     if (payload.message) lines.push(`Message: ${payload.message}`);
-    if (record.accountEmail) lines.push(`Account: ${record.accountEmail}`);
+    if (record.accountEmail) lines.push(`Account: ${maskAccountText(record.accountEmail)}`);
     if (record.modelId) lines.push(`Model: ${record.modelId}`);
     if (record.prompt) lines.push(`Prompt: ${record.prompt}`);
     if (payload.validationUrl) lines.push(`Validation URL: ${payload.validationUrl}`);
@@ -1461,7 +1495,7 @@ export function WakeupTasksPage({ onNavigate }: WakeupPageProps) {
             const modelLabels = task.schedule.selectedModels.map(
               (id) => modelById.get(id)?.displayName || getReadableModelLabel(id)
             );
-            const accountLabels = task.schedule.selectedAccounts;
+            const accountLabels = task.schedule.selectedAccounts.map((email) => maskAccountText(email));
             return (
               <div
                 key={task.id}
@@ -1584,7 +1618,7 @@ export function WakeupTasksPage({ onNavigate }: WakeupPageProps) {
                         setTestSelectedAccounts((prev) => toggleListValue(prev, email, { allowEmpty: true }))
                       }
                     >
-                      {email}
+                      {maskAccountText(email)}
                     </button>
                   ))}
                 </div>
@@ -1670,7 +1704,7 @@ export function WakeupTasksPage({ onNavigate }: WakeupPageProps) {
                       </div>
                       <div className="wakeup-history-meta">
                         <span>{getHistoryModelLabel(record.modelId)}</span>
-                        <span>{record.accountEmail}</span>
+                        <span>{maskAccountText(record.accountEmail)}</span>
                         {record.duration ? <span>{record.duration}ms</span> : null}
                       </div>
                       {record.prompt && (
@@ -1813,7 +1847,7 @@ export function WakeupTasksPage({ onNavigate }: WakeupPageProps) {
                         setFormSelectedAccounts((prev) => toggleListValue(prev, email, { allowEmpty: true }))
                       }
                     >
-                      {email}
+                      {maskAccountText(email)}
                     </button>
                   ))}
                 </div>

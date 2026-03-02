@@ -1437,7 +1437,14 @@
     "rankingShort": "ローカル",
     "rankingEmpty": "ローカル履歴はまだありません",
     "rankingClear": "ローカル履歴をクリア",
-    "rankingRankShort": "#{{rank}}"
+    "rankingRankShort": "#{{rank}}",
+    "minimize": "最小化",
+    "resumeGameNav": "ゲームを再開",
+    "closeConfirmTitle": "このプレイを終了しますか？",
+    "closeConfirmDesc": "閉じるとこのプレイは終了し、進行状況は保持されません。",
+    "closeContinue": "続ける",
+    "closeMinimize": "最小化して保持",
+    "closeEnd": "終了して閉じる"
   },
   "announcement": {
     "title": "通知",

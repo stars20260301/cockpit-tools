@@ -5,10 +5,10 @@ import type { WindsurfAccount } from '../types/windsurf';
 import type { KiroAccount, KiroAccountStatus } from '../types/kiro';
 import {
   formatResetTimeDisplay,
+  getAntigravityTierBadge,
   getDisplayModels,
   getModelShortName,
   getQuotaClass as getAntigravityQuotaClass,
-  getSubscriptionTier,
   matchModelName,
 } from '../utils/account';
 import {
@@ -248,7 +248,7 @@ export function buildAntigravityAccountPresentation(
   displayGroups: DisplayGroup[],
   t: Translate,
 ): UnifiedAccountPresentation {
-  const normalizedTier = getSubscriptionTier(account.quota);
+  const tierBadge = getAntigravityTierBadge(account.quota);
   const quotaItems = getAntigravityQuotaDisplayItems(account, displayGroups).map((item) => ({
     key: item.key,
     label: item.label,
@@ -262,8 +262,8 @@ export function buildAntigravityAccountPresentation(
   return {
     id: account.id,
     displayName: account.email,
-    planLabel: normalizedTier,
-    planClass: normalizedTier.toLowerCase(),
+    planLabel: tierBadge.label,
+    planClass: tierBadge.className,
     quotaItems,
   };
 }

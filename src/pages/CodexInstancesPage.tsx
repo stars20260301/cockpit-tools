@@ -13,10 +13,15 @@ import {
  * Codex 多开实例内容组件（不包含 header）
  * 用于嵌入到 CodexAccountsPage 中
  */
-export function CodexInstancesContent() {
+interface CodexInstancesContentProps {
+  accountsForSelect?: CodexAccount[];
+}
+
+export function CodexInstancesContent({ accountsForSelect }: CodexInstancesContentProps = {}) {
   const { t } = useTranslation();
   const instanceStore = useCodexInstanceStore();
-  const { accounts, fetchAccounts } = useCodexAccountStore();
+  const { accounts: storeAccounts, fetchAccounts } = useCodexAccountStore();
+  const accounts = accountsForSelect ?? storeAccounts;
   const isSupportedPlatform = usePlatformRuntimeSupport('macos-only');
 
   const renderCodexQuotaPreview = (account: CodexAccount) => {

@@ -1437,7 +1437,14 @@
     "rankingShort": "محلي",
     "rankingEmpty": "لا توجد سجلات محلية بعد",
     "rankingClear": "مسح السجل المحلي",
-    "rankingRankShort": "#{{rank}}"
+    "rankingRankShort": "#{{rank}}",
+    "minimize": "تصغير",
+    "resumeGameNav": "متابعة اللعبة",
+    "closeConfirmTitle": "إنهاء هذه الجولة؟",
+    "closeConfirmDesc": "عند الإغلاق ستنتهي هذه الجولة ولن يتم الاحتفاظ بالتقدم.",
+    "closeContinue": "متابعة اللعب",
+    "closeMinimize": "تصغير مع الاحتفاظ",
+    "closeEnd": "إنهاء وإغلاق"
   },
   "announcement": {
     "title": "الإشعارات",

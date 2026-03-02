@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { InstancesManager } from '../components/InstancesManager';
 import { OverviewTabsHeader } from '../components/OverviewTabsHeader';
@@ -11,6 +11,13 @@ import {
   buildAntigravityAccountPresentation,
   buildQuotaPreviewLines,
 } from '../presentation/platformAccountPresentation';
+import {
+  ANTIGRAVITY_ACCOUNTS_SORT_BY_STORAGE_KEY,
+  ANTIGRAVITY_ACCOUNTS_SORT_DIRECTION_STORAGE_KEY,
+  createAntigravityAccountComparator,
+  normalizeAntigravitySortBy,
+  normalizeAntigravitySortDirection,
+} from '../utils/antigravityAccountSort';
 
 interface InstancesPageProps {
   onNavigate?: (page: Page) => void;
@@ -21,6 +28,30 @@ export function InstancesPage({ onNavigate }: InstancesPageProps) {
   const instanceStore = useInstanceStore();
   const { accounts, fetchAccounts } = useAccountStore();
   const [displayGroups, setDisplayGroups] = useState<DisplayGroup[]>([]);
+  const [sortBy] = useState(() =>
+    normalizeAntigravitySortBy(
+      localStorage.getItem(ANTIGRAVITY_ACCOUNTS_SORT_BY_STORAGE_KEY),
+    ),
+  );
+  const [sortDirection] = useState(() =>
+    normalizeAntigravitySortDirection(
+      localStorage.getItem(ANTIGRAVITY_ACCOUNTS_SORT_DIRECTION_STORAGE_KEY),
+    ),
+  );
+
+  const accountSortComparator = useMemo(
+    () =>
+      createAntigravityAccountComparator({
+        sortBy,
+        sortDirection,
+        displayGroups,
+      }),
+    [displayGroups, sortBy, sortDirection],
+  );
+  const sortedAccountsForSelect = useMemo(
+    () => [...accounts].sort(accountSortComparator),
+    [accountSortComparator, accounts],
+  );
 
   useEffect(() => {
     getDisplayGroups()
@@ -61,7 +92,7 @@ export function InstancesPage({ onNavigate }: InstancesPageProps) {
       />
       <InstancesManager
         instanceStore={instanceStore}
-        accounts={accounts}
+        accounts={sortedAccountsForSelect}
         fetchAccounts={fetchAccounts}
         renderAccountQuotaPreview={renderAccountQuotaPreview}
         renderAccountBadge={(account) => {

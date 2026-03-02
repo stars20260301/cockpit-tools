@@ -46,6 +46,11 @@ interface InstancesManagerProps<TAccount extends AccountLike> {
 
 const INSTANCE_AUTO_REFRESH_INTERVAL_MS = 10_000;
 
+const resolveInstanceSortStorageKeys = (appType: InstancesManagerProps<AccountLike>['appType']) => ({
+  sortField: `agtools.${appType}.instances.sort_field`,
+  sortDirection: `agtools.${appType}.instances.sort_direction`,
+});
+
 const hashDirName = (name: string) => {
   const trimmed = name.trim();
   if (!trimmed) return '';
@@ -111,8 +116,16 @@ export function InstancesManager<TAccount extends AccountLike>({
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [startingInstanceIds, setStartingInstanceIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortField, setSortField] = useState<InstanceSortField>('createdAt');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [sortField, setSortField] = useState<InstanceSortField>(() => {
+    const keys = resolveInstanceSortStorageKeys(appType);
+    const saved = localStorage.getItem(keys.sortField);
+    return saved === 'lastLaunchedAt' ? 'lastLaunchedAt' : 'createdAt';
+  });
+  const [sortDirection, setSortDirection] = useState<SortDirection>(() => {
+    const keys = resolveInstanceSortStorageKeys(appType);
+    const saved = localStorage.getItem(keys.sortDirection);
+    return saved === 'desc' ? 'desc' : 'asc';
+  });
   const [privacyModeEnabled, setPrivacyModeEnabled] = useState<boolean>(() => isPrivacyModeEnabledByDefault());
 
   const startingInstanceIdSet = useMemo(() => new Set(startingInstanceIds), [startingInstanceIds]);
@@ -179,6 +192,16 @@ export function InstancesManager<TAccount extends AccountLike>({
     if (!formError || !showModal) return;
     formErrorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [formError, formErrorTick, showModal]);
+
+  useEffect(() => {
+    const keys = resolveInstanceSortStorageKeys(appType);
+    localStorage.setItem(keys.sortField, sortField);
+  }, [appType, sortField]);
+
+  useEffect(() => {
+    const keys = resolveInstanceSortStorageKeys(appType);
+    localStorage.setItem(keys.sortDirection, sortDirection);
+  }, [appType, sortDirection]);
 
   const sortedInstances = useMemo(
     () =>

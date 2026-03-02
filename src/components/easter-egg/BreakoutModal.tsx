@@ -1,4 +1,4 @@
-import { Pause, Play, X } from 'lucide-react';
+import { Minus, Pause, Play, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALL_PLATFORM_IDS, PlatformId } from '../../types/platform';
@@ -6,7 +6,9 @@ import { renderPlatformIcon } from '../../utils/platformMeta';
 import './BreakoutModal.css';
 
 interface BreakoutModalProps {
-  onClose: () => void;
+  open: boolean;
+  onMinimize: () => void;
+  onTerminate: () => void;
 }
 
 type DropType = 'split' | 'triple' | 'expand' | 'shield';
@@ -1597,7 +1599,7 @@ function getHistoryRank(records: GameHistoryRecord[], targetId: string): number 
   return index >= 0 ? index + 1 : null;
 }
 
-export function BreakoutModal({ onClose }: BreakoutModalProps) {
+export function BreakoutModal({ open, onMinimize, onTerminate }: BreakoutModalProps) {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const keysRef = useRef({ left: false, right: false });
@@ -1628,6 +1630,7 @@ export function BreakoutModal({ onClose }: BreakoutModalProps) {
   const historyRecordsRef = useRef<GameHistoryRecord[]>(historyRecords);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [gameOverRank, setGameOverRank] = useState<number | null>(null);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const [stageSize, setStageSize] = useState<StageSize>(() =>
     calcStageSize(window.innerWidth, window.innerHeight),
   );
@@ -1706,10 +1709,38 @@ export function BreakoutModal({ onClose }: BreakoutModalProps) {
     saveBreakoutHistoryRecords([]);
   }, []);
 
-  const handleClose = useCallback(() => {
+  const handleEndAndClose = useCallback(() => {
     appendHistoryRecord(stateRef.current, 'manualExit');
-    onClose();
-  }, [appendHistoryRecord, onClose]);
+    setShowCloseConfirm(false);
+    setHistoryOpen(false);
+    onTerminate();
+  }, [appendHistoryRecord, onTerminate]);
+
+  const handleMinimize = useCallback(() => {
+    if (isStartedRef.current && !isGameOverRef.current && !isPausedRef.current) {
+      isPausedRef.current = true;
+      setIsPaused(true);
+    }
+    keysRef.current.left = false;
+    keysRef.current.right = false;
+    setShowCloseConfirm(false);
+    setHistoryOpen(false);
+    onMinimize();
+  }, [onMinimize]);
+
+  const handleRequestClose = useCallback(() => {
+    if (isStartedRef.current && !isGameOverRef.current) {
+      if (!isPausedRef.current) {
+        isPausedRef.current = true;
+        setIsPaused(true);
+      }
+      keysRef.current.left = false;
+      keysRef.current.right = false;
+      setShowCloseConfirm(true);
+      return;
+    }
+    handleEndAndClose();
+  }, [handleEndAndClose]);
 
   const drawFrame = useCallback((ctx: CanvasRenderingContext2D, state: GameState) => {
     ctx.clearRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
@@ -1858,6 +1889,15 @@ export function BreakoutModal({ onClose }: BreakoutModalProps) {
     keysRef.current.right = false;
     lastFrameRef.current = 0;
   }, []);
+
+  useEffect(() => {
+    if (open) return;
+    keysRef.current.left = false;
+    keysRef.current.right = false;
+    setHistoryOpen(false);
+    setShowCloseConfirm(false);
+    lastFrameRef.current = 0;
+  }, [open]);
 
   const updateGame = useCallback((state: GameState, dt: number, now: number): 'running' | 'gameOver' | 'levelCleared' => {
     if (now > state.expandUntil && state.paddleWidth !== PADDLE_BASE_WIDTH) {
@@ -2126,10 +2166,11 @@ export function BreakoutModal({ onClose }: BreakoutModalProps) {
   }, []);
 
   useEffect(() => {
+    if (!open) return;
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
       if (key === 'escape') {
-        handleClose();
+        handleRequestClose();
         return;
       }
 
@@ -2205,9 +2246,10 @@ export function BreakoutModal({ onClose }: BreakoutModalProps) {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [handleClose, handleLaunchBall, handleNextLevel, handlePauseToggle, handleRestart, handleStartGame]);
+  }, [handleLaunchBall, handleNextLevel, handlePauseToggle, handleRequestClose, handleRestart, handleStartGame, open]);
 
   useEffect(() => {
+    if (!open) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -2285,20 +2327,15 @@ export function BreakoutModal({ onClose }: BreakoutModalProps) {
         window.cancelAnimationFrame(rafRef.current);
       }
     };
-  }, [appendHistoryRecord, drawFrame, updateGame, updateLevelClearedBackground]);
+  }, [appendHistoryRecord, drawFrame, open, updateGame, updateLevelClearedBackground]);
+
+  if (!open) {
+    return null;
+  }
 
   return (
     <div className="modal-overlay breakout-overlay">
       <div className="breakout-modal" onClick={(event) => event.stopPropagation()}>
-        <button
-          className="breakout-close"
-          onClick={handleClose}
-          aria-label={t('common.close', '关闭')}
-          title={t('common.close', '关闭')}
-        >
-          <X size={16} />
-        </button>
-
         <div
           className="breakout-stage"
           style={{ width: `${stageSize.width}px`, height: `${stageSize.height}px` }}
@@ -2354,6 +2391,24 @@ export function BreakoutModal({ onClose }: BreakoutModalProps) {
                 aria-label={isPaused ? t('breakout.resume', '继续') : t('breakout.pause', '暂停')}
               >
                 {isPaused ? <Play size={14} /> : <Pause size={14} />}
+              </button>
+              <button
+                type="button"
+                className="breakout-window-btn"
+                onClick={handleMinimize}
+                title={t('breakout.minimize', '最小化')}
+                aria-label={t('breakout.minimize', '最小化')}
+              >
+                <Minus size={14} />
+              </button>
+              <button
+                type="button"
+                className="breakout-window-btn close"
+                onClick={handleRequestClose}
+                title={t('common.close', '关闭')}
+                aria-label={t('common.close', '关闭')}
+              >
+                <X size={14} />
               </button>
               <span className="breakout-shields">
                 {Array.from({ length: shields }).map((_, index) => (
@@ -2432,6 +2487,42 @@ export function BreakoutModal({ onClose }: BreakoutModalProps) {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {showCloseConfirm && (
+            <div className="breakout-close-confirm">
+              <div className="breakout-close-confirm-card">
+                <div className="breakout-close-confirm-title">
+                  {t('breakout.closeConfirmTitle', '结束本局？')}
+                </div>
+                <div className="breakout-close-confirm-desc">
+                  {t('breakout.closeConfirmDesc', '关闭后本局将结束，进度不会保留。')}
+                </div>
+                <div className="breakout-close-confirm-actions">
+                  <button
+                    type="button"
+                    className="breakout-close-confirm-btn"
+                    onClick={() => setShowCloseConfirm(false)}
+                  >
+                    {t('breakout.closeContinue', '继续游戏')}
+                  </button>
+                  <button
+                    type="button"
+                    className="breakout-close-confirm-btn"
+                    onClick={handleMinimize}
+                  >
+                    {t('breakout.closeMinimize', '最小化保留')}
+                  </button>
+                  <button
+                    type="button"
+                    className="breakout-close-confirm-btn danger"
+                    onClick={handleEndAndClose}
+                  >
+                    {t('breakout.closeEnd', '结束并关闭')}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

@@ -47,6 +47,19 @@ export function getSubscriptionTierDisplay(quota?: QuotaData): string {
   return getSubscriptionTier(quota);
 }
 
+export function getAntigravityTierBadge(quota?: QuotaData): {
+  tier: string;
+  label: string;
+  className: string;
+} {
+  const tier = getSubscriptionTier(quota);
+  return {
+    tier,
+    label: tier,
+    className: tier.toLowerCase(),
+  };
+}
+
 export function getQuotaClass(percentage: number): string {
   if (percentage >= 70) return 'high';
   if (percentage >= 30) return 'medium';

@@ -15,18 +15,25 @@ import {
  * Kiro 多开实例内容组件（不包含 header）
  * 用于嵌入到 KiroAccountsPage 中
  */
-export function KiroInstancesContent() {
+interface KiroInstancesContentProps {
+  accountsForSelect?: KiroAccount[];
+}
+
+export function KiroInstancesContent({
+  accountsForSelect,
+}: KiroInstancesContentProps = {}) {
   const { t } = useTranslation();
   const instanceStore = useKiroInstanceStore();
-  const { accounts, fetchAccounts } = useKiroAccountStore();
+  const { accounts: storeAccounts, fetchAccounts } = useKiroAccountStore();
+  const sourceAccounts = accountsForSelect ?? storeAccounts;
   type AccountForSelect = KiroAccount & { email: string };
-  const accountsForSelect = useMemo(
+  const mappedAccountsForSelect = useMemo(
     () =>
-      accounts.map((acc) => ({
+      sourceAccounts.map((acc) => ({
         ...acc,
         email: acc.email || getKiroAccountDisplayEmail(acc),
       })) as AccountForSelect[],
-    [accounts],
+    [sourceAccounts],
   );
   const isSupportedPlatform = usePlatformRuntimeSupport('desktop');
 
@@ -51,7 +58,7 @@ export function KiroInstancesContent() {
   return (
     <PlatformInstancesContent<AccountForSelect>
       instanceStore={instanceStore}
-      accounts={accountsForSelect}
+      accounts={mappedAccountsForSelect}
       fetchAccounts={fetchAccounts}
       renderAccountQuotaPreview={renderKiroQuotaPreview}
       renderAccountBadge={(account) => {

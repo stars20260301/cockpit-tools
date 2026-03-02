@@ -14,6 +14,7 @@ import {
   getAntigravityModelDisplayName,
   type AntigravityModelOption,
 } from '../utils/antigravityModels';
+import { getAntigravityTierBadge } from '../utils/account';
 import {
   isPrivacyModeEnabledByDefault,
   maskSensitiveValue,
@@ -318,6 +319,15 @@ export function WakeupVerificationPage({ onNavigate }: WakeupVerificationPagePro
   const maskAccountText = useCallback(
     (value?: string | null) => maskSensitiveValue(value, privacyModeEnabled),
     [privacyModeEnabled],
+  );
+  const resolveAccountPlanBadge = useCallback(
+    (accountId?: string | null) => {
+      if (!accountId) return null;
+      const account = accountById.get(accountId);
+      if (!account) return null;
+      return getAntigravityTierBadge(account.quota);
+    },
+    [accountById],
   );
 
   const fetchHistory = async () => {
@@ -744,6 +754,25 @@ export function WakeupVerificationPage({ onNavigate }: WakeupVerificationPagePro
     );
   };
 
+  const renderDetailMessage = (item: WakeupVerificationStateItem) => {
+    const normalizedStatus = normalizeStatus(item.status);
+    if (normalizedStatus === STATUS_SUCCESS || normalizedStatus === STATUS_RUNNING) {
+      return null;
+    }
+    const message = item.lastMessage?.replace(/\s+/g, ' ').trim();
+    if (!message) return null;
+    const maxLength = 260;
+    const display = message.length > maxLength ? `${message.slice(0, maxLength)}...` : message;
+    return (
+      <div
+        className={`verification-progress-message ${isFailedStatus(normalizedStatus) ? 'is-failed' : ''}`}
+        title={message}
+      >
+        {display}
+      </div>
+    );
+  };
+
   const resolveModelLabel = (modelId?: string | null) => {
     if (!modelId) return t('wakeup.format.none');
     return modelNameById.get(modelId) || getAntigravityModelDisplayName(modelId) || modelId;
@@ -1025,25 +1054,36 @@ export function WakeupVerificationPage({ onNavigate }: WakeupVerificationPagePro
                 {filteredDetailRows.length === 0 ? (
                   <li className="verification-progress-empty">{t('wakeup.historyEmpty')}</li>
                 ) : (
-                  filteredDetailRows.map((item) => (
-                    <li key={`${activeDetailBatchLabel}-${item.accountId}`} className="verification-progress-item">
-                      <div className="verification-progress-main">
-                        <span className="verification-account-email">{maskAccountText(item.accountEmail)}</span>
-                        <span className={`verification-status-pill ${getStatusClass(item.status)}`}>
-                          {getStatusText(item.status)}
-                        </span>
-                        {item.durationMs ? <span className="verification-duration">{item.durationMs}ms</span> : null}
-                      </div>
-                      <div className="verification-progress-sub">
-                        {resolveModelLabel(item.lastModel)}
-                        {typeof item.lastErrorCode === 'number'
-                          ? ` · ${t('wakeup.errorUi.errorCode', { code: item.lastErrorCode })}`
-                          : ''}
-                        {item.trajectoryId ? ` · ${t('wakeup.errorUi.trajectoryId', { id: item.trajectoryId })}` : ''}
-                      </div>
-                      {item.validationUrl ? renderValidationActions(item) : null}
-                    </li>
-                  ))
+                  filteredDetailRows.map((item) => {
+                    const planBadge = resolveAccountPlanBadge(item.accountId);
+                    return (
+                      <li key={`${activeDetailBatchLabel}-${item.accountId}`} className="verification-progress-item">
+                        <div className="verification-progress-main">
+                          <span className="verification-account-email">{maskAccountText(item.accountEmail)}</span>
+                          {planBadge ? (
+                            <span className={`tier-badge ${planBadge.className}`}>
+                              {planBadge.label}
+                            </span>
+                          ) : null}
+                          <span className={`verification-status-pill ${getStatusClass(item.status)}`}>
+                            {getStatusText(item.status)}
+                          </span>
+                          {item.durationMs ? <span className="verification-duration">{item.durationMs}ms</span> : null}
+                        </div>
+                        <div className="verification-progress-sub">
+                          {resolveModelLabel(item.lastModel)}
+                          {typeof item.lastErrorCode === 'number'
+                            ? ` · ${t('wakeup.errorUi.errorCode', { code: item.lastErrorCode })}`
+                            : ''}
+                          {item.trajectoryId
+                            ? ` · ${t('wakeup.errorUi.trajectoryId', { id: item.trajectoryId })}`
+                            : ''}
+                        </div>
+                        {renderDetailMessage(item)}
+                        {item.validationUrl ? renderValidationActions(item) : null}
+                      </li>
+                    );
+                  })
                 )}
               </ul>
             </div>

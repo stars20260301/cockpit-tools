@@ -1437,7 +1437,14 @@
     "rankingShort": "Místní",
     "rankingEmpty": "Zatím bez místních záznamů",
     "rankingClear": "Vymazat místní pořadí",
-    "rankingRankShort": "#{{rank}}"
+    "rankingRankShort": "#{{rank}}",
+    "minimize": "Minimalizovat",
+    "resumeGameNav": "Pokračovat ve hře",
+    "closeConfirmTitle": "Ukončit tuto hru?",
+    "closeConfirmDesc": "Po zavření bude tato hra ukončena a postup se neuloží.",
+    "closeContinue": "Pokračovat ve hře",
+    "closeMinimize": "Minimalizovat a ponechat",
+    "closeEnd": "Ukončit a zavřít"
   },
   "announcement": {
     "title": "Oznámení",

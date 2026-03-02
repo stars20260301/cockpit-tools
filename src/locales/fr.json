@@ -1437,7 +1437,14 @@
     "rankingShort": "Locale",
     "rankingEmpty": "Aucun enregistrement local",
     "rankingClear": "Effacer l'historique local",
-    "rankingRankShort": "#{{rank}}"
+    "rankingRankShort": "#{{rank}}",
+    "minimize": "Réduire",
+    "resumeGameNav": "Reprendre la partie",
+    "closeConfirmTitle": "Terminer cette partie ?",
+    "closeConfirmDesc": "La fermeture mettra fin à cette partie et la progression ne sera pas conservée.",
+    "closeContinue": "Continuer à jouer",
+    "closeMinimize": "Réduire et conserver",
+    "closeEnd": "Terminer et fermer"
   },
   "announcement": {
     "title": "Notifications",

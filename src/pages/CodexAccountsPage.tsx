@@ -384,6 +384,28 @@ export function CodexAccountsPage() {
   }, [accounts, resolvePlanKey]);
 
   // ─── Filtering & Sorting ────────────────────────────────────────────
+  const compareAccountsBySort = useCallback((a: CodexAccount, b: CodexAccount) => {
+    if (sortBy === 'created_at') {
+      const diff = b.created_at - a.created_at;
+      return sortDirection === 'desc' ? diff : -diff;
+    }
+    if (sortBy === 'weekly_reset' || sortBy === 'hourly_reset') {
+      const aR = sortBy === 'weekly_reset' ? a.quota?.weekly_reset_time ?? null : a.quota?.hourly_reset_time ?? null;
+      const bR = sortBy === 'weekly_reset' ? b.quota?.weekly_reset_time ?? null : b.quota?.hourly_reset_time ?? null;
+      if (aR == null && bR == null) return 0;
+      if (aR == null) return 1;
+      if (bR == null) return -1;
+      return sortDirection === 'desc' ? bR - aR : aR - bR;
+    }
+    const aV = sortBy === 'weekly' ? a.quota?.weekly_percentage ?? -1 : a.quota?.hourly_percentage ?? -1;
+    const bV = sortBy === 'weekly' ? b.quota?.weekly_percentage ?? -1 : b.quota?.hourly_percentage ?? -1;
+    return sortDirection === 'desc' ? bV - aV : aV - bV;
+  }, [sortBy, sortDirection]);
+
+  const sortedAccountsForInstances = useMemo(
+    () => [...accounts].sort(compareAccountsBySort),
+    [accounts, compareAccountsBySort],
+  );
 
   const filteredAccounts = useMemo(() => {
     let result = [...accounts];
@@ -396,20 +418,9 @@ export function CodexAccountsPage() {
       const selectedTags = new Set(tagFilter.map(normalizeTag));
       result = result.filter((a) => (a.tags || []).map(normalizeTag).some((tag) => selectedTags.has(tag)));
     }
-    result.sort((a, b) => {
-      if (sortBy === 'created_at') { const diff = b.created_at - a.created_at; return sortDirection === 'desc' ? diff : -diff; }
-      if (sortBy === 'weekly_reset' || sortBy === 'hourly_reset') {
-        const aR = sortBy === 'weekly_reset' ? a.quota?.weekly_reset_time ?? null : a.quota?.hourly_reset_time ?? null;
-        const bR = sortBy === 'weekly_reset' ? b.quota?.weekly_reset_time ?? null : b.quota?.hourly_reset_time ?? null;
-        if (aR == null && bR == null) return 0; if (aR == null) return 1; if (bR == null) return -1;
-        return sortDirection === 'desc' ? bR - aR : aR - bR;
-      }
-      const aV = sortBy === 'weekly' ? a.quota?.weekly_percentage ?? -1 : a.quota?.hourly_percentage ?? -1;
-      const bV = sortBy === 'weekly' ? b.quota?.weekly_percentage ?? -1 : b.quota?.hourly_percentage ?? -1;
-      return sortDirection === 'desc' ? bV - aV : aV - bV;
-    });
+    result.sort(compareAccountsBySort);
     return result;
-  }, [accounts, filterType, normalizeTag, resolvePlanKey, resolvePresentation, searchQuery, sortBy, sortDirection, tagFilter]);
+  }, [accounts, compareAccountsBySort, filterType, normalizeTag, resolvePlanKey, resolvePresentation, searchQuery, tagFilter]);
 
   const groupedAccounts = useMemo(() => {
     if (!groupByTag) return [] as Array<[string, typeof filteredAccounts]>;
@@ -703,7 +714,9 @@ export function CodexAccountsPage() {
         onClose={() => setShowTagModal(null)} onSave={handleSaveTags} />
       </>)}
 
-      {activeTab === 'instances' && <CodexInstancesContent />}
+      {activeTab === 'instances' && (
+        <CodexInstancesContent accountsForSelect={sortedAccountsForInstances} />
+      )}
     </div>
   );
 }

@@ -15,18 +15,25 @@ import {
  * GitHub Copilot 多开实例内容组件（不包含 header）
  * 用于嵌入到 GitHubCopilotAccountsPage 中
  */
-export function GitHubCopilotInstancesContent() {
+interface GitHubCopilotInstancesContentProps {
+  accountsForSelect?: GitHubCopilotAccount[];
+}
+
+export function GitHubCopilotInstancesContent({
+  accountsForSelect,
+}: GitHubCopilotInstancesContentProps = {}) {
   const { t } = useTranslation();
   const instanceStore = useGitHubCopilotInstanceStore();
-  const { accounts, fetchAccounts } = useGitHubCopilotAccountStore();
+  const { accounts: storeAccounts, fetchAccounts } = useGitHubCopilotAccountStore();
+  const sourceAccounts = accountsForSelect ?? storeAccounts;
   type AccountForSelect = GitHubCopilotAccount & { email: string };
-  const accountsForSelect = useMemo(
+  const mappedAccountsForSelect = useMemo(
     () =>
-      accounts.map((acc) => ({
+      sourceAccounts.map((acc) => ({
         ...acc,
         email: acc.email || getGitHubCopilotAccountDisplayEmail(acc),
       })) as AccountForSelect[],
-    [accounts],
+    [sourceAccounts],
   );
   const isSupportedPlatform = usePlatformRuntimeSupport('desktop');
 
@@ -51,7 +58,7 @@ export function GitHubCopilotInstancesContent() {
   return (
     <PlatformInstancesContent<AccountForSelect>
       instanceStore={instanceStore}
-      accounts={accountsForSelect}
+      accounts={mappedAccountsForSelect}
       fetchAccounts={fetchAccounts}
       renderAccountQuotaPreview={renderGitHubCopilotQuotaPreview}
       renderAccountBadge={(account) => {

@@ -208,6 +208,7 @@ function App() {
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const [showPlatformLayoutModal, setShowPlatformLayoutModal] = useState(false);
   const [showBreakout, setShowBreakout] = useState(false);
+  const [hasBreakoutSession, setHasBreakoutSession] = useState(false);
   const [appPathMissing, setAppPathMissing] = useState<AppPathMissingDetail | null>(null);
   const [appPathSetting, setAppPathSetting] = useState(false);
   const [appPathDetecting, setAppPathDetecting] = useState(false);
@@ -215,15 +216,38 @@ function App() {
   const [appPathActionError, setAppPathActionError] = useState('');
   const { showModal, closeModal } = useGlobalModal();
   const trayRefreshInFlightRef = useRef(false);
-  const openBreakout = useCallback(() => setShowBreakout(true), []);
+  const openBreakout = useCallback(() => {
+    setHasBreakoutSession(true);
+    setShowBreakout(true);
+  }, []);
+  const handleBreakoutMinimize = useCallback(() => {
+    setShowBreakout(false);
+  }, []);
+  const handleBreakoutTerminate = useCallback(() => {
+    setShowBreakout(false);
+    setHasBreakoutSession(false);
+  }, []);
+  const handleResumeBreakout = useCallback(() => {
+    if (!hasBreakoutSession) return;
+    setShowBreakout(true);
+  }, [hasBreakoutSession]);
   const {
     count: easterEggClickCount,
     registerClick: handleEasterEggTriggerClick,
+    reset: resetEasterEggTrigger,
   } = useEasterEggTrigger({
     threshold: 20,
     windowMs: 8000,
     onTrigger: openBreakout,
   });
+  const handleBreakoutEntryTriggerClick = useCallback(() => {
+    if (hasBreakoutSession) {
+      resetEasterEggTrigger();
+      handleResumeBreakout();
+      return;
+    }
+    handleEasterEggTriggerClick();
+  }, [handleEasterEggTriggerClick, handleResumeBreakout, hasBreakoutSession, resetEasterEggTrigger]);
   
   // 启用自动刷新 hook
   useAutoRefresh();
@@ -930,9 +954,13 @@ function App() {
         </Suspense>
       )}
 
-      {showBreakout && (
+      {hasBreakoutSession && (
         <Suspense fallback={null}>
-          <BreakoutModal onClose={() => setShowBreakout(false)} />
+          <BreakoutModal
+            open={showBreakout}
+            onMinimize={handleBreakoutMinimize}
+            onTerminate={handleBreakoutTerminate}
+          />
         </Suspense>
       )}
 
@@ -1044,7 +1072,8 @@ function App() {
         setPage={setPage}
         onOpenPlatformLayout={() => setShowPlatformLayoutModal(true)}
         easterEggClickCount={easterEggClickCount}
-        onEasterEggTriggerClick={handleEasterEggTriggerClick}
+        onEasterEggTriggerClick={handleBreakoutEntryTriggerClick}
+        hasBreakoutSession={hasBreakoutSession}
       />
 
       <Suspense fallback={null}>
@@ -1058,7 +1087,7 @@ function App() {
             <DashboardPage
               onNavigate={setPage}
               onOpenPlatformLayout={() => setShowPlatformLayoutModal(true)}
-              onEasterEggTriggerClick={handleEasterEggTriggerClick}
+              onEasterEggTriggerClick={handleBreakoutEntryTriggerClick}
             />
           )}
           {page === 'overview' && <AccountsPage onNavigate={setPage} />}

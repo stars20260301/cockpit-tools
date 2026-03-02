@@ -7,6 +7,22 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
 ---
+## [0.9.10] - 2026-03-02
+
+### 变更
+- **唤醒链路稳定性进一步对齐官方客户端**：官方 LS 启动等待窗口提升到 60 秒，client-gateway 轨迹轮询窗口同步提升到 60 秒，并将 `app_data_dir` 调整为官方风格的 IDE 级目录（默认 `antigravity`，可通过 `AG_WAKEUP_OFFICIAL_LS_APP_DATA_DIR` 覆盖）。
+- **唤醒网关的错误处理语义对齐长任务执行场景**：当轨迹状态仍为 `RUNNING` 时，中间出现的 `errorMessage` 不再立即判失败，而是继续轮询等待最终结果。
+- **Antigravity 套餐徽标展示在多入口统一**：通过 `getAntigravityTierBadge` 统一档位徽标映射，并在账号页与验证详情页复用同一展示口径。
+- **多开实例账号下拉顺序与账号页排序逻辑全平台对齐**：Antigravity / Codex / GitHub Copilot / Windsurf / Kiro 的实例账号下拉统一复用各自账号页排序规则，避免页面间顺序漂移。
+- **全平台账号页排序偏好支持重启恢复**：所有账号页的排序字段与排序方向已持久化到本地，应用重启后自动恢复。
+- **实例列表排序偏好按平台持久化**：实例列表排序字段（`createdAt` / `lastLaunchedAt`）与排序方向按平台类型分别持久化，重启后不再重置实例排序。
+
+### 修复
+- **唤醒链路对上游临时失败新增一次自动重试**：对于 `AG_WAKEUP_ERROR_JSON` 中 `temporary`/HTTP 5xx 类错误，增加延迟后的一次自动重试，再决定最终失败。
+- **账号验证“查看详情”现在可直接看到后端错误文案**：详情列表新增 `lastMessage` 渲染（含截断），可直接看到如 `Agent execution terminated due to error.` 的用户态错误信息。
+- **唤醒任务页账号邮箱脱敏覆盖补齐**：任务卡片、测试账号选择、历史记录与调试信息复制文本均统一走隐私脱敏展示。
+
+---
 ## [0.9.9] - 2026-03-02
 
 ### 新增

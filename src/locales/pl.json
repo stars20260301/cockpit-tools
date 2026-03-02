@@ -1437,7 +1437,14 @@
     "rankingShort": "Lokalna",
     "rankingEmpty": "Brak lokalnych zapisów",
     "rankingClear": "Wyczyść lokalny ranking",
-    "rankingRankShort": "#{{rank}}"
+    "rankingRankShort": "#{{rank}}",
+    "minimize": "Minimalizuj",
+    "resumeGameNav": "Wznów grę",
+    "closeConfirmTitle": "Zakończyć tę rozgrywkę?",
+    "closeConfirmDesc": "Po zamknięciu ta rozgrywka się zakończy, a postęp nie zostanie zachowany.",
+    "closeContinue": "Kontynuuj grę",
+    "closeMinimize": "Minimalizuj i zachowaj",
+    "closeEnd": "Zakończ i zamknij"
   },
   "announcement": {
     "title": "Powiadomienia",

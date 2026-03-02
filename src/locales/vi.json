@@ -1437,7 +1437,14 @@
     "rankingShort": "Cục bộ",
     "rankingEmpty": "Chưa có bản ghi cục bộ",
     "rankingClear": "Xóa xếp hạng cục bộ",
-    "rankingRankShort": "#{{rank}}"
+    "rankingRankShort": "#{{rank}}",
+    "minimize": "Thu nhỏ",
+    "resumeGameNav": "Tiếp tục trò chơi",
+    "closeConfirmTitle": "Kết thúc ván này?",
+    "closeConfirmDesc": "Khi đóng, ván này sẽ kết thúc và tiến độ sẽ không được giữ lại.",
+    "closeContinue": "Tiếp tục chơi",
+    "closeMinimize": "Thu nhỏ và giữ lại",
+    "closeEnd": "Kết thúc và đóng"
   },
   "announcement": {
     "title": "Thông báo",

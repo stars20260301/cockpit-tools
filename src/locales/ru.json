@@ -1437,7 +1437,14 @@
     "rankingShort": "Локально",
     "rankingEmpty": "Локальных записей пока нет",
     "rankingClear": "Очистить локальный рейтинг",
-    "rankingRankShort": "#{{rank}}"
+    "rankingRankShort": "#{{rank}}",
+    "minimize": "Свернуть",
+    "resumeGameNav": "Продолжить игру",
+    "closeConfirmTitle": "Завершить эту попытку?",
+    "closeConfirmDesc": "После закрытия эта попытка завершится, прогресс не сохранится.",
+    "closeContinue": "Продолжить игру",
+    "closeMinimize": "Свернуть и сохранить",
+    "closeEnd": "Завершить и закрыть"
   },
   "announcement": {
     "title": "Уведомления",

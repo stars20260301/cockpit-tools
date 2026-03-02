@@ -1437,7 +1437,14 @@
     "rankingShort": "Local",
     "rankingEmpty": "No local ranking data yet",
     "rankingClear": "Clear Local Ranking",
-    "rankingRankShort": "#{{rank}}"
+    "rankingRankShort": "#{{rank}}",
+    "minimize": "Minimize",
+    "resumeGameNav": "Resume Game",
+    "closeConfirmTitle": "End this run?",
+    "closeConfirmDesc": "Closing will end this run and progress will not be kept.",
+    "closeContinue": "Keep Playing",
+    "closeMinimize": "Minimize and Keep",
+    "closeEnd": "End and Close"
   },
   "announcement": {
     "title": "Notifications",

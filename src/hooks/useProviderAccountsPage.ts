@@ -101,6 +101,20 @@ export interface ProviderAccountBase {
   tags?: string[] | null;
 }
 
+const DEFAULT_SORT_BY = 'created_at';
+const DEFAULT_SORT_DIRECTION: SortDirection = 'desc';
+
+const normalizeSortDirection = (value: string | null): SortDirection =>
+  value === 'asc' ? 'asc' : DEFAULT_SORT_DIRECTION;
+
+const buildSortStorageKeys = (platformKey: string) => {
+  const scope = platformKey.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  return {
+    sortByKey: `agtools.${scope}.accounts_sort_by`,
+    sortDirectionKey: `agtools.${scope}.accounts_sort_direction`,
+  };
+};
+
 // ---------------------------------------------------------------------------
 // Hook return type
 // ---------------------------------------------------------------------------
@@ -278,6 +292,7 @@ export function useProviderAccountsPage<TAccount extends ProviderAccountBase>(
     refreshAllTokens,
     updateAccountTags,
   } = store;
+  const { sortByKey, sortDirectionKey } = buildSortStorageKeys(platformKey);
 
   // ─── Privacy ──────────────────────────────────────────────────────────
   const [privacyModeEnabled, setPrivacyModeEnabled] = useState<boolean>(() =>
@@ -305,8 +320,21 @@ export function useProviderAccountsPage<TAccount extends ProviderAccountBase>(
   const [filterType, setFilterType] = useState<string>('all');
 
   // ─── Sort ─────────────────────────────────────────────────────────────
-  const [sortBy, setSortBy] = useState<string>('created_at');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sortBy, setSortBy] = useState<string>(() => {
+    const saved = localStorage.getItem(sortByKey);
+    return saved?.trim() ? saved : DEFAULT_SORT_BY;
+  });
+  const [sortDirection, setSortDirection] = useState<SortDirection>(() =>
+    normalizeSortDirection(localStorage.getItem(sortDirectionKey)),
+  );
+
+  useEffect(() => {
+    localStorage.setItem(sortByKey, sortBy);
+  }, [sortBy, sortByKey]);
+
+  useEffect(() => {
+    localStorage.setItem(sortDirectionKey, sortDirection);
+  }, [sortDirection, sortDirectionKey]);
 
   // ─── Selection ────────────────────────────────────────────────────────
   const [selected, setSelected] = useState<Set<string>>(new Set());

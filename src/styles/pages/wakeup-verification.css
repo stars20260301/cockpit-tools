@@ -501,6 +501,23 @@
   word-break: break-word;
 }
 
+.verification-progress-message {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-primary);
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.08);
+  padding: 6px 8px;
+  word-break: break-word;
+}
+
+.verification-progress-message.is-failed {
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.08);
+}
+
 .spin {
   animation: verificationSpin 0.8s linear infinite;
 }

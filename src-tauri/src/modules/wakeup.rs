@@ -19,6 +19,9 @@ const DEFAULT_ATTEMPTS: usize = 2;
 const BACKOFF_BASE_MS: u64 = 500;
 const BACKOFF_MAX_MS: u64 = 4000;
 const WAKEUP_ERROR_JSON_PREFIX: &str = "AG_WAKEUP_ERROR_JSON:";
+const CLIENT_GATEWAY_POLL_INTERVAL_MS: u64 = 250;
+const CLIENT_GATEWAY_MAX_POLL_ROUNDS: usize = 240; // 240 * 250ms = 60s
+const CLIENT_GATEWAY_UPSTREAM_RETRY_DELAY_MS: u64 = 1200;
 static BASE_URL_ORDER: OnceLock<Mutex<Vec<&'static str>>> = OnceLock::new();
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -43,7 +46,7 @@ struct StreamParseResult {
     response_id: Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct WakeupUiErrorPayload {
     version: u8,
@@ -488,7 +491,10 @@ fn build_gateway_client(base_url: &str, timeout_secs: u64) -> Result<reqwest::Cl
     builder = builder.no_proxy();
     if base_url.starts_with("https://127.0.0.1:") || base_url.starts_with("https://localhost:") {
         // 本地自签名网关证书（协议形态对齐客户端，校验在此放宽）
-        builder = builder.danger_accept_invalid_certs(true);
+        builder = builder
+            .danger_accept_invalid_certs(true)
+            // 回环地址使用 IP 时不发送 SNI，避免 rustls 告警 Illegal SNI extension。
+            .tls_sni(false);
     }
     builder
         .build()
@@ -516,10 +522,9 @@ fn classify_gateway_transport_error(err: &reqwest::Error) -> &'static str {
     "send"
 }
 
-fn is_local_gateway_transport_error_message(message: &str) -> bool {
+fn is_local_gateway_recoverable_error_message(message: &str) -> bool {
     let lower = message.to_lowercase();
     if !(lower.contains("网关")
-        && lower.contains("请求失败")
         && (lower.contains("url=https://127.0.0.1:")
             || lower.contains("url=https://localhost:")
             || lower.contains("url=http://127.0.0.1:")
@@ -528,14 +533,53 @@ fn is_local_gateway_transport_error_message(message: &str) -> bool {
         return false;
     }
 
-    lower.contains("[connect]")
-        || lower.contains("[timeout]")
-        || lower.contains("[tls]")
-        || lower.contains("connection refused")
-        || lower.contains("connection reset")
-        || lower.contains("timed out")
-        || lower.contains("dns error")
-        || lower.contains("error sending request")
+    let transport_error = lower.contains("请求失败")
+        && (lower.contains("[connect]")
+            || lower.contains("[timeout]")
+            || lower.contains("[tls]")
+            || lower.contains("connection refused")
+            || lower.contains("connection reset")
+            || lower.contains("timed out")
+            || lower.contains("dns error")
+            || lower.contains("error sending request"));
+    if transport_error {
+        return true;
+    }
+
+    lower.contains("languageserverstarted")
+        && (lower.contains("超时") || lower.contains("通知通道已关闭"))
+}
+
+fn parse_wakeup_ui_error_payload_from_message(message: &str) -> Option<WakeupUiErrorPayload> {
+    let payload = message.strip_prefix(WAKEUP_ERROR_JSON_PREFIX)?.trim();
+    if payload.is_empty() {
+        return None;
+    }
+    serde_json::from_str::<WakeupUiErrorPayload>(payload).ok()
+}
+
+fn is_gateway_upstream_retryable_error_message(message: &str) -> bool {
+    if let Some(payload) = parse_wakeup_ui_error_payload_from_message(message) {
+        if payload.kind.eq_ignore_ascii_case("temporary") {
+            return true;
+        }
+        if matches!(
+            payload.error_code,
+            Some(4 | 8 | 13 | 14 | 408 | 429 | 500 | 502 | 503 | 504)
+        ) {
+            return true;
+        }
+    }
+
+    let lower = message.to_ascii_lowercase();
+    lower.contains("internal (code 500)")
+        || lower.contains("service unavailable")
+        || lower.contains("deadline exceeded")
+}
+
+fn is_cascade_status_running(status: &str) -> bool {
+    let normalized = status.trim().to_ascii_uppercase();
+    !normalized.is_empty() && normalized.contains("RUNNING")
 }
 
 async fn post_gateway_json(
@@ -900,7 +944,9 @@ fn classify_gateway_error_kind(error_code: Option<i64>) -> &'static str {
         Some(403) => "verification_required",
         Some(429) => "quota",
         // gRPC canonical codes: RESOURCE_EXHAUSTED=8, DEADLINE_EXCEEDED=4, INTERNAL=13, UNAVAILABLE=14
-        Some(8) | Some(4) | Some(13) | Some(14) => "temporary",
+        // 同时覆盖 HTTP 侧常见的临时失败码。
+        Some(8) | Some(4) | Some(13) | Some(14) | Some(408) | Some(500) | Some(502)
+        | Some(503) | Some(504) => "temporary",
         _ => "generic",
     }
 }
@@ -1208,8 +1254,9 @@ async fn trigger_wakeup_via_client_gateway_once(
         let started_at = std::time::Instant::now();
         let mut last_status = String::new();
         let mut last_trajectory_summary = String::new();
+        let mut last_running_error: Option<GatewayTrajectoryErrorDetail> = None;
 
-        for poll_idx in 0..120 {
+        for poll_idx in 0..CLIENT_GATEWAY_MAX_POLL_ROUNDS {
             let get_resp: serde_json::Value = post_gateway_json(
                 &client,
                 &format!("{}/GetCascadeTrajectory", service_base),
@@ -1240,6 +1287,12 @@ async fn trigger_wakeup_via_client_gateway_once(
                 &get_resp,
                 started_at.elapsed().as_millis() as u64,
             ) {
+                if last_running_error.is_some() {
+                    crate::modules::logger::log_info(&format!(
+                        "[Wakeup] 网关轨迹在中间错误后恢复成功: cascade_id={}",
+                        cascade_id
+                    ));
+                }
                 crate::modules::logger::log_info(&format!(
                     "[Wakeup] 网关唤醒成功: cascade_id={}, duration={}ms, reply={}",
                     cascade_id,
@@ -1250,6 +1303,24 @@ async fn trigger_wakeup_via_client_gateway_once(
             }
 
             if let Some(err) = extract_gateway_error_from_trajectory(&get_resp) {
+                if is_cascade_status_running(&last_status) {
+                    if poll_idx == 0 || poll_idx % 8 == 0 {
+                        crate::modules::logger::log_warn(&format!(
+                            "[Wakeup] 网关轨迹出现中间错误但状态仍为 RUNNING，继续等待恢复: cascade_id={}, status={}, error_code={:?}, message={}",
+                            cascade_id,
+                            last_status,
+                            err.error_code,
+                            truncate_log_text(&err.message, 500)
+                        ));
+                    }
+                    last_running_error = Some(err);
+                    tokio::time::sleep(std::time::Duration::from_millis(
+                        CLIENT_GATEWAY_POLL_INTERVAL_MS,
+                    ))
+                    .await;
+                    continue;
+                }
+
                 if err.error_code == Some(403) {
                     crate::modules::logger::log_error(&format!(
                         "[Wakeup] 网关轨迹错误(403): cascade_id={}, status={}, message={}, validation_url={:?}, errorMessage={}, step={}",
@@ -1273,7 +1344,21 @@ async fn trigger_wakeup_via_client_gateway_once(
                 return Err(encode_wakeup_ui_error_payload(&err));
             }
 
-            tokio::time::sleep(std::time::Duration::from_millis(250)).await;
+            tokio::time::sleep(std::time::Duration::from_millis(
+                CLIENT_GATEWAY_POLL_INTERVAL_MS,
+            ))
+            .await;
+        }
+
+        if let Some(err) = last_running_error {
+            crate::modules::logger::log_error(&format!(
+                "[Wakeup] 网关轨迹持续错误且未恢复: cascade_id={}, last_status={}, error_code={:?}, message={}",
+                cascade_id,
+                if last_status.is_empty() { "-" } else { &last_status },
+                err.error_code,
+                truncate_log_text(&err.message, 500)
+            ));
+            return Err(encode_wakeup_ui_error_payload(&err));
         }
 
         let message = if last_status.is_empty() {
@@ -1345,12 +1430,23 @@ async fn trigger_wakeup_via_client_gateway(
         {
             Ok(resp) => return Ok(resp),
             Err(err) => {
-                if attempt == 1 && !from_env && is_local_gateway_transport_error_message(&err) {
+                if attempt == 1 && !from_env && is_local_gateway_recoverable_error_message(&err) {
                     crate::modules::logger::log_warn(&format!(
-                        "[Wakeup] 检测到本地网关可恢复传输错误，尝试重建网关并重试一次: {}",
+                        "[Wakeup] 检测到本地网关可恢复错误（传输或官方 LS 启动超时），尝试重建网关并重试一次: {}",
                         err
                     ));
                     modules::wakeup_gateway::clear_local_gateway_base_url_cache().await;
+                    continue;
+                }
+                if attempt == 1 && is_gateway_upstream_retryable_error_message(&err) {
+                    crate::modules::logger::log_warn(&format!(
+                        "[Wakeup] 检测到上游临时错误，等待后自动重试一次: {}",
+                        err
+                    ));
+                    tokio::time::sleep(std::time::Duration::from_millis(
+                        CLIENT_GATEWAY_UPSTREAM_RETRY_DELAY_MS,
+                    ))
+                    .await;
                     continue;
                 }
                 return Err(err);

@@ -16,28 +16,6 @@
   overflow: hidden;
 }
 
-.breakout-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: 999px;
-  color: #d8e2f2;
-  background: rgba(148, 163, 184, 0.22);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  z-index: 3;
-}
-
-.breakout-close:hover {
-  background: rgba(148, 163, 184, 0.34);
-}
-
 .breakout-stage {
   margin: 0 auto;
   border-radius: 18px;
@@ -107,6 +85,7 @@
   left: 16px;
   right: 16px;
   top: 12px;
+  z-index: 6;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -180,6 +159,34 @@
 
 .breakout-pause-btn:hover {
   background: rgba(30, 64, 175, 0.55);
+}
+
+.breakout-window-btn {
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.4);
+  color: #dbeafe;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 0.2s ease;
+}
+
+.breakout-window-btn:hover {
+  background: rgba(30, 64, 175, 0.55);
+}
+
+.breakout-window-btn.close {
+  background: rgba(127, 29, 29, 0.52);
+  border-color: rgba(248, 113, 113, 0.42);
+}
+
+.breakout-window-btn.close:hover {
+  background: rgba(185, 28, 28, 0.68);
 }
 
 .breakout-history-btn {
@@ -410,6 +417,77 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
+}
+
+.breakout-close-confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  background: rgba(2, 6, 23, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.breakout-close-confirm-card {
+  width: min(420px, calc(100% - 24px));
+  border: 1px solid rgba(148, 163, 184, 0.38);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 18px 36px rgba(2, 6, 23, 0.45);
+  padding: 16px 16px 14px;
+}
+
+.breakout-close-confirm-title {
+  color: #dbeafe;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.breakout-close-confirm-desc {
+  margin-top: 8px;
+  color: #bfdbfe;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.breakout-close-confirm-actions {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.breakout-close-confirm-btn {
+  border: 1px solid rgba(191, 219, 254, 0.35);
+  border-radius: 999px;
+  height: 32px;
+  padding: 0 14px;
+  background: rgba(30, 64, 175, 0.65);
+  color: #eff6ff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.breakout-close-confirm-btn:hover {
+  background: rgba(37, 99, 235, 0.78);
+}
+
+.breakout-close-confirm-btn:active {
+  transform: scale(0.97);
+}
+
+.breakout-close-confirm-btn.danger {
+  background: rgba(220, 38, 38, 0.75);
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
+.breakout-close-confirm-btn.danger:hover {
+  background: rgba(239, 68, 68, 0.85);
 }
 
 .breakout-paused {

@@ -39,6 +39,7 @@ import * as accountService from '../services/accountService'
 import { FingerprintWithStats, Account } from '../types/account'
 import { Page } from '../types/navigation'
 import {
+  getAntigravityTierBadge,
   getQuotaClass,
   formatResetTimeDisplay,
   getSubscriptionTier,
@@ -56,9 +57,17 @@ import {
   updateGroupOrder
 } from '../services/groupService'
 import {
-  getAntigravityGroupResetTimestamp,
   getAntigravityQuotaDisplayItems,
 } from '../presentation/platformAccountPresentation'
+import {
+  ANTIGRAVITY_ACCOUNTS_SORT_BY_STORAGE_KEY,
+  ANTIGRAVITY_ACCOUNTS_SORT_DIRECTION_STORAGE_KEY,
+  ANTIGRAVITY_RESET_SORT_PREFIX,
+  DEFAULT_ANTIGRAVITY_SORT_BY,
+  createAntigravityAccountComparator,
+  normalizeAntigravitySortBy,
+  normalizeAntigravitySortDirection,
+} from '../utils/antigravityAccountSort'
 import { OverviewTabsHeader } from '../components/OverviewTabsHeader'
 import styles from '../styles/CompactView.module.css'
 import { FileCorruptedModal, parseFileCorruptedError, type FileCorruptedError } from '../components/FileCorruptedModal'
@@ -213,9 +222,17 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
   // 分组管理
   const [showGroupModal, setShowGroupModal] = useState(false)
   const [displayGroups, setDisplayGroups] = useState<DisplayGroup[]>([])
-  const [sortBy, setSortBy] = useState<'overall' | 'created_at' | string>('overall')
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
-  const resetSortPrefix = 'reset:'
+  const [displayGroupsLoaded, setDisplayGroupsLoaded] = useState(false)
+  const [sortBy, setSortBy] = useState<string>(() =>
+    normalizeAntigravitySortBy(
+      localStorage.getItem(ANTIGRAVITY_ACCOUNTS_SORT_BY_STORAGE_KEY)
+    )
+  )
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(() =>
+    normalizeAntigravitySortDirection(
+      localStorage.getItem(ANTIGRAVITY_ACCOUNTS_SORT_DIRECTION_STORAGE_KEY)
+    )
+  )
 
   // Compact view model sorting
   const [compactGroupOrder, setCompactGroupOrder] = useState<string[]>([])
@@ -288,13 +305,58 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
     }))
   }, [accounts])
 
-  const getGroupResetTimestamp = (account: Account, group: DisplayGroup): number | null =>
-    getAntigravityGroupResetTimestamp(account, group)
-
   const getQuotaDisplayItems = (account: Account) =>
     getAntigravityQuotaDisplayItems(account, displayGroups)
 
   const normalizeTag = (tag: string) => tag.trim().toLowerCase()
+
+  useEffect(() => {
+    localStorage.setItem(ANTIGRAVITY_ACCOUNTS_SORT_BY_STORAGE_KEY, sortBy)
+  }, [sortBy])
+
+  useEffect(() => {
+    localStorage.setItem(
+      ANTIGRAVITY_ACCOUNTS_SORT_DIRECTION_STORAGE_KEY,
+      sortDirection
+    )
+  }, [sortDirection])
+
+  useEffect(() => {
+    if (!displayGroupsLoaded) {
+      return
+    }
+    const normalizedSortBy = normalizeAntigravitySortBy(sortBy)
+    if (
+      normalizedSortBy === 'overall' ||
+      normalizedSortBy === 'created_at' ||
+      normalizedSortBy === 'default'
+    ) {
+      return
+    }
+
+    if (normalizedSortBy.startsWith(ANTIGRAVITY_RESET_SORT_PREFIX)) {
+      const targetGroupId = normalizedSortBy.slice(ANTIGRAVITY_RESET_SORT_PREFIX.length)
+      if (displayGroups.some((group) => group.id === targetGroupId)) {
+        return
+      }
+      setSortBy(DEFAULT_ANTIGRAVITY_SORT_BY)
+      return
+    }
+
+    if (!displayGroups.some((group) => group.id === normalizedSortBy)) {
+      setSortBy(DEFAULT_ANTIGRAVITY_SORT_BY)
+    }
+  }, [displayGroups, displayGroupsLoaded, sortBy])
+
+  const accountSortComparator = useMemo(
+    () =>
+      createAntigravityAccountComparator({
+        sortBy,
+        sortDirection,
+        displayGroups,
+      }),
+    [displayGroups, sortBy, sortDirection]
+  )
 
   const availableTags = useMemo(() => {
     const set = new Set<string>()
@@ -332,85 +394,14 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
         return tags.some((tag) => selectedTags.has(tag))
       })
     }
-    // 排序逻辑
-    if (sortBy === 'created_at') {
-      // 按创建时间排序
-      result.sort((a, b) => {
-        const diff = b.created_at - a.created_at
-        return sortDirection === 'desc' ? diff : -diff
-      })
-    } else if (sortBy.startsWith(resetSortPrefix) && displayGroups.length > 0) {
-      const targetGroupId = sortBy.slice(resetSortPrefix.length)
-      const targetGroup = displayGroups.find((group) => group.id === targetGroupId)
-      if (targetGroup) {
-        result.sort((a, b) => {
-          const aReset = getGroupResetTimestamp(a, targetGroup)
-          const bReset = getGroupResetTimestamp(b, targetGroup)
-          if (aReset === null && bReset === null) return 0
-          if (aReset === null) return 1
-          if (bReset === null) return -1
-          const diff = bReset - aReset
-          return sortDirection === 'desc' ? diff : -diff
-        })
-      }
-    } else if (
-      sortBy !== 'default' &&
-      sortBy !== 'overall' &&
-      displayGroups.length > 0
-    ) {
-      // 按指定分组配额排序，相同配额按总配额再排序
-      const groupSettings: GroupSettings = {
-        groupMappings: {},
-        groupNames: {},
-        groupOrder: displayGroups.map((g) => g.id),
-        updatedAt: 0,
-        updatedBy: 'desktop'
-      }
-      // 从 displayGroups 构建 groupMappings
-      for (const group of displayGroups) {
-        groupSettings.groupNames[group.id] = group.name
-        for (const modelId of group.models) {
-          groupSettings.groupMappings[modelId] = group.id
-        }
-      }
-
-      result.sort((a, b) => {
-        const aGroupQuota =
-          calculateGroupQuota(sortBy, getAccountQuotas(a), groupSettings) ?? 0
-        const bGroupQuota =
-          calculateGroupQuota(sortBy, getAccountQuotas(b), groupSettings) ?? 0
-
-        // 如果分组配额不同，按分组配额排序
-        if (aGroupQuota !== bGroupQuota) {
-          const diff = bGroupQuota - aGroupQuota
-          return sortDirection === 'desc' ? diff : -diff
-        }
-
-        // 分组配额相同，按总配额排序
-        const aOverall = calculateOverallQuota(getAccountQuotas(a))
-        const bOverall = calculateOverallQuota(getAccountQuotas(b))
-        const diff = bOverall - aOverall
-        return sortDirection === 'desc' ? diff : -diff
-      })
-    } else {
-      // 默认按综合配额排序
-      result.sort((a, b) => {
-        const aQuota = calculateOverallQuota(getAccountQuotas(a))
-        const bQuota = calculateOverallQuota(getAccountQuotas(b))
-        const diff = bQuota - aQuota
-        return sortDirection === 'desc' ? diff : -diff
-      })
-    }
+    result.sort(accountSortComparator)
     return result
   }, [
     accounts,
     searchQuery,
     filterType,
     tagFilter,
-    currentAccount,
-    sortBy,
-    sortDirection,
-    displayGroups
+    accountSortComparator,
   ])
 
   const groupedAccounts = useMemo(() => {
@@ -512,6 +503,8 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
       }
     } catch (e) {
       console.error('Failed to load display groups:', e)
+    } finally {
+      setDisplayGroupsLoaded(true)
     }
   }
 
@@ -1304,8 +1297,7 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
   const renderGridCards = (items: Account[], groupKey?: string) =>
     items.map((account) => {
       const isCurrent = currentAccount?.id === account.id
-      const tier = getSubscriptionTier(account.quota)
-      const tierLabel = tier
+      const tierBadge = getAntigravityTierBadge(account.quota)
       const quotaDisplayItems = getQuotaDisplayItems(account)
       const isDisabled = account.disabled
       const isForbidden = Boolean(account.quota?.is_forbidden)
@@ -1376,8 +1368,8 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
                 {t('accounts.status.forbidden')}
               </span>
             )}
-            <span className={`tier-badge ${tier.toLowerCase()}`}>
-              {tierLabel}
+            <span className={`tier-badge ${tierBadge.className}`}>
+              {tierBadge.label}
             </span>
           </div>
 
@@ -1570,7 +1562,7 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
     const renderCompactCards = (items: Account[]) =>
       items.map((account) => {
           const isCurrent = currentAccount?.id === account.id
-          const tier = getSubscriptionTier(account.quota)
+          const tierBadge = getAntigravityTierBadge(account.quota)
           const quotas = getAccountQuotas(account)
           const overallQuota = calculateOverallQuota(quotas)
           const isSelected = selected.has(account.id)
@@ -1640,7 +1632,7 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
               onClick={(e) => e.stopPropagation()}
             />
             <span
-              className={`${styles.email} ${tier === 'PRO' || tier === 'ULTRA' ? styles.emailGradient : ''}`}
+              className={`${styles.email} ${tierBadge.tier === 'PRO' || tierBadge.tier === 'ULTRA' ? styles.emailGradient : ''}`}
             >
               {(warning || isDisabled || isForbidden) && (
                 <span className={styles.statusIcon} title={statusTitle}>
@@ -1830,8 +1822,7 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
   const renderListRows = (items: Account[], groupKey?: string) =>
     items.map((account) => {
       const isCurrent = currentAccount?.id === account.id
-      const tier = getSubscriptionTier(account.quota)
-      const tierLabel = tier
+      const tierBadge = getAntigravityTierBadge(account.quota)
       const quotaDisplayItems = getQuotaDisplayItems(account)
       const isForbidden = Boolean(account.quota?.is_forbidden)
       const quotaError = account.quota_error
@@ -1872,8 +1863,8 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
                 )}
               </div>
               <div className="account-sub-line">
-                <span className={`tier-badge ${tier.toLowerCase()}`}>
-                  {tierLabel}
+                <span className={`tier-badge ${tierBadge.className}`}>
+                  {tierBadge.label}
                 </span>
                 {warning && (
                   <span className="status-pill warning" title={warningTitle}>
@@ -2225,7 +2216,7 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
                   </option>
                 ))}
                 {displayGroups.map(group => (
-                  <option key={`${group.id}-reset`} value={`${resetSortPrefix}${group.id}`}>
+                  <option key={`${group.id}-reset`} value={`${ANTIGRAVITY_RESET_SORT_PREFIX}${group.id}`}>
                     {t('accounts.sort.byGroupReset', { group: group.name, defaultValue: `按 ${group.name} 重置时间` })}
                   </option>
                 ))}
@@ -2801,10 +2792,9 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
         (() => {
           const account = accounts.find((a) => a.id === showQuotaModal)
           if (!account) return null
-          const tier = getSubscriptionTier(account.quota)
-          const tierLabel = tier
+          const tierBadge = getAntigravityTierBadge(account.quota)
           const tierClass =
-            tier === 'PRO' || tier === 'ULTRA'
+            tierBadge.tier === 'PRO' || tierBadge.tier === 'ULTRA'
               ? 'pill-success'
               : 'pill-secondary'
 
@@ -2820,7 +2810,7 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
                 <div className="modal-header">
                   <h2>{t('modals.quota.title')}</h2>
                   <div className="badges">
-                    <span className={`pill ${tierClass}`}>{tierLabel}</span>
+                    <span className={`pill ${tierClass}`}>{tierBadge.label}</span>
                   </div>
                   <button
                     className="close-btn"

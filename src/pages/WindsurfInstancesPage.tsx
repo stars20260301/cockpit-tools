@@ -15,18 +15,25 @@ import {
  * Windsurf 多开实例内容组件（不包含 header）
  * 用于嵌入到 WindsurfAccountsPage 中
  */
-export function WindsurfInstancesContent() {
+interface WindsurfInstancesContentProps {
+  accountsForSelect?: WindsurfAccount[];
+}
+
+export function WindsurfInstancesContent({
+  accountsForSelect,
+}: WindsurfInstancesContentProps = {}) {
   const { t } = useTranslation();
   const instanceStore = useWindsurfInstanceStore();
-  const { accounts, fetchAccounts } = useWindsurfAccountStore();
+  const { accounts: storeAccounts, fetchAccounts } = useWindsurfAccountStore();
+  const sourceAccounts = accountsForSelect ?? storeAccounts;
   type AccountForSelect = WindsurfAccount & { email: string };
-  const accountsForSelect = useMemo(
+  const mappedAccountsForSelect = useMemo(
     () =>
-      accounts.map((acc) => ({
+      sourceAccounts.map((acc) => ({
         ...acc,
         email: acc.email || getWindsurfAccountDisplayEmail(acc),
       })) as AccountForSelect[],
-    [accounts],
+    [sourceAccounts],
   );
   const isSupportedPlatform = usePlatformRuntimeSupport('desktop');
 
@@ -51,7 +58,7 @@ export function WindsurfInstancesContent() {
   return (
     <PlatformInstancesContent<AccountForSelect>
       instanceStore={instanceStore}
-      accounts={accountsForSelect}
+      accounts={mappedAccountsForSelect}
       fetchAccounts={fetchAccounts}
       renderAccountQuotaPreview={renderWindsurfQuotaPreview}
       renderAccountBadge={(account) => {

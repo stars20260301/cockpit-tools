@@ -1437,7 +1437,14 @@
     "rankingShort": "本地",
     "rankingEmpty": "暫無本地歷史記錄",
     "rankingClear": "清空本地排名",
-    "rankingRankShort": "#{{rank}}"
+    "rankingRankShort": "#{{rank}}",
+    "minimize": "最小化",
+    "resumeGameNav": "繼續遊戲",
+    "closeConfirmTitle": "結束本局？",
+    "closeConfirmDesc": "關閉後本局將結束，進度不會保留。",
+    "closeContinue": "繼續遊戲",
+    "closeMinimize": "最小化保留",
+    "closeEnd": "結束並關閉"
   },
   "announcement": {
     "title": "消息通知",

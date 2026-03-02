@@ -194,6 +194,45 @@ export function GitHubCopilotAccountsPage() {
 
   const normalizeTag = (tag: string) => tag.trim().toLowerCase();
 
+  const compareAccountsBySort = useCallback((a: GitHubCopilotAccount, b: GitHubCopilotAccount) => {
+    if (sortBy === 'created_at') {
+      const diff = b.created_at - a.created_at;
+      return sortDirection === 'desc' ? diff : -diff;
+    }
+
+    if (sortBy === 'weekly_reset' || sortBy === 'hourly_reset') {
+      const aResetMetric = resolveUsageMetric(a, sortBy === 'weekly_reset' ? 'weekly' : 'hourly');
+      const bResetMetric = resolveUsageMetric(b, sortBy === 'weekly_reset' ? 'weekly' : 'hourly');
+      const aReset = parseResetAt(aResetMetric?.resetAt);
+      const bReset = parseResetAt(bResetMetric?.resetAt);
+      if (aReset === null && bReset === null) return 0;
+      if (aReset === null) return 1;
+      if (bReset === null) return -1;
+      const diff = bReset - aReset;
+      return sortDirection === 'desc' ? diff : -diff;
+    }
+
+    const aValue =
+      sortBy === 'weekly'
+        ? (resolveUsageMetric(a, 'weekly')?.percentage ?? -1)
+        : sortBy === 'hourly'
+          ? (resolveUsageMetric(a, 'hourly')?.percentage ?? -1)
+          : (resolveUsageMetric(a, 'premium')?.percentage ?? -1);
+    const bValue =
+      sortBy === 'weekly'
+        ? (resolveUsageMetric(b, 'weekly')?.percentage ?? -1)
+        : sortBy === 'hourly'
+          ? (resolveUsageMetric(b, 'hourly')?.percentage ?? -1)
+          : (resolveUsageMetric(b, 'premium')?.percentage ?? -1);
+    const diff = bValue - aValue;
+    return sortDirection === 'desc' ? diff : -diff;
+  }, [parseResetAt, resolveUsageMetric, sortBy, sortDirection]);
+
+  const sortedAccountsForInstances = useMemo(
+    () => [...accounts].sort(compareAccountsBySort),
+    [accounts, compareAccountsBySort],
+  );
+
   const filteredAccounts = useMemo(() => {
     let result = [...accounts];
 
@@ -216,42 +255,10 @@ export function GitHubCopilotAccountsPage() {
       });
     }
 
-    result.sort((a, b) => {
-      if (sortBy === 'created_at') {
-        const diff = b.created_at - a.created_at;
-        return sortDirection === 'desc' ? diff : -diff;
-      }
-
-      if (sortBy === 'weekly_reset' || sortBy === 'hourly_reset') {
-        const aResetMetric = resolveUsageMetric(a, sortBy === 'weekly_reset' ? 'weekly' : 'hourly');
-        const bResetMetric = resolveUsageMetric(b, sortBy === 'weekly_reset' ? 'weekly' : 'hourly');
-        const aReset = parseResetAt(aResetMetric?.resetAt);
-        const bReset = parseResetAt(bResetMetric?.resetAt);
-        if (aReset === null && bReset === null) return 0;
-        if (aReset === null) return 1;
-        if (bReset === null) return -1;
-        const diff = bReset - aReset;
-        return sortDirection === 'desc' ? diff : -diff;
-      }
-
-      const aValue =
-        sortBy === 'weekly'
-          ? (resolveUsageMetric(a, 'weekly')?.percentage ?? -1)
-          : sortBy === 'hourly'
-            ? (resolveUsageMetric(a, 'hourly')?.percentage ?? -1)
-            : (resolveUsageMetric(a, 'premium')?.percentage ?? -1);
-      const bValue =
-        sortBy === 'weekly'
-          ? (resolveUsageMetric(b, 'weekly')?.percentage ?? -1)
-          : sortBy === 'hourly'
-            ? (resolveUsageMetric(b, 'hourly')?.percentage ?? -1)
-            : (resolveUsageMetric(b, 'premium')?.percentage ?? -1);
-      const diff = bValue - aValue;
-      return sortDirection === 'desc' ? diff : -diff;
-    });
+    result.sort(compareAccountsBySort);
 
     return result;
-  }, [accounts, filterType, parseResetAt, resolvePlanKey, resolvePresentation, resolveUsageMetric, searchQuery, sortBy, sortDirection, tagFilter]);
+  }, [accounts, compareAccountsBySort, filterType, normalizeTag, resolvePlanKey, resolvePresentation, searchQuery, tagFilter]);
 
   const groupedAccounts = useMemo(() => {
     if (!groupByTag) return [] as Array<[string, typeof filteredAccounts]>;
@@ -1224,7 +1231,7 @@ export function GitHubCopilotAccountsPage() {
       )}
 
       {activeTab === 'instances' && (
-        <GitHubCopilotInstancesContent />
+        <GitHubCopilotInstancesContent accountsForSelect={sortedAccountsForInstances} />
       )}
     </div>
   );

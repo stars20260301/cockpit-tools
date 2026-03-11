@@ -367,7 +367,8 @@
     "tabs": {
       "general": "Chung",
       "network": "Dịch vụ mạng",
-      "about": "Giới thiệu"
+      "about": "Giới thiệu",
+      "storage": "Lưu trữ"
     },
     "general": {
       "appearance": "Giao diện",
@@ -505,7 +506,43 @@
       "download": "Tải về",
       "checkFailed": "Kiểm tra cập nhật thất bại, vui lòng thử lại sau"
     },
-    "saveSettings": "Lưu cài đặt"
+    "saveSettings": "Lưu cài đặt",
+    "storage": {
+      "summaryDesc": "Xem mức sử dụng đĩa được quản lý, đặt thư mục gốc mặc định cho phiên bản mới và di chuyển dữ liệu ứng dụng hoặc thư mục phiên bản trên Windows.",
+      "summaryAppData": "Dữ liệu ứng dụng",
+      "summaryInstances": "Thư mục phiên bản",
+      "summaryManagedInstances": "Phiên bản được quản lý",
+      "windowsOnly": "Di chuyển thư mục hiện chỉ khả dụng trên Windows.",
+      "directorySection": "Thư mục",
+      "currentAppData": "Thư mục dữ liệu ứng dụng hiện tại",
+      "currentAppDataDesc": "Đây là thư mục đang được Cockpit Tools dùng cho tài khoản, cấu hình, bộ nhớ đệm và nhật ký.",
+      "defaultInstanceBase": "Thư mục gốc mặc định cho phiên bản mới",
+      "defaultInstanceBaseDesc": "Chỉ ảnh hưởng đến các phiên bản được quản lý tạo mới. Đường dẫn của các phiên bản hiện có sẽ không đổi cho đến khi bạn chạy di chuyển.",
+      "browse": "Duyệt",
+      "saveDefaultSuccess": "Đã lưu thư mục gốc mặc định của phiên bản.",
+      "saveDefaultFailed": "Không thể lưu thư mục gốc mặc định của phiên bản: {{error}}",
+      "migrationSection": "Di chuyển",
+      "targetRoot": "Thư mục gốc đích để di chuyển",
+      "targetRootDesc": "Dữ liệu ứng dụng sẽ được sao chép vào app-data dưới thư mục gốc này, còn các thư mục phiên bản được di chuyển sẽ nằm dưới instances.",
+      "scopeTitle": "Phạm vi di chuyển",
+      "scopeDesc": "Chọn các thư mục được quản lý cần chuyển sang ổ đĩa mới. Bạn cũng có thể chỉ thay đổi thư mục gốc mặc định cho các phiên bản về sau.",
+      "migrateAppData": "Di chuyển thư mục dữ liệu ứng dụng",
+      "migrateInstances": "Di chuyển thư mục phiên bản được quản lý",
+      "migrationHintTitle": "Lưu ý khi di chuyển",
+      "migrationHint": "Trước tiên, quá trình di chuyển sẽ cố gắng đóng các phiên bản được quản lý. Khi di chuyển dữ liệu ứng dụng, thư mục cũ sẽ được giữ lại làm bản sao lưu để hoàn tác; sau khi hoàn tất, hãy khởi động lại ứng dụng để các lần ghi tiếp theo chuyển hẳn sang thư mục mới.",
+      "startMigration": "Bắt đầu di chuyển",
+      "migrationTargetRequired": "Hãy chọn thư mục gốc đích trước.",
+      "confirmMigration": "Bắt đầu di chuyển lưu trữ ngay bây giờ? Các phiên bản được quản lý sẽ được đóng trước.",
+      "migrationSuccess": "Di chuyển hoàn tất. Thư mục gốc phiên bản mới: {{instanceBaseDir}}. Số phiên bản đã cập nhật: {{count}}.",
+      "migrationSuccessRestart": "Di chuyển hoàn tất. Dữ liệu ứng dụng hiện trỏ tới {{appDataPath}}. Hãy khởi động lại ứng dụng để hoàn tất việc chuyển các lần ghi tiếp theo. Số phiên bản đã cập nhật: {{count}}.",
+      "migrationFailed": "Di chuyển thất bại: {{error}}",
+      "statsSection": "Chi tiết sử dụng",
+      "managedInstancesSection": "Chi tiết phiên bản được quản lý",
+      "noInstances": "Không tìm thấy phiên bản được quản lý nào.",
+      "instanceRootLabel": "Thư mục gốc phiên bản {{platform}}",
+      "currentLocalAppData": "Thu muc du lieu ung dung cuc bo hien tai",
+      "currentLocalAppDataDesc": "Day la thu muc rieng cuc bo ma Cockpit Tools dung cho chi muc tai khoan va cac du lieu cuc bo khac."
+    }
   },
   "appPath": {
     "missing": {

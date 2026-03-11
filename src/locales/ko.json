@@ -367,7 +367,8 @@
     "tabs": {
       "general": "일반",
       "network": "네트워크",
-      "about": "정보"
+      "about": "정보",
+      "storage": "저장소"
     },
     "general": {
       "appearance": "디자인",
@@ -505,7 +506,43 @@
       "download": "다운로드",
       "checkFailed": "업데이트 확인에 실패했습니다. 나중에 다시 시도해 주세요."
     },
-    "saveSettings": "설정 저장"
+    "saveSettings": "설정 저장",
+    "storage": {
+      "summaryDesc": "관리 중인 디스크 사용량을 확인하고, 새 인스턴스의 기본 루트를 설정하며, Windows에서 앱 데이터나 인스턴스 디렉터리를 마이그레이션합니다.",
+      "summaryAppData": "앱 데이터",
+      "summaryInstances": "인스턴스 디렉터리",
+      "summaryManagedInstances": "관리 인스턴스",
+      "windowsOnly": "디렉터리 마이그레이션은 현재 Windows에서만 지원됩니다.",
+      "directorySection": "디렉터리 설정",
+      "currentAppData": "현재 앱 데이터 디렉터리",
+      "currentAppDataDesc": "Cockpit Tools의 계정, 설정, 캐시, 로그 파일이 현재 저장되는 활성 디렉터리입니다.",
+      "defaultInstanceBase": "새 인스턴스 기본 루트",
+      "defaultInstanceBaseDesc": "앞으로 새로 만드는 관리 인스턴스에만 적용됩니다. 기존 인스턴스 경로는 마이그레이션을 실행하기 전까지 바뀌지 않습니다.",
+      "browse": "찾아보기",
+      "saveDefaultSuccess": "기본 인스턴스 루트를 저장했습니다.",
+      "saveDefaultFailed": "기본 인스턴스 루트 저장에 실패했습니다: {{error}}",
+      "migrationSection": "마이그레이션",
+      "targetRoot": "마이그레이션 대상 루트",
+      "targetRootDesc": "앱 데이터는 이 루트 아래 app-data로 복사되고, 마이그레이션되는 인스턴스 디렉터리는 instances 아래로 이동합니다.",
+      "scopeTitle": "마이그레이션 범위",
+      "scopeDesc": "새 드라이브로 옮길 관리 디렉터리를 선택하세요. 앞으로 만들 인스턴스용 기본 루트만 변경할 수도 있습니다.",
+      "migrateAppData": "앱 데이터 디렉터리 마이그레이션",
+      "migrateInstances": "관리 인스턴스 디렉터리 마이그레이션",
+      "migrationHintTitle": "마이그레이션 안내",
+      "migrationHint": "마이그레이션 전에 관리 인스턴스를 먼저 종료하려고 시도합니다. 앱 데이터 마이그레이션 후에도 기존 디렉터리는 롤백 백업으로 남으므로, 이후 쓰기를 완전히 새 디렉터리로 전환하려면 완료 후 앱을 다시 시작하세요.",
+      "startMigration": "마이그레이션 시작",
+      "migrationTargetRequired": "먼저 대상 루트를 선택하세요.",
+      "confirmMigration": "지금 저장소 마이그레이션을 시작할까요? 관리 인스턴스를 먼저 종료합니다.",
+      "migrationSuccess": "마이그레이션이 완료되었습니다. 새 인스턴스 루트: {{instanceBaseDir}}. 업데이트된 인스턴스 수: {{count}}.",
+      "migrationSuccessRestart": "마이그레이션이 완료되었습니다. 앱 데이터가 이제 {{appDataPath}} 를 가리킵니다. 이후 쓰기 전환을 마치려면 앱을 다시 시작하세요. 업데이트된 인스턴스 수: {{count}}.",
+      "migrationFailed": "마이그레이션 실패: {{error}}",
+      "statsSection": "사용량 세부 정보",
+      "managedInstancesSection": "관리 인스턴스 상세",
+      "noInstances": "관리 인스턴스를 찾지 못했습니다.",
+      "instanceRootLabel": "{{platform}} 인스턴스 루트",
+      "currentLocalAppData": "현재 로컬 앱 데이터 디렉터리",
+      "currentLocalAppDataDesc": "Cockpit Tools가 계정 인덱스와 기타 로컬 데이터를 저장하는 로컬 전용 디렉터리입니다."
+    }
   },
   "appPath": {
     "missing": {

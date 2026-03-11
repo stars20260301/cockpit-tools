@@ -237,6 +237,14 @@ fn resolve_codex_home_from_env() -> Option<PathBuf> {
     Some(PathBuf::from(unquoted))
 }
 
+fn get_local_app_data_dir() -> PathBuf {
+    crate::modules::storage_paths::get_local_app_data_dir().unwrap_or_else(|_| {
+        dirs::data_local_dir()
+            .unwrap_or_else(|| dirs::home_dir().expect("无法获取用户目录"))
+            .join("com.antigravity.cockpit-tools")
+    })
+}
+
 /// 获取官方 auth.json 路径
 pub fn get_auth_json_path() -> PathBuf {
     get_codex_home().join("auth.json")
@@ -244,19 +252,14 @@ pub fn get_auth_json_path() -> PathBuf {
 
 /// 获取我们的多账号存储路径
 fn get_accounts_storage_path() -> PathBuf {
-    let data_dir = dirs::data_local_dir()
-        .unwrap_or_else(|| dirs::home_dir().expect("无法获取用户目录"))
-        .join("com.antigravity.cockpit-tools");
+    let data_dir = get_local_app_data_dir();
     fs::create_dir_all(&data_dir).ok();
     data_dir.join("codex_accounts.json")
 }
 
 /// 获取账号详情存储目录
 fn get_accounts_dir() -> PathBuf {
-    let data_dir = dirs::data_local_dir()
-        .unwrap_or_else(|| dirs::home_dir().expect("无法获取用户目录"))
-        .join("com.antigravity.cockpit-tools")
-        .join("codex_accounts");
+    let data_dir = get_local_app_data_dir().join("codex_accounts");
     fs::create_dir_all(&data_dir).ok();
     data_dir
 }

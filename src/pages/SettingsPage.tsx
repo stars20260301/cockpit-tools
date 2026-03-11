@@ -9,6 +9,7 @@ import * as accountService from '../services/accountService';
 import { usePlatformRuntimeSupport } from '../hooks/usePlatformRuntimeSupport';
 import { usePlatformLayoutStore } from '../stores/usePlatformLayoutStore';
 import { ALL_PLATFORM_IDS, PlatformId } from '../types/platform';
+import { StorageSettingsPanel } from '../components/settings/StorageSettingsPanel';
 import './settings/Settings.css';
 import { 
   Github, User, Rocket, Save, FolderOpen,
@@ -96,7 +97,7 @@ type UpdateCheckFinishedDetail = {
 export function SettingsPage() {
   const { t } = useTranslation();
   const isMacOS = usePlatformRuntimeSupport('macos-only');
-  const [activeTab, setActiveTab] = useState<'general' | 'network' | 'about'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'network' | 'storage' | 'about'>('general');
   const orderedPlatformIds = usePlatformLayoutStore((state) => state.orderedPlatformIds);
   const platformSettingsOrder = useMemo<Record<PlatformId, number>>(() => {
     const next: Record<PlatformId, number> = { ...FALLBACK_PLATFORM_SETTINGS_ORDER };
@@ -844,6 +845,12 @@ export function SettingsPage() {
             onClick={() => setActiveTab('network')}
           >
             {t('settings.tabs.network')}
+          </button>
+          <button
+            className={`filter-tab ${activeTab === 'storage' ? 'active' : ''}`}
+            onClick={() => setActiveTab('storage')}
+          >
+            {t('settings.tabs.storage')}
           </button>
           <button 
             className={`filter-tab ${activeTab === 'about' ? 'active' : ''}`}
@@ -2629,6 +2636,8 @@ export function SettingsPage() {
 
           </>
         )}
+
+        {activeTab === 'storage' && <StorageSettingsPanel />}
 
         {/* === Network Tab === */}
         {activeTab === 'network' && (

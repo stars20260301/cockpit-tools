@@ -367,7 +367,8 @@
     "tabs": {
       "general": "通用",
       "network": "網路服務",
-      "about": "關於"
+      "about": "關於",
+      "storage": "儲存"
     },
     "general": {
       "appearance": "介面外觀",
@@ -505,7 +506,43 @@
       "download": "下載",
       "checkFailed": "檢查更新失敗，請稍後重試"
     },
-    "saveSettings": "儲存設定"
+    "saveSettings": "儲存設定",
+    "storage": {
+      "summaryDesc": "統計受管磁碟用量，設定新實例的預設根目錄，並在 Windows 上遷移應用資料或實例目錄。",
+      "summaryAppData": "應用資料",
+      "summaryInstances": "實例目錄",
+      "summaryManagedInstances": "受管實例",
+      "windowsOnly": "目錄遷移目前僅支援 Windows。",
+      "directorySection": "目錄設定",
+      "currentAppData": "目前應用資料目錄",
+      "currentAppDataDesc": "這是 Cockpit Tools 目前使用的帳號、設定、快取與日誌目錄。",
+      "defaultInstanceBase": "新實例預設根目錄",
+      "defaultInstanceBaseDesc": "只會影響之後新建的受管實例。既有實例路徑會在執行遷移前保持不變。",
+      "browse": "瀏覽",
+      "saveDefaultSuccess": "已儲存實例預設根目錄。",
+      "saveDefaultFailed": "儲存實例預設根目錄失敗：{{error}}",
+      "migrationSection": "遷移",
+      "targetRoot": "遷移目標根目錄",
+      "targetRootDesc": "應用資料會複製到此根目錄下的 app-data，遷移的實例目錄會移到 instances 下。",
+      "scopeTitle": "遷移範圍",
+      "scopeDesc": "選擇哪些受管目錄要移到新磁碟，也可以只修改未來新實例的預設根目錄。",
+      "migrateAppData": "遷移應用資料目錄",
+      "migrateInstances": "遷移受管實例目錄",
+      "migrationHintTitle": "遷移說明",
+      "migrationHint": "遷移前會先嘗試關閉受管實例。應用資料遷移後舊目錄會保留作為回滾備份；完成後請重新啟動應用，讓後續寫入完全切到新目錄。",
+      "startMigration": "開始遷移",
+      "migrationTargetRequired": "請先選擇遷移目標根目錄。",
+      "confirmMigration": "現在開始儲存遷移嗎？系統會先嘗試關閉受管實例。",
+      "migrationSuccess": "遷移完成。新的實例根目錄：{{instanceBaseDir}}。已更新實例數：{{count}}。",
+      "migrationSuccessRestart": "遷移完成。應用資料已指向 {{appDataPath}}。請重新啟動應用以完成後續寫入切換。已更新實例數：{{count}}。",
+      "migrationFailed": "遷移失敗：{{error}}",
+      "statsSection": "用量詳情",
+      "managedInstancesSection": "受管實例詳情",
+      "noInstances": "未找到受管實例。",
+      "instanceRootLabel": "{{platform}} 實例根目錄",
+      "currentLocalAppData": "目前本機應用資料目錄",
+      "currentLocalAppDataDesc": "這是 Cockpit Tools 目前用於帳號索引與其他本機資料的私有目錄。"
+    }
   },
   "appPath": {
     "missing": {

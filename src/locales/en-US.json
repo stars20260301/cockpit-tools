@@ -367,7 +367,8 @@
     "tabs": {
       "general": "General",
       "network": "Network",
-      "about": "About"
+      "about": "About",
+      "storage": "Storage"
     },
     "general": {
       "appearance": "Appearance",
@@ -505,7 +506,43 @@
       "download": "Download",
       "checkFailed": "Failed to check updates, please try again"
     },
-    "saveSettings": "Save Settings"
+    "saveSettings": "Save Settings",
+    "storage": {
+      "summaryDesc": "Review managed disk usage, set the default root for new instances, and migrate app data or instance directories on Windows.",
+      "summaryAppData": "App Data",
+      "summaryInstances": "Instance Directories",
+      "summaryManagedInstances": "Managed Instances",
+      "windowsOnly": "Directory migration is currently available on Windows only.",
+      "directorySection": "Directories",
+      "currentAppData": "Current App Data Directory",
+      "currentAppDataDesc": "This is the active directory used for Cockpit Tools account, config, cache, and log files.",
+      "defaultInstanceBase": "Default Root for New Instances",
+      "defaultInstanceBaseDesc": "Only affects newly created managed instances. Existing instance paths stay unchanged until you run migration.",
+      "browse": "Browse",
+      "saveDefaultSuccess": "Default instance root saved.",
+      "saveDefaultFailed": "Failed to save the default instance root: {{error}}",
+      "migrationSection": "Migration",
+      "targetRoot": "Migration Target Root",
+      "targetRootDesc": "App data is copied into an app-data folder under this root, local private data is copied into local-app-data, and migrated instance directories are moved under instances.",
+      "scopeTitle": "Migration Scope",
+      "scopeDesc": "Select which managed directories should move to the new disk. You can also change only the default root for future instances.",
+      "migrateAppData": "Migrate app data directory",
+      "migrateInstances": "Migrate managed instance directories",
+      "migrationHintTitle": "Migration Notes",
+      "migrationHint": "Migration will try to close managed instances first. App data and local private data migrations keep the old directories as rollback backups; restart the app after completion to switch future writes fully to the new directory.",
+      "startMigration": "Start Migration",
+      "migrationTargetRequired": "Select a target root first.",
+      "confirmMigration": "Start storage migration now? Managed instances will be closed first.",
+      "migrationSuccess": "Migration completed. New instance root: {{instanceBaseDir}}. Updated instances: {{count}}.",
+      "migrationSuccessRestart": "Migration completed. App data now points to {{appDataPath}}. Restart the app to finish switching future writes. Updated instances: {{count}}.",
+      "migrationFailed": "Migration failed: {{error}}",
+      "statsSection": "Usage Details",
+      "managedInstancesSection": "Managed Instance Details",
+      "noInstances": "No managed instances found.",
+      "instanceRootLabel": "{{platform}} instance root",
+      "currentLocalAppData": "Current Local App Data Directory",
+      "currentLocalAppDataDesc": "This is the local private directory used by Cockpit Tools for account indexes and other local data."
+    }
   },
   "appPath": {
     "missing": {

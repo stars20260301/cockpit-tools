@@ -367,7 +367,8 @@
     "tabs": {
       "general": "Allgemein",
       "network": "Netzwerk",
-      "about": "Über"
+      "about": "Über",
+      "storage": "Speicher"
     },
     "general": {
       "appearance": "Erscheinungsbild",
@@ -505,7 +506,43 @@
       "download": "Herunterladen",
       "checkFailed": "Fehler bei der Update-Suche"
     },
-    "saveSettings": "Einstellungen speichern"
+    "saveSettings": "Einstellungen speichern",
+    "storage": {
+      "summaryDesc": "Prüfen Sie den verwalteten Speicherbedarf, legen Sie das Standard-Stammverzeichnis für neue Instanzen fest und migrieren Sie unter Windows App-Daten oder Instanzverzeichnisse.",
+      "summaryAppData": "App-Daten",
+      "summaryInstances": "Instanzverzeichnisse",
+      "summaryManagedInstances": "Verwaltete Instanzen",
+      "windowsOnly": "Die Verzeichnismigration ist derzeit nur unter Windows verfügbar.",
+      "directorySection": "Verzeichnisse",
+      "currentAppData": "Aktuelles App-Datenverzeichnis",
+      "currentAppDataDesc": "Dies ist das aktive Verzeichnis für Konten, Konfigurationen, Cache- und Logdateien von Cockpit Tools.",
+      "defaultInstanceBase": "Standard-Stamm für neue Instanzen",
+      "defaultInstanceBaseDesc": "Wirkt sich nur auf neu erstellte verwaltete Instanzen aus. Bestehende Instanzpfade bleiben unverändert, bis Sie die Migration ausführen.",
+      "browse": "Durchsuchen",
+      "saveDefaultSuccess": "Standard-Stamm für Instanzen gespeichert.",
+      "saveDefaultFailed": "Der Standard-Stamm für Instanzen konnte nicht gespeichert werden: {{error}}",
+      "migrationSection": "Datenumzug",
+      "targetRoot": "Ziel-Stammverzeichnis",
+      "targetRootDesc": "App-Daten werden unter diesem Stamm in app-data kopiert, migrierte Instanzverzeichnisse werden unter instances verschoben.",
+      "scopeTitle": "Migrationsumfang",
+      "scopeDesc": "Wählen Sie aus, welche verwalteten Verzeichnisse auf das neue Laufwerk verschoben werden sollen. Sie können auch nur den Standard-Stamm für künftige Instanzen ändern.",
+      "migrateAppData": "App-Datenverzeichnis migrieren",
+      "migrateInstances": "Verwaltete Instanzverzeichnisse migrieren",
+      "migrationHintTitle": "Migrationshinweise",
+      "migrationHint": "Vor der Migration wird versucht, verwaltete Instanzen zu schließen. Bei einer App-Datenmigration bleibt das alte Verzeichnis als Rollback-Backup erhalten. Starten Sie die App nach Abschluss neu, damit zukünftige Schreibvorgänge vollständig auf das neue Verzeichnis wechseln.",
+      "startMigration": "Migration starten",
+      "migrationTargetRequired": "Wählen Sie zuerst ein Ziel-Stammverzeichnis aus.",
+      "confirmMigration": "Speichermigration jetzt starten? Verwaltete Instanzen werden zuerst geschlossen.",
+      "migrationSuccess": "Migration abgeschlossen. Neuer Instanz-Stamm: {{instanceBaseDir}}. Aktualisierte Instanzen: {{count}}.",
+      "migrationSuccessRestart": "Migration abgeschlossen. App-Daten zeigen jetzt auf {{appDataPath}}. Starten Sie die App neu, um zukünftige Schreibvorgänge umzustellen. Aktualisierte Instanzen: {{count}}.",
+      "migrationFailed": "Migration fehlgeschlagen: {{error}}",
+      "statsSection": "Nutzungsdetails",
+      "managedInstancesSection": "Details verwalteter Instanzen",
+      "noInstances": "Keine verwalteten Instanzen gefunden.",
+      "instanceRootLabel": "{{platform}}-Instanzstamm",
+      "currentLocalAppData": "Aktuelles lokales App-Datenverzeichnis",
+      "currentLocalAppDataDesc": "Dies ist das lokale private Verzeichnis, das Cockpit Tools fur Kontoindizes und andere lokale Daten verwendet."
+    }
   },
   "appPath": {
     "missing": {

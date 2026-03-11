@@ -37,6 +37,8 @@ pub mod process;
 pub mod quota;
 pub mod quota_cache;
 pub mod sync_settings;
+pub mod storage_manager;
+pub mod storage_paths;
 pub mod tray;
 pub mod tray_layout;
 pub mod update_checker;

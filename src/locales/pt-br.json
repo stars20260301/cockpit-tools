@@ -367,7 +367,8 @@
     "tabs": {
       "general": "Geral",
       "network": "Rede",
-      "about": "Sobre"
+      "about": "Sobre",
+      "storage": "Armazenamento"
     },
     "general": {
       "appearance": "Aparência",
@@ -505,7 +506,43 @@
       "download": "Baixar",
       "checkFailed": "Falha ao verificar atualizações"
     },
-    "saveSettings": "Salvar Configurações"
+    "saveSettings": "Salvar Configurações",
+    "storage": {
+      "summaryDesc": "Revise o uso de disco gerenciado, defina a raiz padrão para novas instâncias e migre no Windows os dados do aplicativo ou os diretórios de instância.",
+      "summaryAppData": "Dados do aplicativo",
+      "summaryInstances": "Diretórios de instância",
+      "summaryManagedInstances": "Instâncias gerenciadas",
+      "windowsOnly": "A migração de diretórios está disponível apenas no Windows por enquanto.",
+      "directorySection": "Diretórios",
+      "currentAppData": "Diretório atual de dados do aplicativo",
+      "currentAppDataDesc": "Este é o diretório ativo usado pelo Cockpit Tools para contas, configuração, cache e logs.",
+      "defaultInstanceBase": "Raiz padrão para novas instâncias",
+      "defaultInstanceBaseDesc": "Afeta apenas novas instâncias gerenciadas. Os caminhos das instâncias existentes permanecem inalterados até você executar a migração.",
+      "browse": "Procurar",
+      "saveDefaultSuccess": "A raiz padrão das instâncias foi salva.",
+      "saveDefaultFailed": "Falha ao salvar a raiz padrão das instâncias: {{error}}",
+      "migrationSection": "Migração",
+      "targetRoot": "Raiz de destino da migração",
+      "targetRootDesc": "Os dados do aplicativo são copiados para app-data dentro desta raiz, e os diretórios de instância migrados são movidos para instances.",
+      "scopeTitle": "Escopo da migração",
+      "scopeDesc": "Selecione quais diretórios gerenciados devem ir para o novo disco. Você também pode alterar apenas a raiz padrão das futuras instâncias.",
+      "migrateAppData": "Migrar diretório de dados do aplicativo",
+      "migrateInstances": "Migrar diretórios de instâncias gerenciadas",
+      "migrationHintTitle": "Notas da migração",
+      "migrationHint": "A migração tentará fechar primeiro as instâncias gerenciadas. Ao migrar os dados do aplicativo, o diretório antigo é mantido como backup de retorno; reinicie o aplicativo após a conclusão para mover totalmente as próximas gravações para o novo diretório.",
+      "startMigration": "Iniciar migração",
+      "migrationTargetRequired": "Selecione primeiro uma raiz de destino.",
+      "confirmMigration": "Iniciar a migração de armazenamento agora? As instâncias gerenciadas serão fechadas primeiro.",
+      "migrationSuccess": "Migração concluída. Nova raiz das instâncias: {{instanceBaseDir}}. Instâncias atualizadas: {{count}}.",
+      "migrationSuccessRestart": "Migração concluída. Os dados do aplicativo agora apontam para {{appDataPath}}. Reinicie o aplicativo para concluir a troca das próximas gravações. Instâncias atualizadas: {{count}}.",
+      "migrationFailed": "Falha na migração: {{error}}",
+      "statsSection": "Detalhes de uso",
+      "managedInstancesSection": "Detalhes das instâncias gerenciadas",
+      "noInstances": "Nenhuma instância gerenciada encontrada.",
+      "instanceRootLabel": "Raiz de instâncias do {{platform}}",
+      "currentLocalAppData": "Diretorio local atual de dados do aplicativo",
+      "currentLocalAppDataDesc": "Este e o diretorio privado local usado pelo Cockpit Tools para indices de contas e outros dados locais."
+    }
   },
   "appPath": {
     "missing": {

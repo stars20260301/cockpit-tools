@@ -228,6 +228,11 @@ pub fn run() {
             commands::system::handle_window_close,
             commands::system::open_folder,
             commands::system::delete_corrupted_file,
+            // Storage Commands
+            commands::storage::storage_get_state,
+            commands::storage::storage_get_overview,
+            commands::storage::storage_set_default_instance_base_dir,
+            commands::storage::storage_migrate,
             // Wakeup Commands
             commands::wakeup::wakeup_ensure_runtime_ready,
             commands::wakeup::trigger_wakeup,

@@ -367,7 +367,8 @@
     "tabs": {
       "general": "General",
       "network": "Red",
-      "about": "Acerca de"
+      "about": "Acerca de",
+      "storage": "Almacenamiento"
     },
     "general": {
       "appearance": "Apariencia",
@@ -505,7 +506,43 @@
       "download": "Descargar",
       "checkFailed": "Error al buscar actualizaciones"
     },
-    "saveSettings": "Guardar Ajustes"
+    "saveSettings": "Guardar Ajustes",
+    "storage": {
+      "summaryDesc": "Revisa el uso de disco gestionado, define la raíz predeterminada para nuevas instancias y migra en Windows los datos de la aplicación o los directorios de instancia.",
+      "summaryAppData": "Datos de la aplicación",
+      "summaryInstances": "Directorios de instancia",
+      "summaryManagedInstances": "Instancias gestionadas",
+      "windowsOnly": "La migración de directorios solo está disponible en Windows por ahora.",
+      "directorySection": "Directorios",
+      "currentAppData": "Directorio actual de datos de la aplicación",
+      "currentAppDataDesc": "Este es el directorio activo que usa Cockpit Tools para cuentas, configuración, caché y registros.",
+      "defaultInstanceBase": "Raíz predeterminada para nuevas instancias",
+      "defaultInstanceBaseDesc": "Solo afecta a las nuevas instancias gestionadas. Las rutas de las instancias existentes no cambian hasta que ejecutes la migración.",
+      "browse": "Examinar",
+      "saveDefaultSuccess": "Se guardó la raíz predeterminada de instancias.",
+      "saveDefaultFailed": "No se pudo guardar la raíz predeterminada de instancias: {{error}}",
+      "migrationSection": "Migración",
+      "targetRoot": "Raíz de destino para la migración",
+      "targetRootDesc": "Los datos de la aplicación se copian en app-data dentro de esta raíz y los directorios de instancia migrados se mueven a instances.",
+      "scopeTitle": "Alcance de la migración",
+      "scopeDesc": "Selecciona qué directorios gestionados deben moverse al nuevo disco. También puedes cambiar solo la raíz predeterminada de futuras instancias.",
+      "migrateAppData": "Migrar directorio de datos de la aplicación",
+      "migrateInstances": "Migrar directorios de instancias gestionadas",
+      "migrationHintTitle": "Notas de migración",
+      "migrationHint": "La migración intentará cerrar primero las instancias gestionadas. Al migrar los datos de la aplicación, el directorio anterior se conserva como copia de seguridad para volver atrás; reinicia la aplicación al terminar para que las futuras escrituras pasen por completo al nuevo directorio.",
+      "startMigration": "Iniciar migración",
+      "migrationTargetRequired": "Selecciona primero una raíz de destino.",
+      "confirmMigration": "¿Iniciar ahora la migración de almacenamiento? Primero se cerrarán las instancias gestionadas.",
+      "migrationSuccess": "Migración completada. Nueva raíz de instancias: {{instanceBaseDir}}. Instancias actualizadas: {{count}}.",
+      "migrationSuccessRestart": "Migración completada. Los datos de la aplicación ahora apuntan a {{appDataPath}}. Reinicia la aplicación para completar el cambio de futuras escrituras. Instancias actualizadas: {{count}}.",
+      "migrationFailed": "La migración falló: {{error}}",
+      "statsSection": "Detalles de uso",
+      "managedInstancesSection": "Detalles de instancias gestionadas",
+      "noInstances": "No se encontraron instancias gestionadas.",
+      "instanceRootLabel": "Raíz de instancias de {{platform}}",
+      "currentLocalAppData": "Directorio local actual de datos de la aplicacion",
+      "currentLocalAppDataDesc": "Este es el directorio privado local que Cockpit Tools usa para los indices de cuentas y otros datos locales."
+    }
   },
   "appPath": {
     "missing": {

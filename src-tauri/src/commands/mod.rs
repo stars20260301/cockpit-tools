@@ -17,6 +17,7 @@ pub mod instance;
 pub mod kiro;
 pub mod kiro_instance;
 pub mod oauth;
+pub mod storage;
 pub mod system;
 pub mod update;
 pub mod wakeup;

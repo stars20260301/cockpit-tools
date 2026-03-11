@@ -367,7 +367,8 @@
     "tabs": {
       "general": "Ogólne",
       "network": "Sieć",
-      "about": "O aplikacji"
+      "about": "O aplikacji",
+      "storage": "Pamięć"
     },
     "general": {
       "appearance": "Wygląd",
@@ -505,7 +506,43 @@
       "download": "Pobierz",
       "checkFailed": "Błąd sprawdzania aktualizacji"
     },
-    "saveSettings": "Zapisz ustawienia"
+    "saveSettings": "Zapisz ustawienia",
+    "storage": {
+      "summaryDesc": "Sprawdź zarządzane użycie dysku, ustaw domyślny katalog główny dla nowych instancji i migruj w Windows dane aplikacji lub katalogi instancji.",
+      "summaryAppData": "Dane aplikacji",
+      "summaryInstances": "Katalogi instancji",
+      "summaryManagedInstances": "Zarządzane instancje",
+      "windowsOnly": "Migracja katalogów jest obecnie dostępna tylko w systemie Windows.",
+      "directorySection": "Katalogi",
+      "currentAppData": "Bieżący katalog danych aplikacji",
+      "currentAppDataDesc": "To aktywny katalog używany przez Cockpit Tools na konta, konfigurację, pamięć podręczną i logi.",
+      "defaultInstanceBase": "Domyślny katalog główny dla nowych instancji",
+      "defaultInstanceBaseDesc": "Wpływa tylko na nowo tworzone zarządzane instancje. Ścieżki istniejących instancji nie zmienią się, dopóki nie uruchomisz migracji.",
+      "browse": "Przeglądaj",
+      "saveDefaultSuccess": "Zapisano domyślny katalog główny instancji.",
+      "saveDefaultFailed": "Nie udało się zapisać domyślnego katalogu głównego instancji: {{error}}",
+      "migrationSection": "Migracja",
+      "targetRoot": "Docelowy katalog główny migracji",
+      "targetRootDesc": "Dane aplikacji są kopiowane do app-data pod tym katalogiem głównym, a migrowane katalogi instancji są przenoszone do instances.",
+      "scopeTitle": "Zakres migracji",
+      "scopeDesc": "Wybierz, które zarządzane katalogi mają zostać przeniesione na nowy dysk. Możesz też zmienić tylko domyślny katalog główny dla przyszłych instancji.",
+      "migrateAppData": "Migruj katalog danych aplikacji",
+      "migrateInstances": "Migruj katalogi zarządzanych instancji",
+      "migrationHintTitle": "Uwagi do migracji",
+      "migrationHint": "Migracja najpierw spróbuje zamknąć zarządzane instancje. Przy migracji danych aplikacji stary katalog zostaje zachowany jako kopia zapasowa do wycofania zmian; po zakończeniu uruchom aplikację ponownie, aby przyszłe zapisy w pełni trafiły do nowego katalogu.",
+      "startMigration": "Rozpocznij migrację",
+      "migrationTargetRequired": "Najpierw wybierz katalog docelowy.",
+      "confirmMigration": "Rozpocząć migrację pamięci teraz? Najpierw zostaną zamknięte zarządzane instancje.",
+      "migrationSuccess": "Migracja zakończona. Nowy katalog główny instancji: {{instanceBaseDir}}. Zaktualizowane instancje: {{count}}.",
+      "migrationSuccessRestart": "Migracja zakończona. Dane aplikacji wskazują teraz na {{appDataPath}}. Uruchom aplikację ponownie, aby dokończyć przełączenie przyszłych zapisów. Zaktualizowane instancje: {{count}}.",
+      "migrationFailed": "Migracja nie powiodła się: {{error}}",
+      "statsSection": "Szczegóły użycia",
+      "managedInstancesSection": "Szczegóły zarządzanych instancji",
+      "noInstances": "Nie znaleziono zarządzanych instancji.",
+      "instanceRootLabel": "Katalog główny instancji {{platform}}",
+      "currentLocalAppData": "Biezacy lokalny katalog danych aplikacji",
+      "currentLocalAppDataDesc": "Jest to lokalny prywatny katalog uzywany przez Cockpit Tools na indeksy kont i inne dane lokalne."
+    }
   },
   "appPath": {
     "missing": {

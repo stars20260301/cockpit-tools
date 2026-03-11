@@ -367,7 +367,8 @@
     "tabs": {
       "general": "Genel",
       "network": "Ağ",
-      "about": "Hakkında"
+      "about": "Hakkında",
+      "storage": "Depolama"
     },
     "general": {
       "appearance": "Görünüm",
@@ -505,7 +506,43 @@
       "download": "İndir",
       "checkFailed": "Güncelleme kontrolü başarısız oldu"
     },
-    "saveSettings": "Ayarları Kaydet"
+    "saveSettings": "Ayarları Kaydet",
+    "storage": {
+      "summaryDesc": "Yönetilen disk kullanımını inceleyin, yeni örnekler için varsayılan kök dizini ayarlayın ve Windows üzerinde uygulama verilerini veya örnek dizinlerini taşıyın.",
+      "summaryAppData": "Uygulama verileri",
+      "summaryInstances": "Örnek dizinleri",
+      "summaryManagedInstances": "Yönetilen örnekler",
+      "windowsOnly": "Dizin taşıma şu anda yalnızca Windows üzerinde kullanılabilir.",
+      "directorySection": "Dizinler",
+      "currentAppData": "Geçerli uygulama veri dizini",
+      "currentAppDataDesc": "Bu dizin, Cockpit Tools tarafından hesaplar, yapılandırma, önbellek ve günlük dosyaları için aktif olarak kullanılır.",
+      "defaultInstanceBase": "Yeni örnekler için varsayılan kök",
+      "defaultInstanceBaseDesc": "Yalnızca yeni oluşturulan yönetilen örnekleri etkiler. Var olan örnek yolları, taşıma işlemi yapılana kadar değişmez.",
+      "browse": "Gözat",
+      "saveDefaultSuccess": "Varsayılan örnek kökü kaydedildi.",
+      "saveDefaultFailed": "Varsayılan örnek kökü kaydedilemedi: {{error}}",
+      "migrationSection": "Taşıma",
+      "targetRoot": "Taşıma hedef kökü",
+      "targetRootDesc": "Uygulama verileri bu kökün altındaki app-data içine kopyalanır, taşınan örnek dizinleri ise instances altına taşınır.",
+      "scopeTitle": "Taşıma kapsamı",
+      "scopeDesc": "Yeni diske taşınacak yönetilen dizinleri seçin. İsterseniz yalnızca gelecekteki örnekler için varsayılan kökü değiştirebilirsiniz.",
+      "migrateAppData": "Uygulama veri dizinini taşı",
+      "migrateInstances": "Yönetilen örnek dizinlerini taşı",
+      "migrationHintTitle": "Taşıma notları",
+      "migrationHint": "Taşıma önce yönetilen örnekleri kapatmayı dener. Uygulama verileri taşındığında eski dizin geri dönüş yedeği olarak tutulur; gelecekteki yazmaların tamamen yeni dizine geçmesi için işlem tamamlandıktan sonra uygulamayı yeniden başlatın.",
+      "startMigration": "Taşımayı başlat",
+      "migrationTargetRequired": "Önce bir hedef kök seçin.",
+      "confirmMigration": "Depolama taşımasını şimdi başlatmak istiyor musunuz? Yönetilen örnekler önce kapatılacak.",
+      "migrationSuccess": "Taşıma tamamlandı. Yeni örnek kökü: {{instanceBaseDir}}. Güncellenen örnek sayısı: {{count}}.",
+      "migrationSuccessRestart": "Taşıma tamamlandı. Uygulama verileri artık {{appDataPath}} konumunu kullanıyor. Gelecekteki yazmaları geçirmek için uygulamayı yeniden başlatın. Güncellenen örnek sayısı: {{count}}.",
+      "migrationFailed": "Taşıma başarısız oldu: {{error}}",
+      "statsSection": "Kullanım ayrıntıları",
+      "managedInstancesSection": "Yönetilen örnek ayrıntıları",
+      "noInstances": "Yönetilen örnek bulunamadı.",
+      "instanceRootLabel": "{{platform}} örnek kökü",
+      "currentLocalAppData": "Gecerli yerel uygulama veri dizini",
+      "currentLocalAppDataDesc": "Bu, Cockpit Tools'un hesap dizinleri ve diger yerel veriler icin kullandigi yerel ozel dizindir."
+    }
   },
   "appPath": {
     "missing": {

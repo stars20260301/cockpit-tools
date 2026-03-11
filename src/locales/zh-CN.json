@@ -367,7 +367,8 @@
     "tabs": {
       "general": "通用",
       "network": "网络服务",
-      "about": "关于"
+      "about": "关于",
+      "storage": "存储"
     },
     "general": {
       "appearance": "界面外观",
@@ -505,7 +506,43 @@
       "download": "下载",
       "checkFailed": "检查更新失败，请稍后重试"
     },
-    "saveSettings": "保存设置"
+    "saveSettings": "保存设置",
+    "storage": {
+      "summaryDesc": "统计受管磁盘占用，设置新实例默认根目录，并在 Windows 上迁移应用数据或实例目录。",
+      "summaryAppData": "应用数据",
+      "summaryInstances": "实例目录",
+      "summaryManagedInstances": "受管实例",
+      "windowsOnly": "目录迁移当前仅支持 Windows。",
+      "directorySection": "目录设置",
+      "currentAppData": "当前应用数据目录",
+      "currentAppDataDesc": "这是 Cockpit Tools 当前使用的账号、配置、缓存和日志目录。",
+      "defaultInstanceBase": "新实例默认根目录",
+      "defaultInstanceBaseDesc": "只影响后续新建的受管实例。已有实例路径会在执行迁移前保持不变。",
+      "browse": "浏览",
+      "saveDefaultSuccess": "已保存实例默认根目录。",
+      "saveDefaultFailed": "保存实例默认根目录失败：{{error}}",
+      "migrationSection": "迁移",
+      "targetRoot": "迁移目标根目录",
+      "targetRootDesc": "应用数据会复制到该根目录下的 app-data，本地私有数据会复制到 local-app-data，迁移的实例目录会移动到 instances 下。",
+      "scopeTitle": "迁移范围",
+      "scopeDesc": "选择哪些受管目录要迁移到新盘，也可以只修改后续新实例的默认根目录。",
+      "migrateAppData": "迁移应用数据目录",
+      "migrateInstances": "迁移受管实例目录",
+      "migrationHintTitle": "迁移说明",
+      "migrationHint": "迁移前会先尝试关闭受管实例。应用数据和本地私有数据迁移后旧目录会保留为回滚备份；完成后请重启应用，让后续写入完全切到新目录。",
+      "startMigration": "开始迁移",
+      "migrationTargetRequired": "请先选择迁移目标根目录。",
+      "confirmMigration": "现在开始存储迁移吗？系统会先尝试关闭受管实例。",
+      "migrationSuccess": "迁移完成。新的实例根目录：{{instanceBaseDir}}。已更新实例数：{{count}}。",
+      "migrationSuccessRestart": "迁移完成。应用数据已指向 {{appDataPath}}。请重启应用以完成后续写入切换。已更新实例数：{{count}}。",
+      "migrationFailed": "迁移失败：{{error}}",
+      "statsSection": "占用详情",
+      "managedInstancesSection": "受管实例详情",
+      "noInstances": "未发现受管实例。",
+      "instanceRootLabel": "{{platform}} 实例根目录",
+      "currentLocalAppData": "当前本地应用数据目录",
+      "currentLocalAppDataDesc": "这是 Cockpit Tools 当前用于账号索引和其他本地私有数据的目录。"
+    }
   },
   "appPath": {
     "missing": {

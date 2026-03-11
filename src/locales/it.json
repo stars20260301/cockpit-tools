@@ -367,7 +367,8 @@
     "tabs": {
       "general": "Generale",
       "network": "Rete",
-      "about": "Informazioni"
+      "about": "Informazioni",
+      "storage": "Archiviazione"
     },
     "general": {
       "appearance": "Aspetto",
@@ -505,7 +506,43 @@
       "download": "Scarica",
       "checkFailed": "Controllo fallito"
     },
-    "saveSettings": "Salva Impostazioni"
+    "saveSettings": "Salva Impostazioni",
+    "storage": {
+      "summaryDesc": "Controlla l’utilizzo disco gestito, imposta la radice predefinita per le nuove istanze e migra in Windows i dati dell’app o le directory delle istanze.",
+      "summaryAppData": "Dati app",
+      "summaryInstances": "Directory istanze",
+      "summaryManagedInstances": "Istanze gestite",
+      "windowsOnly": "La migrazione delle directory è attualmente disponibile solo su Windows.",
+      "directorySection": "Directory",
+      "currentAppData": "Directory attuale dei dati app",
+      "currentAppDataDesc": "Questa è la directory attiva usata da Cockpit Tools per account, configurazione, cache e log.",
+      "defaultInstanceBase": "Radice predefinita per le nuove istanze",
+      "defaultInstanceBaseDesc": "Influisce solo sulle nuove istanze gestite. I percorsi delle istanze esistenti restano invariati finché non esegui la migrazione.",
+      "browse": "Sfoglia",
+      "saveDefaultSuccess": "La radice predefinita delle istanze è stata salvata.",
+      "saveDefaultFailed": "Impossibile salvare la radice predefinita delle istanze: {{error}}",
+      "migrationSection": "Migrazione",
+      "targetRoot": "Radice di destinazione della migrazione",
+      "targetRootDesc": "I dati dell’app vengono copiati in app-data sotto questa radice e le directory delle istanze migrate vengono spostate in instances.",
+      "scopeTitle": "Ambito della migrazione",
+      "scopeDesc": "Seleziona quali directory gestite spostare sul nuovo disco. Puoi anche modificare solo la radice predefinita per le istanze future.",
+      "migrateAppData": "Migra directory dati app",
+      "migrateInstances": "Migra directory istanze gestite",
+      "migrationHintTitle": "Note sulla migrazione",
+      "migrationHint": "La migrazione proverà prima a chiudere le istanze gestite. Durante la migrazione dei dati app, la vecchia directory viene mantenuta come backup di rollback; riavvia l’app al termine per spostare completamente le scritture future nella nuova directory.",
+      "startMigration": "Avvia migrazione",
+      "migrationTargetRequired": "Seleziona prima una radice di destinazione.",
+      "confirmMigration": "Avviare ora la migrazione dello storage? Le istanze gestite verranno chiuse prima.",
+      "migrationSuccess": "Migrazione completata. Nuova radice istanze: {{instanceBaseDir}}. Istanze aggiornate: {{count}}.",
+      "migrationSuccessRestart": "Migrazione completata. I dati app ora puntano a {{appDataPath}}. Riavvia l’app per completare il passaggio delle future scritture. Istanze aggiornate: {{count}}.",
+      "migrationFailed": "Migrazione non riuscita: {{error}}",
+      "statsSection": "Dettagli utilizzo",
+      "managedInstancesSection": "Dettagli istanze gestite",
+      "noInstances": "Nessuna istanza gestita trovata.",
+      "instanceRootLabel": "Radice istanze di {{platform}}",
+      "currentLocalAppData": "Directory locale attuale dei dati dell'app",
+      "currentLocalAppDataDesc": "Questa e la directory privata locale usata da Cockpit Tools per gli indici degli account e altri dati locali."
+    }
   },
   "appPath": {
     "missing": {

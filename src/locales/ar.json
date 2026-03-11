@@ -367,7 +367,8 @@
     "tabs": {
       "general": "عام",
       "network": "خدمات الشبكة",
-      "about": "حول"
+      "about": "حول",
+      "storage": "التخزين"
     },
     "general": {
       "appearance": "المظهر",
@@ -505,7 +506,43 @@
       "download": "تنزيل",
       "checkFailed": "فشل التحقق من التحديثات"
     },
-    "saveSettings": "حفظ الإعدادات"
+    "saveSettings": "حفظ الإعدادات",
+    "storage": {
+      "summaryDesc": "راجع استهلاك القرص المُدار، واضبط الجذر الافتراضي للحالات الجديدة، وانقل بيانات التطبيق أو مجلدات الحالات على Windows.",
+      "summaryAppData": "بيانات التطبيق",
+      "summaryInstances": "مجلدات الحالات",
+      "summaryManagedInstances": "الحالات المُدارة",
+      "windowsOnly": "نقل المجلدات متاح حاليًا على Windows فقط.",
+      "directorySection": "المجلدات",
+      "currentAppData": "مجلد بيانات التطبيق الحالي",
+      "currentAppDataDesc": "هذا هو المجلد النشط الذي يستخدمه Cockpit Tools للحسابات والإعدادات وذاكرة التخزين المؤقت وملفات السجل.",
+      "defaultInstanceBase": "الجذر الافتراضي للحالات الجديدة",
+      "defaultInstanceBaseDesc": "يؤثر فقط في الحالات المُدارة الجديدة. ستبقى مسارات الحالات الحالية كما هي حتى تنفذ عملية النقل.",
+      "browse": "استعراض",
+      "saveDefaultSuccess": "تم حفظ الجذر الافتراضي للحالات.",
+      "saveDefaultFailed": "تعذر حفظ الجذر الافتراضي للحالات: {{error}}",
+      "migrationSection": "النقل",
+      "targetRoot": "الجذر الهدف للنقل",
+      "targetRootDesc": "سيتم نسخ بيانات التطبيق إلى app-data داخل هذا الجذر، وستُنقل مجلدات الحالات إلى instances.",
+      "scopeTitle": "نطاق النقل",
+      "scopeDesc": "اختر المجلدات المُدارة التي يجب نقلها إلى القرص الجديد. يمكنك أيضًا تغيير الجذر الافتراضي للحالات المستقبلية فقط.",
+      "migrateAppData": "نقل مجلد بيانات التطبيق",
+      "migrateInstances": "نقل مجلدات الحالات المُدارة",
+      "migrationHintTitle": "ملاحظات النقل",
+      "migrationHint": "ستحاول عملية النقل أولًا إغلاق الحالات المُدارة. عند نقل بيانات التطبيق سيبقى المجلد القديم كنسخة احتياطية للتراجع؛ أعد تشغيل التطبيق بعد الانتهاء لتحويل عمليات الكتابة المستقبلية بالكامل إلى المجلد الجديد.",
+      "startMigration": "بدء النقل",
+      "migrationTargetRequired": "اختر الجذر الهدف أولًا.",
+      "confirmMigration": "هل تريد بدء نقل التخزين الآن؟ سيتم إغلاق الحالات المُدارة أولًا.",
+      "migrationSuccess": "اكتملت عملية النقل. الجذر الجديد للحالات: {{instanceBaseDir}}. عدد الحالات المحدَّثة: {{count}}.",
+      "migrationSuccessRestart": "اكتملت عملية النقل. أصبحت بيانات التطبيق تشير الآن إلى {{appDataPath}}. أعد تشغيل التطبيق لإكمال تحويل عمليات الكتابة القادمة. عدد الحالات المحدَّثة: {{count}}.",
+      "migrationFailed": "فشل النقل: {{error}}",
+      "statsSection": "تفاصيل الاستخدام",
+      "managedInstancesSection": "تفاصيل الحالات المُدارة",
+      "noInstances": "لم يتم العثور على حالات مُدارة.",
+      "instanceRootLabel": "جذر حالات {{platform}}",
+      "currentLocalAppData": "دليل بيانات التطبيق المحلي الحالي",
+      "currentLocalAppDataDesc": "هذا هو الدليل المحلي الخاص الذي يستخدمه Cockpit Tools لفهارس الحسابات والبيانات المحلية الأخرى."
+    }
   },
   "appPath": {
     "missing": {

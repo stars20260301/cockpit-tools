@@ -367,7 +367,8 @@
     "tabs": {
       "general": "Obecné",
       "network": "Síť",
-      "about": "O aplikaci"
+      "about": "O aplikaci",
+      "storage": "Úložiště"
     },
     "general": {
       "appearance": "Vzhled",
@@ -505,7 +506,43 @@
       "download": "Stáhnout",
       "checkFailed": "Kontrola aktualizací selhala"
     },
-    "saveSettings": "Uložit nastavení"
+    "saveSettings": "Uložit nastavení",
+    "storage": {
+      "summaryDesc": "Zkontrolujte spravované využití disku, nastavte výchozí kořen pro nové instance a ve Windows přesuňte data aplikace nebo adresáře instancí.",
+      "summaryAppData": "Data aplikace",
+      "summaryInstances": "Adresáře instancí",
+      "summaryManagedInstances": "Spravované instance",
+      "windowsOnly": "Migrace adresářů je nyní dostupná jen ve Windows.",
+      "directorySection": "Adresáře",
+      "currentAppData": "Aktuální adresář dat aplikace",
+      "currentAppDataDesc": "Toto je aktivní adresář, který Cockpit Tools používá pro účty, konfiguraci, mezipaměť a logy.",
+      "defaultInstanceBase": "Výchozí kořen pro nové instance",
+      "defaultInstanceBaseDesc": "Platí jen pro nově vytvořené spravované instance. Cesty existujících instancí se nezmění, dokud nespustíte migraci.",
+      "browse": "Procházet",
+      "saveDefaultSuccess": "Výchozí kořen instancí byl uložen.",
+      "saveDefaultFailed": "Výchozí kořen instancí se nepodařilo uložit: {{error}}",
+      "migrationSection": "Migrace",
+      "targetRoot": "Cílový kořen migrace",
+      "targetRootDesc": "Data aplikace se zkopírují do app-data pod tímto kořenem a migrované adresáře instancí se přesunou do instances.",
+      "scopeTitle": "Rozsah migrace",
+      "scopeDesc": "Vyberte, které spravované adresáře se mají přesunout na nový disk. Můžete také změnit jen výchozí kořen pro budoucí instance.",
+      "migrateAppData": "Migrovat adresář dat aplikace",
+      "migrateInstances": "Migrovat adresáře spravovaných instancí",
+      "migrationHintTitle": "Poznámky k migraci",
+      "migrationHint": "Migrace se nejprve pokusí zavřít spravované instance. Při migraci dat aplikace zůstane starý adresář zachován jako záloha pro návrat zpět; po dokončení aplikaci restartujte, aby se budoucí zápisy plně přepnuly do nového adresáře.",
+      "startMigration": "Spustit migraci",
+      "migrationTargetRequired": "Nejprve vyberte cílový kořen.",
+      "confirmMigration": "Spustit migraci úložiště nyní? Spravované instance budou nejprve zavřeny.",
+      "migrationSuccess": "Migrace dokončena. Nový kořen instancí: {{instanceBaseDir}}. Aktualizované instance: {{count}}.",
+      "migrationSuccessRestart": "Migrace dokončena. Data aplikace nyní ukazují na {{appDataPath}}. Restartujte aplikaci, aby se dokončilo přepnutí budoucích zápisů. Aktualizované instance: {{count}}.",
+      "migrationFailed": "Migrace selhala: {{error}}",
+      "statsSection": "Podrobnosti využití",
+      "managedInstancesSection": "Podrobnosti spravovaných instancí",
+      "noInstances": "Nebyly nalezeny žádné spravované instance.",
+      "instanceRootLabel": "Kořen instancí {{platform}}",
+      "currentLocalAppData": "Aktualni lokalni adresar dat aplikace",
+      "currentLocalAppDataDesc": "Toto je mistni soukromy adresar, ktery Cockpit Tools pouziva pro indexy uctu a dalsi lokalni data."
+    }
   },
   "appPath": {
     "missing": {

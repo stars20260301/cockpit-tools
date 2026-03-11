@@ -367,7 +367,8 @@
     "tabs": {
       "general": "Général",
       "network": "Réseau",
-      "about": "À propos"
+      "about": "À propos",
+      "storage": "Stockage"
     },
     "general": {
       "appearance": "Apparence",
@@ -505,7 +506,43 @@
       "download": "Télécharger",
       "checkFailed": "Échec de la vérification"
     },
-    "saveSettings": "Enregistrer les paramètres"
+    "saveSettings": "Enregistrer les paramètres",
+    "storage": {
+      "summaryDesc": "Consultez l’espace disque géré, définissez la racine par défaut des nouvelles instances et migrez sous Windows les données de l’application ou les répertoires d’instance.",
+      "summaryAppData": "Données applicatives",
+      "summaryInstances": "Répertoires d’instance",
+      "summaryManagedInstances": "Instances gérées",
+      "windowsOnly": "La migration de répertoires est actuellement disponible uniquement sous Windows.",
+      "directorySection": "Répertoires",
+      "currentAppData": "Répertoire actuel des données applicatives",
+      "currentAppDataDesc": "Il s’agit du répertoire actif utilisé par Cockpit Tools pour les comptes, la configuration, le cache et les journaux.",
+      "defaultInstanceBase": "Racine par défaut des nouvelles instances",
+      "defaultInstanceBaseDesc": "N’affecte que les nouvelles instances gérées. Les chemins des instances existantes restent inchangés tant que vous n’exécutez pas la migration.",
+      "browse": "Parcourir",
+      "saveDefaultSuccess": "La racine par défaut des instances a été enregistrée.",
+      "saveDefaultFailed": "Impossible d’enregistrer la racine par défaut des instances : {{error}}",
+      "migrationSection": "Déplacement",
+      "targetRoot": "Racine cible de migration",
+      "targetRootDesc": "Les données applicatives sont copiées dans app-data sous cette racine, et les répertoires d’instance migrés sont déplacés sous instances.",
+      "scopeTitle": "Périmètre de migration",
+      "scopeDesc": "Choisissez quels répertoires gérés doivent être déplacés vers le nouveau disque. Vous pouvez aussi modifier uniquement la racine par défaut des futures instances.",
+      "migrateAppData": "Migrer le répertoire des données applicatives",
+      "migrateInstances": "Migrer les répertoires d’instance gérés",
+      "migrationHintTitle": "Notes de migration",
+      "migrationHint": "La migration tente d’abord de fermer les instances gérées. Lors d’une migration des données applicatives, l’ancien répertoire est conservé comme sauvegarde de retour arrière ; redémarrez l’application après la fin pour basculer complètement les futures écritures vers le nouveau répertoire.",
+      "startMigration": "Démarrer la migration",
+      "migrationTargetRequired": "Sélectionnez d’abord une racine cible.",
+      "confirmMigration": "Démarrer la migration du stockage maintenant ? Les instances gérées seront fermées avant.",
+      "migrationSuccess": "Migration terminée. Nouvelle racine d’instance : {{instanceBaseDir}}. Instances mises à jour : {{count}}.",
+      "migrationSuccessRestart": "Migration terminée. Les données applicatives pointent maintenant vers {{appDataPath}}. Redémarrez l’application pour terminer le basculement des futures écritures. Instances mises à jour : {{count}}.",
+      "migrationFailed": "Échec de la migration : {{error}}",
+      "statsSection": "Détails d’utilisation",
+      "managedInstancesSection": "Détails des instances gérées",
+      "noInstances": "Aucune instance gérée trouvée.",
+      "instanceRootLabel": "Racine des instances {{platform}}",
+      "currentLocalAppData": "Repertoire local actuel des donnees d'application",
+      "currentLocalAppDataDesc": "Il s'agit du repertoire prive local utilise par Cockpit Tools pour les index de comptes et d'autres donnees locales."
+    }
   },
   "appPath": {
     "missing": {

@@ -367,7 +367,8 @@
     "tabs": {
       "general": "全般",
       "network": "ネットワーク設定",
-      "about": "本アプリについて"
+      "about": "本アプリについて",
+      "storage": "ストレージ"
     },
     "general": {
       "appearance": "外観",
@@ -505,7 +506,43 @@
       "download": "ダウンロード",
       "checkFailed": "アップデートの確認に失敗しました。後でもう一度お試しください"
     },
-    "saveSettings": "設定を保存"
+    "saveSettings": "設定を保存",
+    "storage": {
+      "summaryDesc": "管理対象のディスク使用量を確認し、新しいインスタンスの既定ルートを設定し、Windows でアプリデータやインスタンスディレクトリを移行します。",
+      "summaryAppData": "アプリデータ",
+      "summaryInstances": "インスタンスディレクトリ",
+      "summaryManagedInstances": "管理対象インスタンス",
+      "windowsOnly": "ディレクトリ移行は現在 Windows のみ対応しています。",
+      "directorySection": "ディレクトリ設定",
+      "currentAppData": "現在のアプリデータディレクトリ",
+      "currentAppDataDesc": "Cockpit Tools のアカウント、設定、キャッシュ、ログが現在保存されているディレクトリです。",
+      "defaultInstanceBase": "新規インスタンスの既定ルート",
+      "defaultInstanceBaseDesc": "新しく作成する管理対象インスタンスにのみ適用されます。既存インスタンスのパスは移行を実行するまで変わりません。",
+      "browse": "参照",
+      "saveDefaultSuccess": "既定のインスタンスルートを保存しました。",
+      "saveDefaultFailed": "既定のインスタンスルートの保存に失敗しました: {{error}}",
+      "migrationSection": "移行",
+      "targetRoot": "移行先ルート",
+      "targetRootDesc": "アプリデータはこのルート配下の app-data にコピーされ、移行するインスタンスディレクトリは instances 配下へ移動されます。",
+      "scopeTitle": "移行範囲",
+      "scopeDesc": "新しいドライブへ移動する管理対象ディレクトリを選択します。今後の新規インスタンス向け既定ルートだけ変更することもできます。",
+      "migrateAppData": "アプリデータディレクトリを移行",
+      "migrateInstances": "管理対象インスタンスディレクトリを移行",
+      "migrationHintTitle": "移行メモ",
+      "migrationHint": "移行前に管理対象インスタンスの終了を試みます。アプリデータ移行後も旧ディレクトリはロールバック用バックアップとして残るため、今後の書き込みを完全に新しい場所へ切り替えるには完了後にアプリを再起動してください。",
+      "startMigration": "移行を開始",
+      "migrationTargetRequired": "先に移行先ルートを選択してください。",
+      "confirmMigration": "ストレージ移行を開始しますか？ 管理対象インスタンスを先に終了します。",
+      "migrationSuccess": "移行が完了しました。新しいインスタンスルート: {{instanceBaseDir}}。更新したインスタンス数: {{count}}。",
+      "migrationSuccessRestart": "移行が完了しました。アプリデータは {{appDataPath}} を指しています。今後の書き込みを完全に切り替えるにはアプリを再起動してください。更新したインスタンス数: {{count}}。",
+      "migrationFailed": "移行に失敗しました: {{error}}",
+      "statsSection": "使用状況の詳細",
+      "managedInstancesSection": "管理対象インスタンス詳細",
+      "noInstances": "管理対象インスタンスはありません。",
+      "instanceRootLabel": "{{platform}} のインスタンスルート",
+      "currentLocalAppData": "現在のローカルアプリデータディレクトリ",
+      "currentLocalAppDataDesc": "Cockpit Tools がアカウント索引やその他のローカルデータに使うローカル専用ディレクトリです。"
+    }
   },
   "appPath": {
     "missing": {

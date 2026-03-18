@@ -626,8 +626,10 @@
     },
     "tier": {
       "pro": "PRO",
-      "ultra": "ULTRA",
-      "free": "FREE"
+      "ultra": "ULTRA"
+    },
+    "credits": {
+      "label": "AI 크레딧"
     },
     "empty": {
       "title": "계정 없음",
@@ -647,8 +649,7 @@
     "filter": {
       "all": "전체 ({{count}})",
       "pro": "프로({{count}})",
-      "ultra": "울트라({{count}})",
-      "free": "무료({{count}})"
+      "ultra": "울트라({{count}})"
     },
     "sortLabel": "정렬",
     "sort": {

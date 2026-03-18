@@ -1606,10 +1606,9 @@ fn format_unix_timestamp(value: Option<i64>) -> String {
     } else {
         raw
     };
-    let Some(naive) = chrono::NaiveDateTime::from_timestamp_opt(seconds, 0) else {
+    let Some(dt) = chrono::DateTime::from_timestamp(seconds, 0) else {
         return "-".to_string();
     };
-    let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(naive, chrono::Utc);
     dt.to_rfc3339()
 }
 

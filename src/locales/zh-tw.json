@@ -626,8 +626,10 @@
     },
     "tier": {
       "pro": "PRO",
-      "ultra": "ULTRA",
-      "free": "FREE"
+      "ultra": "ULTRA"
+    },
+    "credits": {
+      "label": "AI 積分"
     },
     "empty": {
       "title": "暫無帳號",
@@ -647,8 +649,7 @@
     "filter": {
       "all": "全部 ({{count}})",
       "pro": "專業版 ({{count}})",
-      "ultra": "超 ({{count}})",
-      "free": "免費（{{count}}）"
+      "ultra": "超 ({{count}})"
     },
     "sortLabel": "排序",
     "sort": {

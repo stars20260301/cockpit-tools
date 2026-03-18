@@ -626,8 +626,10 @@
     },
     "tier": {
       "pro": "PRO",
-      "ultra": "ULTRA",
-      "free": "FREE"
+      "ultra": "ULTRA"
+    },
+    "credits": {
+      "label": "Tín dụng AI"
     },
     "empty": {
       "title": "Chưa có tài khoản",
@@ -647,8 +649,7 @@
     "filter": {
       "all": "Tất cả ({{count}})",
       "pro": "CHUYÊN NGHIỆP ({{count}})",
-      "ultra": "SIÊU ({{count}})",
-      "free": "MIỄN PHÍ ({{count}})"
+      "ultra": "SIÊU ({{count}})"
     },
     "sortLabel": "Sắp xếp",
     "sort": {

@@ -2998,6 +2998,7 @@ fn is_antigravity_main_process(
     }
 }
 
+#[allow(dead_code)]
 fn collect_running_process_exe_by_pid() -> HashMap<u32, String> {
     let mut map = HashMap::new();
 
@@ -3054,6 +3055,7 @@ fn collect_running_process_exe_by_pid() -> HashMap<u32, String> {
     map
 }
 
+#[allow(dead_code)]
 fn filter_entries_by_expected_launch_path(
     app_label: &str,
     entries: Vec<(u32, Option<String>)>,

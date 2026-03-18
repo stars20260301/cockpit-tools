@@ -626,8 +626,10 @@
     },
     "tier": {
       "pro": "PRO",
-      "ultra": "ULTRA",
-      "free": "FREE"
+      "ultra": "ULTRA"
+    },
+    "credits": {
+      "label": "KI-Guthaben"
     },
     "empty": {
       "title": "Keine Konten",
@@ -647,8 +649,7 @@
     "filter": {
       "all": "Alle ({{count}})",
       "pro": "PRO ({{count}})",
-      "ultra": "ULTRA ({{count}})",
-      "free": "KOSTENLOS ({{count}})"
+      "ultra": "ULTRA ({{count}})"
     },
     "sortLabel": "Sortieren",
     "sort": {

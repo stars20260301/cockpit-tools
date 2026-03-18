@@ -10,6 +10,16 @@ pub struct ModelQuota {
     pub reset_time: String,
 }
 
+/// AI 积分信息（来自 loadCodeAssist paidTier.availableCredits）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreditInfo {
+    pub credit_type: String,
+    #[serde(default)]
+    pub credit_amount: Option<String>,
+    #[serde(default)]
+    pub minimum_credit_amount_for_usage: Option<String>,
+}
+
 /// 配额数据结构
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QuotaData {
@@ -20,6 +30,12 @@ pub struct QuotaData {
     /// 订阅等级 (FREE/PRO/ULTRA)
     #[serde(default)]
     pub subscription_tier: Option<String>,
+    /// AI 积分列表（仅付费账号可能有）
+    #[serde(default)]
+    pub credits: Vec<CreditInfo>,
+    /// 账号层级 ID（如 free-tier、g1-pro-tier）
+    #[serde(default)]
+    pub tier_id: Option<String>,
 }
 
 impl QuotaData {
@@ -29,6 +45,8 @@ impl QuotaData {
             last_updated: chrono::Utc::now().timestamp(),
             is_forbidden: false,
             subscription_tier: None,
+            credits: Vec::new(),
+            tier_id: None,
         }
     }
 

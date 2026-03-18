@@ -626,8 +626,10 @@
     },
     "tier": {
       "pro": "PRO",
-      "ultra": "ULTRA",
-      "free": "FREE"
+      "ultra": "ULTRA"
+    },
+    "credits": {
+      "label": "Crediti IA"
     },
     "empty": {
       "title": "Nessun Account",
@@ -647,8 +649,7 @@
     "filter": {
       "all": "Tutti ({{count}})",
       "pro": "PRO ({{count}})",
-      "ultra": "ULTRA ({{count}})",
-      "free": "GRATUITO ({{count}})"
+      "ultra": "ULTRA ({{count}})"
     },
     "sortLabel": "Ordina",
     "sort": {

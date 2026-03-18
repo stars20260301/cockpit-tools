@@ -626,8 +626,10 @@
     },
     "tier": {
       "pro": "PRO",
-      "ultra": "ULTRA",
-      "free": "FREE"
+      "ultra": "ULTRA"
+    },
+    "credits": {
+      "label": "AI Kredileri"
     },
     "empty": {
       "title": "Hesap Yok",
@@ -647,8 +649,7 @@
     "filter": {
       "all": "Tümü ({{count}})",
       "pro": "PRO ({{count}})",
-      "ultra": "ULTRA ({{count}})",
-      "free": "ÜCRETSİZ ({{count}})"
+      "ultra": "ULTRA ({{count}})"
     },
     "sortLabel": "Sırala",
     "sort": {

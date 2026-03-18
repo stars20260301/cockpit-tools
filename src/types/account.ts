@@ -28,6 +28,14 @@ export interface QuotaData {
     last_updated: number;
     is_forbidden?: boolean;
     subscription_tier?: string;
+    credits?: CreditInfo[];
+    tier_id?: string;
+}
+
+export interface CreditInfo {
+    credit_type: string;
+    credit_amount?: string;
+    minimum_credit_amount_for_usage?: string;
 }
 
 export interface QuotaErrorInfo {

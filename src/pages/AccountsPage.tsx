@@ -1752,7 +1752,47 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
                     </div>
                   )
                 })}
-                {quotaDisplayItems.length === 0 && (
+                {/* AI 积分行 (合并分段显示) */}
+                {(() => {
+                  const tier = (account.quota?.subscription_tier || account.quota?.tier_id || '').toLowerCase()
+                  const isPro = tier.includes('pro')
+                  const isUltra = tier.includes('ultra')
+                  if (!isPro && !isUltra) return null
+                  const validCredits = account.quota?.credits?.filter(c => c.credit_amount != null) || []
+                  const paidMax = isUltra ? 25000 : 1000
+                  const freeMax = 100
+                  const paidCredit = validCredits[0] ? parseInt(validCredits[0].credit_amount || '0', 10) : 0
+                  const freeCredit = validCredits[1] ? parseInt(validCredits[1].credit_amount || '0', 10) : 0
+                  const totalMax = paidMax + freeMax
+                  const totalAmount = paidCredit + freeCredit
+                  const percentage = Math.min(Math.round((totalAmount / totalMax) * 100), 100)
+                  const paidPct = Math.min(Math.round((paidCredit / paidMax) * 100), 100)
+                  const freePct = Math.min(Math.round((freeCredit / freeMax) * 100), 100)
+                  const paidSegW = (paidMax / totalMax) * 100
+                  const freeSegW = (freeMax / totalMax) * 100
+                  return (
+                    <div className="quota-compact-item">
+                      <div className="quota-compact-header">
+                        <span className="model-label">{t('accounts.credits.label', 'AI 积分')}</span>
+                        <span className={`model-pct ${getQuotaClass(percentage)}`}>
+                          {percentage}%
+                        </span>
+                      </div>
+                      <div className="quota-compact-bar-track" style={{ display: 'flex', gap: '1px' }}>
+                        <div style={{ width: `${paidSegW}%`, height: '100%', background: 'rgba(15,23,42,0.06)', borderRadius: '2px 0 0 2px', overflow: 'hidden' }}>
+                          <div className={`quota-compact-bar ${getQuotaClass(paidPct)}`} style={{ width: `${paidPct}%`, borderRadius: '2px 0 0 2px' }} />
+                        </div>
+                        <div style={{ width: `${freeSegW}%`, height: '100%', background: 'rgba(15,23,42,0.06)', borderRadius: '0 2px 2px 0', overflow: 'hidden' }}>
+                          <div className={`quota-compact-bar ${getQuotaClass(freePct)}`} style={{ width: `${freePct}%`, borderRadius: '0 2px 2px 0' }} />
+                        </div>
+                      </div>
+                      <span className="quota-compact-reset">
+                        {`${paidCredit}+${freeCredit}/${totalMax}`}
+                      </span>
+                    </div>
+                  )
+                })()}
+                {quotaDisplayItems.length === 0 && (!account.quota?.credits || account.quota.credits.filter(c => c.credit_amount != null).length === 0) && (
                   <div className="quota-empty">{t('overview.noQuotaData')}</div>
                 )}
               </>
@@ -2285,7 +2325,49 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
                       </div>
                     </div>
                   ))}
-                  {quotaDisplayItems.length === 0 && (
+                  {/* AI 积分行 (表格视图 - 分段显示) */}
+                  {(() => {
+                    const tier = (account.quota?.subscription_tier || account.quota?.tier_id || '').toLowerCase()
+                    const isPro = tier.includes('pro')
+                    const isUltra = tier.includes('ultra')
+                    if (!isPro && !isUltra) return null
+                    const validCredits = account.quota?.credits?.filter(c => c.credit_amount != null) || []
+                    const paidMax = isUltra ? 25000 : 1000
+                    const freeMax = 100
+                    const paidCredit = validCredits[0] ? parseInt(validCredits[0].credit_amount || '0', 10) : 0
+                    const freeCredit = validCredits[1] ? parseInt(validCredits[1].credit_amount || '0', 10) : 0
+                    const totalMax = paidMax + freeMax
+                    const totalAmount = paidCredit + freeCredit
+                    const percentage = Math.min(Math.round((totalAmount / totalMax) * 100), 100)
+                    const paidPct = Math.min(Math.round((paidCredit / paidMax) * 100), 100)
+                    const freePct = Math.min(Math.round((freeCredit / freeMax) * 100), 100)
+                    const paidSegW = (paidMax / totalMax) * 100
+                    const freeSegW = (freeMax / totalMax) * 100
+                    return (
+                      <div className="quota-item">
+                        <div className="quota-header">
+                          <span className="quota-name">{t('accounts.credits.label', 'AI 积分')}</span>
+                          <span className={`quota-value ${getQuotaClass(percentage)}`}>
+                            {percentage}%
+                          </span>
+                        </div>
+                        <div className="quota-progress-track" style={{ display: 'flex', gap: '1px' }}>
+                          <div style={{ width: `${paidSegW}%`, height: '100%', background: 'rgba(15,23,42,0.06)', borderRadius: '2px 0 0 2px', overflow: 'hidden' }}>
+                            <div className={`quota-progress-bar ${getQuotaClass(paidPct)}`} style={{ width: `${paidPct}%`, borderRadius: '2px 0 0 2px' }} />
+                          </div>
+                          <div style={{ width: `${freeSegW}%`, height: '100%', background: 'rgba(15,23,42,0.06)', borderRadius: '0 2px 2px 0', overflow: 'hidden' }}>
+                            <div className={`quota-progress-bar ${getQuotaClass(freePct)}`} style={{ width: `${freePct}%`, borderRadius: '0 2px 2px 0' }} />
+                          </div>
+                        </div>
+                        <div className="quota-footer">
+                          <span className="quota-reset">
+                            {`${paidCredit}+${freeCredit}/${totalMax}`}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                  {quotaDisplayItems.length === 0 && (!account.quota?.credits || account.quota.credits.filter(c => c.credit_amount != null).length === 0) && (
                     <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>
                       {t('overview.noQuotaData')}
                     </span>

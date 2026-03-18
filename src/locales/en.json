@@ -626,8 +626,10 @@
     },
     "tier": {
       "pro": "PRO",
-      "ultra": "ULTRA",
-      "free": "FREE"
+      "ultra": "ULTRA"
+    },
+    "credits": {
+      "label": "AI Credits"
     },
     "empty": {
       "title": "No Accounts",
@@ -647,8 +649,7 @@
     "filter": {
       "all": "All ({{count}})",
       "pro": "PRO ({{count}})",
-      "ultra": "ULTRA ({{count}})",
-      "free": "FREE ({{count}})"
+      "ultra": "ULTRA ({{count}})"
     },
     "sortLabel": "Sort",
     "sort": {

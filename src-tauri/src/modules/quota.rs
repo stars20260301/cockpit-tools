@@ -1,4 +1,4 @@
-use crate::models::{QuotaData, TokenData};
+use crate::models::{CreditInfo, QuotaData, TokenData};
 use crate::modules;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -241,6 +241,18 @@ struct AllowedTier {
 #[derive(Debug, Deserialize)]
 struct Tier {
     id: Option<String>,
+    #[serde(rename = "availableCredits", default)]
+    available_credits: Option<Vec<AvailableCreditRaw>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct AvailableCreditRaw {
+    #[serde(rename = "creditType")]
+    credit_type: Option<String>,
+    #[serde(rename = "creditAmount")]
+    credit_amount: Option<String>,
+    #[serde(rename = "minimumCreditAmountForUsage")]
+    minimum_credit_amount_for_usage: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -260,12 +272,13 @@ fn create_client() -> reqwest::Client {
     crate::utils::http::create_client(15)
 }
 
+/// metadata 使用 snake_case 格式，确保 loadCodeAssist 返回 availableCredits
 fn build_metadata_payload() -> serde_json::Value {
     json!({
         "metadata": {
-            "ideType": "ANTIGRAVITY",
-            "platform": "PLATFORM_UNSPECIFIED",
-            "pluginType": "GEMINI"
+            "ide_type": "ANTIGRAVITY",
+            "ide_version": "1.20.5",
+            "ide_name": "antigravity"
         }
     })
 }
@@ -411,11 +424,37 @@ async fn try_onboard_user(
     }
 }
 
-/// 获取项目 ID 和订阅类型（优先使用 token 中的 project_id / is_gcp_tos 上下文）
+/// 从 paidTier.availableCredits 提取有效积分信息
+fn extract_credits_from_tier(tier: &Tier) -> Vec<CreditInfo> {
+    tier.available_credits
+        .as_ref()
+        .map(|credits| {
+            credits
+                .iter()
+                .filter_map(|raw| {
+                    let credit_type = raw.credit_type.as_ref()?.clone();
+                    // 仅保留有 creditAmount 的条目
+                    if raw.credit_amount.is_none() {
+                        return None;
+                    }
+                    Some(CreditInfo {
+                        credit_type,
+                        credit_amount: raw.credit_amount.clone(),
+                        minimum_credit_amount_for_usage: raw
+                            .minimum_credit_amount_for_usage
+                            .clone(),
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// 获取项目 ID、订阅类型和积分信息（优先使用 token 中的 project_id / is_gcp_tos 上下文）
 pub async fn fetch_project_id_for_token(
     token: &TokenData,
     email: &str,
-) -> (Option<String>, Option<String>) {
+) -> (Option<String>, Option<String>, Vec<CreditInfo>) {
     let ctx = QuotaCloudCodeContext::from_token(token);
     fetch_project_id_with_context(&token.access_token, email, &ctx).await
 }
@@ -424,11 +463,12 @@ pub async fn fetch_project_id_with_context(
     access_token: &str,
     email: &str,
     ctx: &QuotaCloudCodeContext,
-) -> (Option<String>, Option<String>) {
+) -> (Option<String>, Option<String>, Vec<CreditInfo>) {
     let client = create_client();
     let mut subscription_tier: Option<String> = None;
     let mut allowed_tiers: Vec<AllowedTier> = Vec::new();
     let mut last_error: Option<String> = None;
+    let mut credits: Vec<CreditInfo> = Vec::new();
     let base_url = resolve_cloud_code_base_url(ctx);
     let preferred_project_id = ctx
         .preferred_project_id
@@ -442,8 +482,10 @@ pub async fn fetch_project_id_with_context(
             .post(format!("{}/{}", base_url, LOAD_CODE_ASSIST_PATH))
             .bearer_auth(access_token)
             .header(reqwest::header::CONTENT_TYPE, "application/json")
-            .header(reqwest::header::USER_AGENT, USER_AGENT)
-            .header(reqwest::header::ACCEPT_ENCODING, "gzip")
+            .header(reqwest::header::USER_AGENT, "antigravity/1.20.5 windows/amd64 google-api-nodejs-client/10.3.0")
+            .header("x-goog-api-client", "gl-node/22.21.1")
+            .header(reqwest::header::ACCEPT, "*/*")
+            .header(reqwest::header::ACCEPT_ENCODING, "gzip, deflate, br")
             .json(&build_load_code_assist_payload(
                 preferred_project_id.as_deref(),
             ))
@@ -457,7 +499,8 @@ pub async fn fetch_project_id_with_context(
                 if status.is_success() {
                     let text_result = res.text().await;
                     match text_result {
-                        Ok(text) => match serde_json::from_str::<LoadProjectResponse>(&text) {
+                        Ok(text) => {
+                            match serde_json::from_str::<LoadProjectResponse>(&text) {
                             Ok(data) => {
                                 let paid_tier_id =
                                     data.paid_tier.as_ref().and_then(|tier| tier.id.clone());
@@ -465,6 +508,19 @@ pub async fn fetch_project_id_with_context(
                                     data.current_tier.as_ref().and_then(|tier| tier.id.clone());
                                 subscription_tier =
                                     paid_tier_id.clone().or(current_tier_id.clone());
+
+                                // 提取积分数据
+                                if let Some(ref paid_tier) = data.paid_tier {
+                                    credits = extract_credits_from_tier(paid_tier);
+                                    if !credits.is_empty() {
+                                        crate::modules::logger::log_info(&format!(
+                                            "💰 [{}] 积分数据: {} 条 ({})",
+                                            email,
+                                            credits.len(),
+                                            credits.iter().map(|c| format!("{}={}", c.credit_type, c.credit_amount.as_deref().unwrap_or("-"))).collect::<Vec<_>>().join(", ")
+                                        ));
+                                    }
+                                }
 
                                 if subscription_tier.is_some() {
                                     log_subscription_tier_result(
@@ -501,7 +557,7 @@ pub async fn fetch_project_id_with_context(
                                 let response_project_id =
                                     data.project.as_ref().and_then(extract_project_id);
                                 if let Some(project_id) = response_project_id.clone() {
-                                    return (Some(project_id), subscription_tier);
+                                    return (Some(project_id), subscription_tier, credits);
                                 }
 
                                 if let Some(tiers) = data.allowed_tiers {
@@ -525,7 +581,7 @@ pub async fn fetch_project_id_with_context(
                                     {
                                         Ok(project_id) => {
                                             if let Some(project_id) = project_id {
-                                                return (Some(project_id), subscription_tier);
+                                                return (Some(project_id), subscription_tier, credits);
                                             }
                                         }
                                         Err(err) => {
@@ -537,7 +593,7 @@ pub async fn fetch_project_id_with_context(
                                     }
                                 }
 
-                                return (None, subscription_tier);
+                                return (None, subscription_tier, credits);
                             }
                             Err(err) => {
                                 last_error = Some(format!("loadCodeAssist 解析失败: {}", err));
@@ -558,7 +614,7 @@ pub async fn fetch_project_id_with_context(
                                     truncate_log_text(&text, 2000)
                                 ));
                             }
-                        },
+                        }},
                         Err(err) => {
                             last_error = Some(format!("loadCodeAssist 读取失败: {}", err));
                             let header_info = format!(
@@ -584,7 +640,7 @@ pub async fn fetch_project_id_with_context(
                         truncate_log_text(&text, 1000)
                     );
                     log_subscription_tier_result(email, subscription_tier.as_ref(), &reason);
-                    return (None, subscription_tier);
+                    return (None, subscription_tier, credits);
                 } else if status == reqwest::StatusCode::FORBIDDEN {
                     let text = res.text().await.unwrap_or_default();
                     let reason = format!(
@@ -595,7 +651,7 @@ pub async fn fetch_project_id_with_context(
                         truncate_log_text(&text, 1000)
                     );
                     log_subscription_tier_result(email, subscription_tier.as_ref(), &reason);
-                    return (None, subscription_tier);
+                    return (None, subscription_tier, credits);
                 } else {
                     let text = res.text().await.unwrap_or_default();
                     let retryable =
@@ -640,12 +696,13 @@ pub async fn fetch_project_id_with_context(
         log_subscription_tier_result(email, subscription_tier.as_ref(), "未知错误");
     }
 
-    (None, subscription_tier)
+    (None, subscription_tier, credits)
 }
 
 fn build_quota_data_from_response(
     quota_response: QuotaResponse,
     subscription_tier: Option<String>,
+    credits: Vec<CreditInfo>,
 ) -> QuotaData {
     let mut quota_data = QuotaData::new();
 
@@ -669,6 +726,7 @@ fn build_quota_data_from_response(
     }
 
     quota_data.subscription_tier = subscription_tier;
+    quota_data.credits = credits;
     quota_data
 }
 
@@ -690,7 +748,7 @@ pub async fn fetch_quota_with_context(
     use crate::error::AppError;
 
     let base_url = resolve_cloud_code_base_url(ctx);
-    let (resolved_project_id, subscription_tier) =
+    let (resolved_project_id, subscription_tier, credits) =
         fetch_project_id_with_context(access_token, email, ctx).await;
     let effective_project_id = resolved_project_id
         .clone()
@@ -709,7 +767,7 @@ pub async fn fetch_quota_with_context(
                     serde_json::from_value::<QuotaResponse>(record.payload.clone())
                 {
                     let quota_data =
-                        build_quota_data_from_response(quota_response, subscription_tier.clone());
+                        build_quota_data_from_response(quota_response, subscription_tier.clone(), credits.clone());
                     return Ok(QuotaFetchResult {
                         quota: quota_data,
                         error: None,
@@ -797,7 +855,7 @@ pub async fn fetch_quota_with_context(
                 let quota_response: QuotaResponse = serde_json::from_value(payload_value)
                     .map_err(|e| AppError::Unknown(format!("API 响应解析失败: {}", e)))?;
                 let quota_data =
-                    build_quota_data_from_response(quota_response, subscription_tier.clone());
+                    build_quota_data_from_response(quota_response, subscription_tier.clone(), credits.clone());
 
                 return Ok(QuotaFetchResult {
                     quota: quota_data,

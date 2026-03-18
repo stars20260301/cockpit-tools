@@ -626,8 +626,10 @@
     },
     "tier": {
       "pro": "PRO",
-      "ultra": "ULTRA",
-      "free": "FREE"
+      "ultra": "ULTRA"
+    },
+    "credits": {
+      "label": "رصيد الذكاء الاصطناعي"
     },
     "empty": {
       "title": "لا توجد حسابات",
@@ -647,8 +649,7 @@
     "filter": {
       "all": "الكل ({{count}})",
       "pro": "محترف ({{count}})",
-      "ultra": "الترا ({{count}})",
-      "free": "مجاني ({{count}})"
+      "ultra": "الترا ({{count}})"
     },
     "sortLabel": "فرز",
     "sort": {

@@ -17,5 +17,5 @@ pub use account::{
     Account, AccountIndex, AccountSummary, DeviceProfile, DeviceProfileVersion, QuotaErrorInfo,
 };
 pub use instance::{DefaultInstanceSettings, InstanceProfile, InstanceProfileView, InstanceStore};
-pub use quota::QuotaData;
+pub use quota::{CreditInfo, QuotaData};
 pub use token::TokenData;

@@ -626,8 +626,10 @@
     },
     "tier": {
       "pro": "PRO",
-      "ultra": "ULTRA",
-      "free": "FREE"
+      "ultra": "ULTRA"
+    },
+    "credits": {
+      "label": "AI Kredity"
     },
     "empty": {
       "title": "Žádné účty",
@@ -647,8 +649,7 @@
     "filter": {
       "all": "Vše ({{count}})",
       "pro": "PRO ({{count}})",
-      "ultra": "ULTRA ({{count}})",
-      "free": "ZDARMA ({{count}})"
+      "ultra": "ULTRA ({{count}})"
     },
     "sortLabel": "Seřadit",
     "sort": {

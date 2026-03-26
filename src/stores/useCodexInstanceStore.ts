@@ -1,7 +1,49 @@
 import * as codexInstanceService from '../services/codexInstanceService';
-import { createInstanceStore } from './createInstanceStore';
+import type {
+  CodexInstanceThreadSyncSummary,
+  CodexSessionRecord,
+  CodexSessionTrashSummary,
+} from '../types/codex';
+import { createInstanceStore, type InstanceStoreState } from './createInstanceStore';
 
-export const useCodexInstanceStore = createInstanceStore(
-  codexInstanceService,
-  'agtools.codex.instances.cache',
-);
+type CodexInstanceStoreState = InstanceStoreState & {
+  syncThreadsAcrossInstances: () => Promise<CodexInstanceThreadSyncSummary>;
+  listSessionsAcrossInstances: () => Promise<CodexSessionRecord[]>;
+  moveSessionsToTrashAcrossInstances: (sessionIds: string[]) => Promise<CodexSessionTrashSummary>;
+};
+
+type CodexInstanceStoreHook = {
+  (): CodexInstanceStoreState;
+  <T>(selector: (state: CodexInstanceStoreState) => T): T;
+  getState: () => CodexInstanceStoreState;
+  setState: (partial: Partial<CodexInstanceStoreState>) => void;
+};
+
+const baseStore = createInstanceStore(codexInstanceService, 'agtools.codex.instances.cache');
+const typedBaseStore = baseStore as unknown as CodexInstanceStoreHook;
+
+const syncThreadsAcrossInstances = async (): Promise<CodexInstanceThreadSyncSummary> => {
+  const summary = await codexInstanceService.syncThreadsAcrossInstances();
+  await typedBaseStore.getState().fetchInstances();
+  return summary;
+};
+
+const listSessionsAcrossInstances = async (): Promise<CodexSessionRecord[]> => {
+  return await codexInstanceService.listSessionsAcrossInstances();
+};
+
+const moveSessionsToTrashAcrossInstances = async (
+  sessionIds: string[],
+): Promise<CodexSessionTrashSummary> => {
+  const summary = await codexInstanceService.moveSessionsToTrashAcrossInstances(sessionIds);
+  await typedBaseStore.getState().fetchInstances();
+  return summary;
+};
+
+typedBaseStore.setState({
+  syncThreadsAcrossInstances,
+  listSessionsAcrossInstances,
+  moveSessionsToTrashAcrossInstances,
+});
+
+export const useCodexInstanceStore = typedBaseStore;

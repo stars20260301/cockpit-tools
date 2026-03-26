@@ -270,12 +270,15 @@
       "openWindow": "Apri finestra",
       "showFloatingCard": "Mostra scheda flottante",
       "showFloatingCardDisabled": "Collega un account prima di mostrare la scheda flottante",
-      "showFloatingCardMissing": "L'account collegato non esiste più, quindi la scheda flottante non può essere mostrata"
+      "showFloatingCardMissing": "L'account collegato non esiste più, quindi la scheda flottante non può essere mostrata",
+      "syncThreads": "Sincronizza thread",
+      "syncThreadsDisabled": "Sono necessarie almeno due istanze per sincronizzare i thread"
     },
     "bulkConfirm": {
       "startAll": "Avviare tutte le istanze fermate?",
       "restartAll": "Riavviare tutte le istanze in esecuzione?",
-      "stopAll": "Chiudere tutte le istanze?"
+      "stopAll": "Chiudere tutte le istanze?",
+      "syncThreads": "Tutte le istanze Codex verranno analizzate e i thread mancanti saranno completati automaticamente. I thread esistenti non verranno riscritti e i file dell’istanza di destinazione verranno salvati prima di qualsiasi scrittura. Continuare?"
     },
     "status": {
       "running": "In esecuzione",
@@ -360,7 +363,8 @@
       "restartedAll": "Istanze in esecuzione riavviate",
       "closedAll": "Tutte le istanze sono state fermate",
       "allAlreadyRunning": "Tutte le istanze sono già in esecuzione",
-      "noneRunning": "Nessuna istanza in esecuzione trovata"
+      "noneRunning": "Nessuna istanza in esecuzione trovata",
+      "syncThreadsNeedTwo": "Sono necessarie almeno due istanze per sincronizzare i thread"
     },
     "runningDialog": {
       "title": "L'istanza è già in esecuzione",
@@ -1546,6 +1550,33 @@
       "nextRunsQuotaResetHint": "I trigger dopo reset quota dipendono dai dati quota più recenti, quindi non è disponibile un'anteprima a orario fisso.",
       "triggerQuotaReset": "Trigger reset quota",
       "noticeSavedEnabledWithQuotaReset": "Attività salvate. Totale: {{count}}. L'aggiornamento automatico di Codex è stato impostato ogni {{minutes}} minuti."
+    },
+    "sessionManager": {
+      "title": "Gestione sessioni",
+      "desc": "Sincronizzazione e pulizia sono raccolte qui: usa l’azione in alto per sincronizzare tutte le istanze, poi espandi ogni progetto per controllare le sessioni e spostarle nel cestino.",
+      "actions": {
+        "moveToTrash": "Sposta nel cestino",
+        "syncSessions": "Sincronizza sessioni",
+        "expand": "Espandi",
+        "collapse": "Comprimi"
+      },
+      "confirm": {
+        "title": "Sposta nel cestino",
+        "message": "Le sessioni selezionate verranno spostate nel cestino dalle rispettive istanze, così potranno essere ripristinate in seguito. Le istanze in esecuzione potrebbero richiedere un riavvio prima che la modifica sia visibile. Continuare?",
+        "syncMessage": "I thread mancanti e i relativi dati di sessione verranno sincronizzati in tutte le istanze. Il contenuto esistente non verrà riscritto e i file dell’istanza di destinazione verranno salvati prima di qualsiasi scrittura. Continuare?"
+      },
+      "empty": {
+        "title": "Nessuna sessione da gestire",
+        "desc": "Nessun record di sessione trovato nel set corrente di istanze."
+      },
+      "messages": {
+        "pickOne": "Seleziona almeno una sessione",
+        "syncNeedTwo": "Sono necessarie almeno due istanze per sincronizzare le sessioni"
+      },
+      "groupCount": "{{count}} sessioni",
+      "updatedAt": "Aggiornato",
+      "locationRunning": " (in esecuzione)",
+      "untitled": "Sessione senza titolo"
     }
   },
   "githubCopilot": {

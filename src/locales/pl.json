@@ -270,12 +270,15 @@
       "openWindow": "Otwórz okno",
       "showFloatingCard": "Pokaż pływającą kartę",
       "showFloatingCardDisabled": "Przed wyświetleniem pływającej karty najpierw przypisz konto",
-      "showFloatingCardMissing": "Powiązane konto już nie istnieje, więc nie można wyświetlić pływającej karty"
+      "showFloatingCardMissing": "Powiązane konto już nie istnieje, więc nie można wyświetlić pływającej karty",
+      "syncThreads": "Synchronizuj wątki",
+      "syncThreadsDisabled": "Do synchronizacji wątków wymagane są co najmniej dwie instancje"
     },
     "bulkConfirm": {
       "startAll": "Uruchomić wszystkie zatrzymane instancje?",
       "restartAll": "Zrestartować wszystkie uruchomione instancje?",
-      "stopAll": "Zamknąć wszystkie instancje?"
+      "stopAll": "Zamknąć wszystkie instancje?",
+      "syncThreads": "Wszystkie instancje Codex zostaną przeskanowane, a brakujące wątki zostaną automatycznie uzupełnione. Istniejące wątki nie zostaną zapisane ponownie, a pliki instancji docelowej zostaną zarchiwizowane przed każdym zapisem. Kontynuować?"
     },
     "status": {
       "running": "Uruchomiona",
@@ -360,7 +363,8 @@
       "restartedAll": "Restartowano uruchomione instancje",
       "closedAll": "Wszystkie instancje zostały zatrzymane",
       "allAlreadyRunning": "Wszystkie instancje są już uruchomione",
-      "noneRunning": "Nie znaleziono uruchomionych instancji"
+      "noneRunning": "Nie znaleziono uruchomionych instancji",
+      "syncThreadsNeedTwo": "Do synchronizacji wątków wymagane są co najmniej dwie instancje"
     },
     "runningDialog": {
       "title": "Instancja jest już uruchomiona",
@@ -1546,6 +1550,33 @@
       "nextRunsQuotaResetHint": "Wyzwalacze po resecie limitu zależą od najnowszych danych limitu, więc podgląd stałej godziny nie jest dostępny.",
       "triggerQuotaReset": "Wyzwalacz resetu limitu",
       "noticeSavedEnabledWithQuotaReset": "Zadania zapisane. Łącznie: {{count}}. Automatyczne odświeżanie Codex ustawiono na co {{minutes}} min."
+    },
+    "sessionManager": {
+      "title": "Menedżer sesji",
+      "desc": "Synchronizacja i porządki są tutaj razem: u góry możesz jednym kliknięciem zsynchronizować wszystko do wszystkich instancji, a niżej rozwinąć każdy projekt, przejrzeć sesje i przenieść je do kosza.",
+      "actions": {
+        "moveToTrash": "Przenieś do kosza",
+        "syncSessions": "Synchronizuj sesje",
+        "expand": "Rozwiń",
+        "collapse": "Zwiń"
+      },
+      "confirm": {
+        "title": "Przenieś do kosza",
+        "message": "Wybrane sesje zostaną przeniesione do kosza z odpowiednich instancji, aby można je było później przywrócić. Uruchomione instancje mogą wymagać ponownego uruchomienia, zanim zmiana będzie widoczna. Kontynuować?",
+        "syncMessage": "Brakujące wątki i ich dane sesji zostaną zsynchronizowane ze wszystkimi instancjami. Istniejąca zawartość nie zostanie zapisana ponownie, a pliki instancji docelowej zostaną zarchiwizowane przed każdym zapisem. Kontynuować?"
+      },
+      "empty": {
+        "title": "Brak sesji do zarządzania",
+        "desc": "Nie znaleziono żadnych wpisów sesji w bieżącym zestawie instancji."
+      },
+      "messages": {
+        "pickOne": "Wybierz co najmniej jedną sesję",
+        "syncNeedTwo": "Do synchronizacji sesji wymagane są co najmniej dwie instancje"
+      },
+      "groupCount": "{{count}} sesji",
+      "updatedAt": "Zaktualizowano",
+      "locationRunning": " (uruchomiona)",
+      "untitled": "Sesja bez tytułu"
     }
   },
   "githubCopilot": {

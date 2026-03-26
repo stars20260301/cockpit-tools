@@ -270,12 +270,15 @@
       "openWindow": "定位視窗",
       "showFloatingCard": "顯示懸浮框",
       "showFloatingCardDisabled": "請先綁定帳號後再顯示懸浮框",
-      "showFloatingCardMissing": "綁定帳號不存在，無法顯示懸浮框"
+      "showFloatingCardMissing": "綁定帳號不存在，無法顯示懸浮框",
+      "syncThreads": "同步執行緒",
+      "syncThreadsDisabled": "至少需要兩個實例才能同步執行緒"
     },
     "bulkConfirm": {
       "startAll": "是否啟動所有已停止的實例？",
       "restartAll": "是否重啟所有正在運行的實例？",
-      "stopAll": "是否關閉所有實例？"
+      "stopAll": "是否關閉所有實例？",
+      "syncThreads": "將掃描所有 Codex 實例並自動補齊缺失執行緒。已存在的執行緒不會重複寫入，發生寫入前會先備份目標實例關鍵檔案。確認繼續？"
     },
     "status": {
       "running": "運行中",
@@ -360,7 +363,8 @@
       "restartedAll": "已重啟運行中的實例",
       "closedAll": "已停止所有實例",
       "allAlreadyRunning": "所有實例均已在運行中",
-      "noneRunning": "未找到正在運行的實例"
+      "noneRunning": "未找到正在運行的實例",
+      "syncThreadsNeedTwo": "至少需要兩個實例才能同步執行緒"
     },
     "runningDialog": {
       "title": "實例已在運行",
@@ -1546,6 +1550,33 @@
       "nextRunsQuotaResetHint": "配額重置觸發依賴最新配額資料，因此不提供固定時間預覽。",
       "triggerQuotaReset": "配額重置觸發",
       "noticeSavedEnabledWithQuotaReset": "任務已儲存，共 {{count}} 個。已將 Codex 自動刷新調整為每 {{minutes}} 分鐘。"
+    },
+    "sessionManager": {
+      "title": "會話管理",
+      "desc": "同步與清理統一放在這裡：頂部可一鍵同步到所有實例，下面按專案展開查看會話並移到垃圾桶。",
+      "actions": {
+        "moveToTrash": "移到垃圾桶",
+        "syncSessions": "同步會話",
+        "expand": "展開",
+        "collapse": "收起"
+      },
+      "confirm": {
+        "title": "移到垃圾桶",
+        "message": "會將所選會話從對應實例中移到垃圾桶，方便後續恢復；執行中的實例可能需要重新啟動後才會反映。確認繼續？",
+        "syncMessage": "會將缺失的執行緒與對應會話同步到所有實例中，已有內容不會重複寫入，寫入前會先備份目標實例關鍵檔案。確認繼續？"
+      },
+      "empty": {
+        "title": "還沒有可管理的會話",
+        "desc": "目前的實例集合中尚未發現會話記錄。"
+      },
+      "messages": {
+        "pickOne": "請至少選擇一條會話",
+        "syncNeedTwo": "至少需要兩個實例才能同步會話"
+      },
+      "groupCount": "{{count}} 條會話",
+      "updatedAt": "最近更新",
+      "locationRunning": "（執行中）",
+      "untitled": "未命名會話"
     }
   },
   "githubCopilot": {

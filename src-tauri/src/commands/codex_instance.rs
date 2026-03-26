@@ -78,6 +78,25 @@ pub async fn codex_list_instances() -> Result<Vec<InstanceProfileView>, String> 
 }
 
 #[tauri::command]
+pub async fn codex_sync_threads_across_instances(
+) -> Result<modules::codex_thread_sync::CodexInstanceThreadSyncSummary, String> {
+    modules::codex_thread_sync::sync_threads_across_instances()
+}
+
+#[tauri::command]
+pub async fn codex_list_sessions_across_instances(
+) -> Result<Vec<modules::codex_session_manager::CodexSessionRecord>, String> {
+    modules::codex_session_manager::list_sessions_across_instances()
+}
+
+#[tauri::command]
+pub async fn codex_move_sessions_to_trash_across_instances(
+    session_ids: Vec<String>,
+) -> Result<modules::codex_session_manager::CodexSessionTrashSummary, String> {
+    modules::codex_session_manager::move_sessions_to_trash_across_instances(session_ids)
+}
+
+#[tauri::command]
 pub async fn codex_create_instance(
     name: String,
     user_data_dir: String,

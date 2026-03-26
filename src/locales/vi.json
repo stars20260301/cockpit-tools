@@ -270,12 +270,15 @@
       "openWindow": "Mở cửa sổ",
       "showFloatingCard": "Hiện thẻ nổi",
       "showFloatingCardDisabled": "Hãy liên kết tài khoản trước khi hiển thị thẻ nổi",
-      "showFloatingCardMissing": "Tài khoản đã liên kết không còn tồn tại nên không thể hiển thị thẻ nổi"
+      "showFloatingCardMissing": "Tài khoản đã liên kết không còn tồn tại nên không thể hiển thị thẻ nổi",
+      "syncThreads": "Đồng bộ luồng",
+      "syncThreadsDisabled": "Cần ít nhất hai phiên bản để đồng bộ luồng"
     },
     "bulkConfirm": {
       "startAll": "Bắt đầu tất cả các phiên bản đang dừng?",
       "restartAll": "Khởi động lại tất cả các phiên bản đang chạy?",
-      "stopAll": "Đóng tất cả các phiên bản?"
+      "stopAll": "Đóng tất cả các phiên bản?",
+      "syncThreads": "Tất cả phiên bản Codex sẽ được quét và các luồng còn thiếu sẽ được bổ sung tự động. Các luồng hiện có sẽ không bị ghi lại, và các tệp của phiên bản đích sẽ được sao lưu trước khi ghi. Tiếp tục chứ?"
     },
     "status": {
       "running": "Đang chạy",
@@ -360,7 +363,8 @@
       "restartedAll": "Các phiên bản đang chạy đã được khởi động lại",
       "closedAll": "Tất cả các phiên bản đã được dừng",
       "allAlreadyRunning": "Tất cả các phiên bản đã đang chạy",
-      "noneRunning": "Không tìm thấy phiên bản nào đang chạy"
+      "noneRunning": "Không tìm thấy phiên bản nào đang chạy",
+      "syncThreadsNeedTwo": "Cần ít nhất hai phiên bản để đồng bộ luồng"
     },
     "runningDialog": {
       "title": "Phiên bản đã đang chạy",
@@ -1546,6 +1550,33 @@
       "nextRunsQuotaResetHint": "Kích hoạt đặt lại hạn mức phụ thuộc dữ liệu hạn mức mới nhất nên không có xem trước thời gian cố định.",
       "triggerQuotaReset": "Kích hoạt đặt lại hạn mức",
       "noticeSavedEnabledWithQuotaReset": "Đã lưu tác vụ. Tổng: {{count}}. Làm mới tự động Codex đã được điều chỉnh mỗi {{minutes}} phút."
+    },
+    "sessionManager": {
+      "title": "Quản lý phiên",
+      "desc": "Đồng bộ và dọn dẹp được đặt chung tại đây: dùng thao tác ở trên để đồng bộ tới tất cả phiên bản, sau đó mở từng dự án bên dưới để xem các phiên và chuyển chúng vào thùng rác.",
+      "actions": {
+        "moveToTrash": "Chuyển vào thùng rác",
+        "syncSessions": "Đồng bộ phiên",
+        "expand": "Mở rộng",
+        "collapse": "Thu gọn"
+      },
+      "confirm": {
+        "title": "Chuyển vào thùng rác",
+        "message": "Các phiên đã chọn sẽ được chuyển vào thùng rác từ các phiên bản tương ứng để có thể khôi phục sau này. Các phiên bản đang chạy có thể cần khởi động lại trước khi thay đổi xuất hiện. Tiếp tục chứ?",
+        "syncMessage": "Các luồng còn thiếu và dữ liệu phiên của chúng sẽ được đồng bộ tới tất cả phiên bản. Nội dung hiện có sẽ không bị ghi lại, và các tệp của phiên bản đích sẽ được sao lưu trước khi ghi. Tiếp tục chứ?"
+      },
+      "empty": {
+        "title": "Chưa có phiên nào để quản lý",
+        "desc": "Không tìm thấy bản ghi phiên nào trong tập hợp phiên bản hiện tại."
+      },
+      "messages": {
+        "pickOne": "Vui lòng chọn ít nhất một phiên",
+        "syncNeedTwo": "Cần ít nhất hai phiên bản để đồng bộ phiên"
+      },
+      "groupCount": "{{count}} phiên",
+      "updatedAt": "Đã cập nhật",
+      "locationRunning": " (đang chạy)",
+      "untitled": "Phiên chưa đặt tên"
     }
   },
   "githubCopilot": {

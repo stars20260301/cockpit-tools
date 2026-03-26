@@ -51,6 +51,7 @@ import { confirm as confirmDialog, open as openFileDialog } from '@tauri-apps/pl
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { CodexOverviewTabsHeader, CodexTab } from '../components/CodexOverviewTabsHeader';
 import { CodexInstancesContent } from './CodexInstancesPage';
+import { CodexSessionManager } from '../components/codex/CodexSessionManager';
 import { CodexWakeupContent } from '../components/codex/CodexWakeupContent';
 import { QuickSettingsPopover } from '../components/QuickSettingsPopover';
 import { useProviderAccountsPage } from '../hooks/useProviderAccountsPage';
@@ -1526,7 +1527,7 @@ export function CodexAccountsPage() {
       <CodexOverviewTabsHeader
         active={activeTab}
         onTabChange={setActiveTab}
-        tabs={['overview', 'wakeup', 'instances']}
+        tabs={['overview', 'wakeup', 'instances', 'sessions']}
       />
 
       {activeTab === 'overview' && (<>
@@ -1855,6 +1856,10 @@ export function CodexAccountsPage() {
 
       {activeTab === 'instances' && (
         <CodexInstancesContent accountsForSelect={sortedAccountsForInstances} />
+      )}
+
+      {activeTab === 'sessions' && (
+        <CodexSessionManager />
       )}
 
       {activeTab === 'wakeup' && (

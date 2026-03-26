@@ -270,12 +270,15 @@
       "openWindow": "Abrir janela",
       "showFloatingCard": "Mostrar cartão flutuante",
       "showFloatingCardDisabled": "Vincule uma conta antes de mostrar o cartão flutuante",
-      "showFloatingCardMissing": "A conta vinculada não existe mais, então o cartão flutuante não pode ser exibido"
+      "showFloatingCardMissing": "A conta vinculada não existe mais, então o cartão flutuante não pode ser exibido",
+      "syncThreads": "Sincronizar threads",
+      "syncThreadsDisabled": "Pelo menos duas instâncias são necessárias para sincronizar threads"
     },
     "bulkConfirm": {
       "startAll": "Iniciar todas as instâncias paradas?",
       "restartAll": "Reiniciar todas as instâncias em execução?",
-      "stopAll": "Fechar todas as instâncias?"
+      "stopAll": "Fechar todas as instâncias?",
+      "syncThreads": "Todas as instâncias do Codex serão analisadas e os threads ausentes serão preenchidos automaticamente. Os threads existentes não serão gravados novamente, e os arquivos da instância de destino serão copiados antes de qualquer gravação. Continuar?"
     },
     "status": {
       "running": "Executando",
@@ -360,7 +363,8 @@
       "restartedAll": "Instâncias em execução reiniciadas",
       "closedAll": "Todas as instâncias foram paradas",
       "allAlreadyRunning": "Todas as instâncias já estão em execução",
-      "noneRunning": "Nenhuma instância em execução encontrada"
+      "noneRunning": "Nenhuma instância em execução encontrada",
+      "syncThreadsNeedTwo": "Pelo menos duas instâncias são necessárias para sincronizar threads"
     },
     "runningDialog": {
       "title": "A instância já está em execução",
@@ -1546,6 +1550,33 @@
       "nextRunsQuotaResetHint": "Os gatilhos de redefinição de cota dependem de dados recentes de cota, por isso não há prévia de horário fixo.",
       "triggerQuotaReset": "Gatilho de redefinição de cota",
       "noticeSavedEnabledWithQuotaReset": "Tarefas salvas. Total: {{count}}. A atualização automática do Codex foi ajustada para cada {{minutes}} minutos."
+    },
+    "sessionManager": {
+      "title": "Gerenciador de sessões",
+      "desc": "A sincronização e a limpeza ficam reunidas aqui: use a ação no topo para sincronizar com todas as instâncias e, abaixo, expanda cada projeto para revisar as sessões e movê-las para a lixeira.",
+      "actions": {
+        "moveToTrash": "Mover para a lixeira",
+        "syncSessions": "Sincronizar sessões",
+        "expand": "Expandir",
+        "collapse": "Recolher"
+      },
+      "confirm": {
+        "title": "Mover para a lixeira",
+        "message": "As sessões selecionadas serão movidas para a lixeira de suas instâncias para que possam ser restauradas depois. Instâncias em execução podem precisar ser reiniciadas antes que a mudança apareça. Continuar?",
+        "syncMessage": "Os threads ausentes e seus dados de sessão serão sincronizados com todas as instâncias. O conteúdo existente não será gravado novamente, e os arquivos da instância de destino serão copiados antes de qualquer gravação. Continuar?"
+      },
+      "empty": {
+        "title": "Nenhuma sessão para gerenciar",
+        "desc": "Nenhum registro de sessão foi encontrado no conjunto atual de instâncias."
+      },
+      "messages": {
+        "pickOne": "Selecione pelo menos uma sessão",
+        "syncNeedTwo": "Pelo menos duas instâncias são necessárias para sincronizar sessões"
+      },
+      "groupCount": "{{count}} sessões",
+      "updatedAt": "Atualizado",
+      "locationRunning": " (em execução)",
+      "untitled": "Sessão sem título"
     }
   },
   "githubCopilot": {

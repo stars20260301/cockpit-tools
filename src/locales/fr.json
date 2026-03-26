@@ -270,12 +270,15 @@
       "openWindow": "Ouvrir la fenêtre",
       "showFloatingCard": "Afficher la carte flottante",
       "showFloatingCardDisabled": "Liez d'abord un compte avant d'afficher la carte flottante",
-      "showFloatingCardMissing": "Le compte lié n'existe plus, la carte flottante ne peut donc pas être affichée"
+      "showFloatingCardMissing": "Le compte lié n'existe plus, la carte flottante ne peut donc pas être affichée",
+      "syncThreads": "Synchroniser les threads",
+      "syncThreadsDisabled": "Au moins deux instances sont nécessaires pour synchroniser les threads"
     },
     "bulkConfirm": {
       "startAll": "Démarrer toutes les instances arrêtées ?",
       "restartAll": "Redémarrer toutes les instances en cours ?",
-      "stopAll": "Fermer toutes les instances ?"
+      "stopAll": "Fermer toutes les instances ?",
+      "syncThreads": "Toutes les instances Codex seront analysées et les threads manquants seront complétés automatiquement. Les threads existants ne seront pas réécrits et les fichiers de l’instance cible seront sauvegardés avant toute écriture. Continuer ?"
     },
     "status": {
       "running": "En cours",
@@ -360,7 +363,8 @@
       "restartedAll": "Instances en cours redémarrées",
       "closedAll": "Toutes les instances ont été arrêtées",
       "allAlreadyRunning": "Toutes les instances sont déjà en cours d'exécution",
-      "noneRunning": "Aucune instance en cours d'exécution trouvée"
+      "noneRunning": "Aucune instance en cours d'exécution trouvée",
+      "syncThreadsNeedTwo": "Au moins deux instances sont nécessaires pour synchroniser les threads"
     },
     "runningDialog": {
       "title": "L'instance est déjà en cours d'exécution",
@@ -1546,6 +1550,33 @@
       "nextRunsQuotaResetHint": "Les déclencheurs de réinitialisation du quota dépendent des données de quota récentes, donc aucun aperçu horaire fixe n'est disponible.",
       "triggerQuotaReset": "Déclencheur de réinitialisation du quota",
       "noticeSavedEnabledWithQuotaReset": "Tâches enregistrées. Total : {{count}}. L'actualisation automatique Codex a été réglée sur {{minutes}} minutes."
+    },
+    "sessionManager": {
+      "title": "Gestion des sessions",
+      "desc": "La synchronisation et le nettoyage sont regroupés ici : utilisez l’action en haut pour synchroniser toutes les instances, puis développez chaque projet pour examiner les sessions et les envoyer à la corbeille.",
+      "actions": {
+        "moveToTrash": "Déplacer vers la corbeille",
+        "syncSessions": "Synchroniser les sessions",
+        "expand": "Développer",
+        "collapse": "Réduire"
+      },
+      "confirm": {
+        "title": "Déplacer vers la corbeille",
+        "message": "Les sessions sélectionnées seront déplacées vers la corbeille depuis leurs instances afin de pouvoir être restaurées plus tard. Les instances en cours d’exécution peuvent nécessiter un redémarrage avant que la modification apparaisse. Continuer ?",
+        "syncMessage": "Les threads manquants et leurs données de session seront synchronisés vers toutes les instances. Le contenu existant ne sera pas réécrit et les fichiers de l’instance cible seront sauvegardés avant toute écriture. Continuer ?"
+      },
+      "empty": {
+        "title": "Aucune session à gérer",
+        "desc": "Aucun enregistrement de session n’a été trouvé dans l’ensemble d’instances actuel."
+      },
+      "messages": {
+        "pickOne": "Veuillez sélectionner au moins une session",
+        "syncNeedTwo": "Au moins deux instances sont nécessaires pour synchroniser les sessions"
+      },
+      "groupCount": "{{count}} sessions",
+      "updatedAt": "Mis à jour",
+      "locationRunning": " (en cours d’exécution)",
+      "untitled": "Session sans titre"
     }
   },
   "githubCopilot": {

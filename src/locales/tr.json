@@ -270,12 +270,15 @@
       "openWindow": "Pencereyi aç",
       "showFloatingCard": "Yüzen kartı göster",
       "showFloatingCardDisabled": "Yüzen kartı göstermeden önce bir hesap bağlayın",
-      "showFloatingCardMissing": "Bağlı hesap artık mevcut değil, bu yüzden yüzen kart gösterilemiyor"
+      "showFloatingCardMissing": "Bağlı hesap artık mevcut değil, bu yüzden yüzen kart gösterilemiyor",
+      "syncThreads": "İş parçacıklarını eşitle",
+      "syncThreadsDisabled": "İş parçacıklarını eşitlemek için en az iki örnek gerekir"
     },
     "bulkConfirm": {
       "startAll": "Tüm durdurulmuş oturumlar başlatılsın mı?",
       "restartAll": "Tüm çalışan oturumlar yeniden başlatılsın mı?",
-      "stopAll": "Tüm oturumlar kapatılsın mı?"
+      "stopAll": "Tüm oturumlar kapatılsın mı?",
+      "syncThreads": "Tüm Codex örnekleri taranacak ve eksik iş parçacıkları otomatik olarak tamamlanacaktır. Mevcut iş parçacıkları yeniden yazılmayacak ve hedef örnek dosyaları herhangi bir yazma işleminden önce yedeklenecektir. Devam edilsin mi?"
     },
     "status": {
       "running": "Çalışıyor",
@@ -360,7 +363,8 @@
       "restartedAll": "Çalışan oturumlar yeniden başlatıldı",
       "closedAll": "Tüm oturumlar durduruldu",
       "allAlreadyRunning": "Tüm oturumlar zaten çalışıyor",
-      "noneRunning": "Çalışan oturum bulunamadı"
+      "noneRunning": "Çalışan oturum bulunamadı",
+      "syncThreadsNeedTwo": "İş parçacıklarını eşitlemek için en az iki örnek gerekir"
     },
     "runningDialog": {
       "title": "Oturum zaten çalışıyor",
@@ -1546,6 +1550,33 @@
       "nextRunsQuotaResetHint": "Kota sıfırlama tetikleyicileri güncel kota verilerine bağlıdır, bu yüzden sabit zaman önizlemesi yoktur.",
       "triggerQuotaReset": "Kota sıfırlama tetikleyicisi",
       "noticeSavedEnabledWithQuotaReset": "Görevler kaydedildi. Toplam: {{count}}. Codex otomatik yenileme {{minutes}} dakikaya ayarlandı."
+    },
+    "sessionManager": {
+      "title": "Oturum yöneticisi",
+      "desc": "Eşitleme ve temizlik burada bir arada: üstteki işlemle tüm örneklere tek tıkla eşitleyebilir, aşağıda her projeyi genişletip oturumları inceleyerek çöp kutusuna taşıyabilirsiniz.",
+      "actions": {
+        "moveToTrash": "Çöp kutusuna taşı",
+        "syncSessions": "Oturumları eşitle",
+        "expand": "Genişlet",
+        "collapse": "Daralt"
+      },
+      "confirm": {
+        "title": "Çöp kutusuna taşı",
+        "message": "Seçilen oturumlar daha sonra geri yüklenebilmesi için ilgili örneklerden çöp kutusuna taşınacaktır. Çalışan örneklerin değişikliğin görünmesi için yeniden başlatılması gerekebilir. Devam edilsin mi?",
+        "syncMessage": "Eksik iş parçacıkları ve bunlara ait oturum verileri tüm örneklerle eşitlenecektir. Mevcut içerik yeniden yazılmayacak ve hedef örnek dosyaları herhangi bir yazma işleminden önce yedeklenecektir. Devam edilsin mi?"
+      },
+      "empty": {
+        "title": "Yönetilecek oturum yok",
+        "desc": "Geçerli örnek kümesinde oturum kaydı bulunamadı."
+      },
+      "messages": {
+        "pickOne": "Lütfen en az bir oturum seçin",
+        "syncNeedTwo": "Oturumları eşitlemek için en az iki örnek gerekir"
+      },
+      "groupCount": "{{count}} oturum",
+      "updatedAt": "Güncellendi",
+      "locationRunning": " (çalışıyor)",
+      "untitled": "Adsız oturum"
     }
   },
   "githubCopilot": {

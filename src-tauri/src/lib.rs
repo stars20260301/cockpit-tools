@@ -281,8 +281,6 @@ pub fn run() {
             commands::wakeup::wakeup_load_history,
             commands::wakeup::wakeup_add_history,
             commands::wakeup::wakeup_clear_history,
-            commands::wakeup::wakeup_cancel_scope,
-            commands::wakeup::wakeup_release_scope,
             commands::wakeup::wakeup_verification_load_state,
             commands::wakeup::wakeup_verification_load_history,
             commands::wakeup::wakeup_verification_delete_history,
@@ -637,6 +635,9 @@ pub fn run() {
             // Codex Instance Commands
             commands::codex_instance::codex_get_instance_defaults,
             commands::codex_instance::codex_list_instances,
+            commands::codex_instance::codex_sync_threads_across_instances,
+            commands::codex_instance::codex_list_sessions_across_instances,
+            commands::codex_instance::codex_move_sessions_to_trash_across_instances,
             commands::codex_instance::codex_create_instance,
             commands::codex_instance::codex_update_instance,
             commands::codex_instance::codex_delete_instance,

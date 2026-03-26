@@ -270,12 +270,15 @@
       "openWindow": "Fenster öffnen",
       "showFloatingCard": "Schwebekarte anzeigen",
       "showFloatingCardDisabled": "Vor dem Anzeigen der Schwebekarte zuerst ein Konto binden",
-      "showFloatingCardMissing": "Das gebundene Konto existiert nicht mehr, daher kann die Schwebekarte nicht angezeigt werden"
+      "showFloatingCardMissing": "Das gebundene Konto existiert nicht mehr, daher kann die Schwebekarte nicht angezeigt werden",
+      "syncThreads": "Threads synchronisieren",
+      "syncThreadsDisabled": "Mindestens zwei Instanzen sind erforderlich, um Threads zu synchronisieren"
     },
     "bulkConfirm": {
       "startAll": "Alle gestoppten Instanzen starten?",
       "restartAll": "Alle laufenden Instanzen neu starten?",
-      "stopAll": "Alle Instanzen schließen?"
+      "stopAll": "Alle Instanzen schließen?",
+      "syncThreads": "Alle Codex-Instanzen werden durchsucht und fehlende Threads automatisch ergänzt. Vorhandene Threads werden nicht erneut geschrieben, und die Dateien der Zielinstanz werden vor jedem Schreibvorgang gesichert. Fortfahren?"
     },
     "status": {
       "running": "Laufend",
@@ -360,7 +363,8 @@
       "restartedAll": "Laufende Instanzen neu gestartet",
       "closedAll": "Alle Instanzen gestoppt",
       "allAlreadyRunning": "Alle Instanzen laufen bereits",
-      "noneRunning": "Keine laufenden Instanzen gefunden"
+      "noneRunning": "Keine laufenden Instanzen gefunden",
+      "syncThreadsNeedTwo": "Mindestens zwei Instanzen sind erforderlich, um Threads zu synchronisieren"
     },
     "runningDialog": {
       "title": "Instanz läuft bereits",
@@ -1546,6 +1550,33 @@
       "nextRunsQuotaResetHint": "Auslöser nach Kontingent-Reset hängen von aktuellen Kontingentdaten ab, daher ist keine feste Zeitvorschau verfügbar.",
       "triggerQuotaReset": "Kontingent-Reset-Auslöser",
       "noticeSavedEnabledWithQuotaReset": "Aufgaben gespeichert. Gesamt: {{count}}. Die automatische Codex-Aktualisierung wurde auf alle {{minutes}} Minuten angepasst."
+    },
+    "sessionManager": {
+      "title": "Sitzungsverwaltung",
+      "desc": "Synchronisierung und Bereinigung befinden sich hier zusammen: Über die Aktion oben kannst du in alle Instanzen synchronisieren und unten jedes Projekt erweitern, Sitzungen prüfen und in den Papierkorb verschieben.",
+      "actions": {
+        "moveToTrash": "In den Papierkorb verschieben",
+        "syncSessions": "Sitzungen synchronisieren",
+        "expand": "Erweitern",
+        "collapse": "Einklappen"
+      },
+      "confirm": {
+        "title": "In den Papierkorb verschieben",
+        "message": "Ausgewählte Sitzungen werden aus den jeweiligen Instanzen in den Papierkorb verschoben, damit sie später wiederhergestellt werden können. Laufende Instanzen müssen möglicherweise neu gestartet werden, bevor die Änderung sichtbar wird. Fortfahren?",
+        "syncMessage": "Fehlende Threads und ihre Sitzungsdaten werden in alle Instanzen synchronisiert. Vorhandene Inhalte werden nicht erneut geschrieben, und die Dateien der Zielinstanz werden vor jedem Schreibvorgang gesichert. Fortfahren?"
+      },
+      "empty": {
+        "title": "Keine Sitzungen zur Verwaltung",
+        "desc": "Im aktuellen Instanzsatz wurden keine Sitzungsdatensätze gefunden."
+      },
+      "messages": {
+        "pickOne": "Bitte wähle mindestens eine Sitzung aus",
+        "syncNeedTwo": "Mindestens zwei Instanzen sind erforderlich, um Sitzungen zu synchronisieren"
+      },
+      "groupCount": "{{count}} Sitzungen",
+      "updatedAt": "Aktualisiert",
+      "locationRunning": " (wird ausgeführt)",
+      "untitled": "Unbenannte Sitzung"
     }
   },
   "githubCopilot": {

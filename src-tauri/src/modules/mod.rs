@@ -11,6 +11,8 @@ pub mod codex_account;
 pub mod codex_instance;
 pub mod codex_oauth;
 pub mod codex_quota;
+pub mod codex_session_manager;
+pub mod codex_thread_sync;
 pub mod codex_wakeup;
 pub mod codex_wakeup_scheduler;
 pub mod config;

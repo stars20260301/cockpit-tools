@@ -270,12 +270,15 @@
       "openWindow": "Otevřít okno",
       "showFloatingCard": "Zobrazit plovoucí kartu",
       "showFloatingCardDisabled": "Před zobrazením plovoucí karty nejdřív připojte účet",
-      "showFloatingCardMissing": "Vázaný účet už neexistuje, proto nelze plovoucí kartu zobrazit"
+      "showFloatingCardMissing": "Vázaný účet už neexistuje, proto nelze plovoucí kartu zobrazit",
+      "syncThreads": "Synchronizovat vlákna",
+      "syncThreadsDisabled": "Pro synchronizaci vláken jsou potřeba alespoň dvě instance"
     },
     "bulkConfirm": {
       "startAll": "Spustit všechny zastavené instance?",
       "restartAll": "Restartovat všechny běžící instance?",
-      "stopAll": "Zavřít všechny instance?"
+      "stopAll": "Zavřít všechny instance?",
+      "syncThreads": "Budou prohledány všechny instance Codex a chybějící vlákna se automaticky doplní. Existující vlákna se znovu nezapíšou a soubory cílové instance budou před zápisem zálohovány. Pokračovat?"
     },
     "status": {
       "running": "Běží",
@@ -360,7 +363,8 @@
       "restartedAll": "Běžící instance byly restartovány",
       "closedAll": "Všechny instance byly zastaveny",
       "allAlreadyRunning": "Všechny instance již běží",
-      "noneRunning": "Nebyly nalezeny žádné běžící instance"
+      "noneRunning": "Nebyly nalezeny žádné běžící instance",
+      "syncThreadsNeedTwo": "Pro synchronizaci vláken jsou potřeba alespoň dvě instance"
     },
     "runningDialog": {
       "title": "Instance již běží",
@@ -1546,6 +1550,33 @@
       "nextRunsQuotaResetHint": "Spouštění po resetu kvóty závisí na aktuálních datech kvóty, proto není k dispozici pevný časový náhled.",
       "triggerQuotaReset": "Spouštěč resetu kvóty",
       "noticeSavedEnabledWithQuotaReset": "Úlohy byly uloženy. Celkem: {{count}}. Automatické obnovování Codex bylo upraveno na každých {{minutes}} minut."
+    },
+    "sessionManager": {
+      "title": "Správce relací",
+      "desc": "Synchronizace a úklid jsou tady pohromadě: nahoře lze jedním kliknutím synchronizovat do všech instancí, níže pak rozbalit každý projekt, zkontrolovat relace a přesunout je do koše.",
+      "actions": {
+        "moveToTrash": "Přesunout do koše",
+        "syncSessions": "Synchronizovat relace",
+        "expand": "Rozbalit",
+        "collapse": "Sbalit"
+      },
+      "confirm": {
+        "title": "Přesunout do koše",
+        "message": "Vybrané relace budou přesunuty do koše z odpovídajících instancí, aby je bylo možné později obnovit; běžící instance mohou vyžadovat restart, než se změna projeví. Pokračovat?",
+        "syncMessage": "Chybějící vlákna a jejich data relací budou synchronizována do všech instancí. Existující obsah se nebude zapisovat znovu a soubory cílové instance budou před zápisem zazálohovány. Pokračovat?"
+      },
+      "empty": {
+        "title": "Žádné relace ke správě",
+        "desc": "V aktuální sadě instancí nebyly nalezeny žádné záznamy relací."
+      },
+      "messages": {
+        "pickOne": "Vyberte prosím alespoň jednu relaci",
+        "syncNeedTwo": "Pro synchronizaci relací jsou potřeba alespoň dvě instance"
+      },
+      "groupCount": "{{count}} relací",
+      "updatedAt": "Aktualizováno",
+      "locationRunning": " (spuštěno)",
+      "untitled": "Nepojmenovaná relace"
     }
   },
   "githubCopilot": {

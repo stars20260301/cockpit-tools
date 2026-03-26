@@ -74,6 +74,46 @@ export interface CodexCodeReviewQuotaMetric {
   resetTime?: number;
 }
 
+export interface CodexInstanceThreadSyncItem {
+  instanceId: string;
+  instanceName: string;
+  addedThreadCount: number;
+  backupDir?: string | null;
+}
+
+export interface CodexInstanceThreadSyncSummary {
+  instanceCount: number;
+  threadUniverseCount: number;
+  mutatedInstanceCount: number;
+  totalSyncedThreadCount: number;
+  items: CodexInstanceThreadSyncItem[];
+  backupDirs: string[];
+  message: string;
+}
+
+export interface CodexSessionLocation {
+  instanceId: string;
+  instanceName: string;
+  running: boolean;
+}
+
+export interface CodexSessionRecord {
+  sessionId: string;
+  title: string;
+  cwd: string;
+  updatedAt?: number | null;
+  locationCount: number;
+  locations: CodexSessionLocation[];
+}
+
+export interface CodexSessionTrashSummary {
+  requestedSessionCount: number;
+  trashedSessionCount: number;
+  trashedInstanceCount: number;
+  trashDirs: string[];
+  message: string;
+}
+
 type JsonRecord = Record<string, unknown>;
 
 function toJsonRecord(value: unknown): JsonRecord | null {

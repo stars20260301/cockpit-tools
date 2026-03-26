@@ -270,12 +270,15 @@
       "openWindow": "Abrir ventana",
       "showFloatingCard": "Mostrar tarjeta flotante",
       "showFloatingCardDisabled": "Vincula una cuenta antes de mostrar la tarjeta flotante",
-      "showFloatingCardMissing": "La cuenta vinculada ya no existe, por lo que no se puede mostrar la tarjeta flotante"
+      "showFloatingCardMissing": "La cuenta vinculada ya no existe, por lo que no se puede mostrar la tarjeta flotante",
+      "syncThreads": "Sincronizar hilos",
+      "syncThreadsDisabled": "Se requieren al menos dos instancias para sincronizar hilos"
     },
     "bulkConfirm": {
       "startAll": "¿Iniciar todas las instancias detenidas?",
       "restartAll": "¿Reiniciar todas las instancias en ejecución?",
-      "stopAll": "¿Cerrar todas las instancias?"
+      "stopAll": "¿Cerrar todas las instancias?",
+      "syncThreads": "Se analizarán todas las instancias de Codex y se completarán automáticamente los hilos faltantes. Los hilos existentes no se volverán a escribir y los archivos de la instancia de destino se respaldarán antes de cualquier escritura. ¿Continuar?"
     },
     "status": {
       "running": "En ejecución",
@@ -360,7 +363,8 @@
       "restartedAll": "Se reiniciaron las instancias en ejecución",
       "closedAll": "Se detuvieron todas las instancias",
       "allAlreadyRunning": "Todas las instancias ya están en ejecución",
-      "noneRunning": "No se encontraron instancias en ejecución"
+      "noneRunning": "No se encontraron instancias en ejecución",
+      "syncThreadsNeedTwo": "Se requieren al menos dos instancias para sincronizar hilos"
     },
     "runningDialog": {
       "title": "La instancia ya está en ejecución",
@@ -1546,6 +1550,33 @@
       "nextRunsQuotaResetHint": "Los disparadores por restablecimiento de cuota dependen de datos de cuota recientes, por lo que no hay vista previa de hora fija.",
       "triggerQuotaReset": "Disparador por restablecimiento de cuota",
       "noticeSavedEnabledWithQuotaReset": "Tareas guardadas. Total: {{count}}. La actualización automática de Codex se ajustó a cada {{minutes}} minutos."
+    },
+    "sessionManager": {
+      "title": "Gestor de sesiones",
+      "desc": "La sincronización y la limpieza se gestionan aquí: usa la acción superior para sincronizar con todas las instancias y luego expande cada proyecto para revisar las sesiones y moverlas a la papelera.",
+      "actions": {
+        "moveToTrash": "Mover a la papelera",
+        "syncSessions": "Sincronizar sesiones",
+        "expand": "Expandir",
+        "collapse": "Contraer"
+      },
+      "confirm": {
+        "title": "Mover a la papelera",
+        "message": "Las sesiones seleccionadas se moverán a la papelera desde sus instancias para que puedan restaurarse más tarde. Es posible que las instancias en ejecución necesiten reiniciarse antes de que aparezcan los cambios. ¿Continuar?",
+        "syncMessage": "Los hilos faltantes y sus datos de sesión se sincronizarán con todas las instancias. El contenido existente no se volverá a escribir y los archivos de la instancia de destino se respaldarán antes de cualquier escritura. ¿Continuar?"
+      },
+      "empty": {
+        "title": "No hay sesiones para gestionar",
+        "desc": "No se encontraron registros de sesiones en el conjunto actual de instancias."
+      },
+      "messages": {
+        "pickOne": "Selecciona al menos una sesión",
+        "syncNeedTwo": "Se requieren al menos dos instancias para sincronizar sesiones"
+      },
+      "groupCount": "{{count}} sesiones",
+      "updatedAt": "Actualizado",
+      "locationRunning": " (en ejecución)",
+      "untitled": "Sesión sin título"
     }
   },
   "githubCopilot": {

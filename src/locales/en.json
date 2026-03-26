@@ -328,12 +328,15 @@
       "openWindow": "Open Window",
       "showFloatingCard": "Show floating card",
       "showFloatingCardDisabled": "Bind an account before showing the floating card",
-      "showFloatingCardMissing": "The bound account no longer exists, so the floating card cannot be shown"
+      "showFloatingCardMissing": "The bound account no longer exists, so the floating card cannot be shown",
+      "syncThreads": "Sync Threads",
+      "syncThreadsDisabled": "At least two instances are required to sync threads"
     },
     "bulkConfirm": {
       "startAll": "Start all stopped instances?",
       "restartAll": "Restart all running instances?",
-      "stopAll": "Close all instances?"
+      "stopAll": "Close all instances?",
+      "syncThreads": "Scan all Codex instances and fill in missing threads automatically. Existing threads will not be written again, and target instance files will be backed up before any write occurs. Continue?"
     },
     "status": {
       "running": "Running",
@@ -418,7 +421,8 @@
       "restartedAll": "Restarted running instances",
       "closedAll": "Closed all instances",
       "allAlreadyRunning": "All instances are already running",
-      "noneRunning": "No running instances found"
+      "noneRunning": "No running instances found",
+      "syncThreadsNeedTwo": "At least two instances are required to sync threads"
     },
     "runningDialog": {
       "title": "Instance already running",
@@ -1153,7 +1157,6 @@
       "testMissingModel": "Please select a test model",
       "testMissingAccount": "Please select a test account",
       "testFailed": "Test failed for {{count}} request(s)",
-      "testCancelled": "Test cancelled",
       "testCompleted": "Test completed",
       "nameRequired": "Please enter a task name",
       "accountRequired": "Select at least one account",
@@ -1162,7 +1165,8 @@
       "taskSaved": "Task \"{{name}}\" saved",
       "featureOff": "Wakeup disabled",
       "featureOn": "Wakeup enabled",
-      "refreshIntervalAdjusted": "Refresh interval adjusted: {{old}} → {{new}}"
+      "refreshIntervalAdjusted": "Refresh interval adjusted: {{old}} → {{new}}",
+      "testCancelled": "Test cancelled"
     },
     "refreshInterval": {
       "disabled": "Disabled",
@@ -1592,6 +1596,33 @@
         "high": "High",
         "xhigh": "XHigh"
       }
+    },
+    "sessionManager": {
+      "title": "Session Manager",
+      "desc": "Sync and cleanup live here together: use the top action to sync to all instances, then expand each project to review and trash sessions.",
+      "actions": {
+        "moveToTrash": "Move to Trash",
+        "syncSessions": "Sync Sessions",
+        "expand": "Expand",
+        "collapse": "Collapse"
+      },
+      "confirm": {
+        "title": "Move to Trash",
+        "message": "Selected sessions will be moved to Trash from their instances so they can be restored later. Running instances may need a restart before the change appears. Continue?",
+        "syncMessage": "Missing threads and their session data will be synced to all instances. Existing content will not be written again, and target instance files will be backed up before any write occurs. Continue?"
+      },
+      "empty": {
+        "title": "No sessions to manage",
+        "desc": "No session records were found in the current instance set."
+      },
+      "messages": {
+        "pickOne": "Please select at least one session",
+        "syncNeedTwo": "At least two instances are required to sync sessions"
+      },
+      "groupCount": "{{count}} sessions",
+      "updatedAt": "Updated",
+      "locationRunning": " (running)",
+      "untitled": "Untitled session"
     }
   },
   "codebuddy": {

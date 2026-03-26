@@ -1,6 +1,6 @@
 import { ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bot, Clock3, Github, Layers } from 'lucide-react';
+import { Bot, Clock3, FolderOpen, Github, Layers } from 'lucide-react';
 import { CodexIcon } from '../icons/CodexIcon';
 import { WindsurfIcon } from '../icons/WindsurfIcon';
 import { KiroIcon } from '../icons/KiroIcon';
@@ -20,7 +20,7 @@ import {
 import { getPlatformLabel } from '../../utils/platformMeta';
 import { PlatformGroupSwitcher } from './PlatformGroupSwitcher';
 
-export type PlatformOverviewTab = 'overview' | 'wakeup' | 'instances';
+export type PlatformOverviewTab = 'overview' | 'wakeup' | 'instances' | 'sessions';
 export type PlatformOverviewHeaderId =
   | 'codex'
   | 'zed'
@@ -162,17 +162,24 @@ export function PlatformOverviewTabsHeader({
       label: t('instances.title', '多开实例'),
       icon: <Layers className="tab-icon" />,
     },
+    sessions: {
+      key: 'sessions',
+      label: t('codex.sessionManager.title', '会话管理'),
+      icon: <FolderOpen className="tab-icon" />,
+    },
   };
   const tabSpecs: TabSpec[] = tabOrder.map((tab) => tabLabels[tab]);
 
   const subtitle =
     active === 'instances'
       ? t('instances.subtitle', '多实例独立配置，多账号并行运行。')
-      : active === 'wakeup'
-        ? (platform === 'codex'
-            ? t('codex.wakeup.subtitle', '安排 Codex 唤醒任务、测试链路并查看历史记录。')
-            : t('wakeup.subtitle', 'Manage wakeup tasks with per-task control and a global switch.'))
-      : t('overview.subtitle', '实时监控所有账号的配额状态。');
+      : active === 'sessions'
+        ? t('codex.sessionManager.desc', '同步和清理统一放在这里：顶部可一键同步到所有实例，下面按项目展开查看会话并移到废纸篓。')
+        : active === 'wakeup'
+          ? (platform === 'codex'
+              ? t('codex.wakeup.subtitle', '安排 Codex 唤醒任务、测试链路并查看历史记录。')
+              : t('wakeup.subtitle', 'Manage wakeup tasks with per-task control and a global switch.'))
+          : t('overview.subtitle', '实时监控所有账号的配额状态。');
 
   return (
     <>

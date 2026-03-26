@@ -6,7 +6,6 @@ English · [简体中文](README.md)
 [![GitHub downloads](https://img.shields.io/github/downloads/jlcodes99/cockpit-tools/total?style=flat&color=blue)](https://github.com/jlcodes99/cockpit-tools/releases)
 [![GitHub release](https://img.shields.io/github/v/release/jlcodes99/cockpit-tools?style=flat)](https://github.com/jlcodes99/cockpit-tools/releases)
 [![GitHub issues](https://img.shields.io/github/issues/jlcodes99/cockpit-tools)](https://github.com/jlcodes99/cockpit-tools/issues)
-[![License](https://img.shields.io/github/license/jlcodes99/cockpit-tools)](https://github.com/jlcodes99/cockpit-tools)
 
 A **universal AI IDE account management tool**, currently supporting **Antigravity**, **Codex**, **GitHub Copilot**, **Windsurf**, **Kiro**, **Cursor**, **Gemini Cli**, **CodeBuddy**, **CodeBuddy CN**, **Qoder**, **Trae**, and **Zed**, with multi-instance parallel workflows.
 
@@ -404,7 +403,11 @@ Thanks to the project author for their open-source contributions! If these proje
 
 ## License
 
-[MIT](LICENSE)
+This project is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+- Allowed: personal learning, research, and non-commercial use/modification (with attribution and share-alike obligations).
+- Not allowed: any commercial use without authorization (including internal commercial operations, external paid services, paid product integration, or resale/redistribution for profit).
+- Commercial license: contact the author for a separate written commercial license and pricing.
 
 ---
 
@@ -412,7 +415,7 @@ Thanks to the project author for their open-source contributions! If these proje
 
 This project is for personal learning and research purposes only. By using this project, you agree to:
 
-- Not use this project for any commercial purposes
+- Not use this project for any commercial purposes without prior written authorization from the author
 - Bear all risks and responsibilities of using this project
 - Comply with relevant terms of service and laws and regulations
 
